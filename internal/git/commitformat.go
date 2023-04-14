@@ -4,13 +4,15 @@ import (
 	"fmt"
 )
 
-const PrettyFormatSeparator = "__SEPARATOR__"
+const PrettyFormatStringSeparator = "__SEPARATOR__"
 
-var PrettyFormat = fmt.Sprintf("%%H%s%%aD%s%%aN%s%%aE%s%%cD%s%%cN%s%%cE",
-	PrettyFormatSeparator,
-	PrettyFormatSeparator,
-	PrettyFormatSeparator,
-	PrettyFormatSeparator,
-	PrettyFormatSeparator,
-	PrettyFormatSeparator)
+func PrettyFormatString() string {
+	return fmt.Sprintf("%%H%s%%aD%s%%aN%s%%aE%s%%cD%s%%cN%s%%cE",
+		PrettyFormatStringSeparator,
+		PrettyFormatStringSeparator,
+		PrettyFormatStringSeparator,
+		PrettyFormatStringSeparator,
+		PrettyFormatStringSeparator,
+		PrettyFormatStringSeparator)
+}
 
