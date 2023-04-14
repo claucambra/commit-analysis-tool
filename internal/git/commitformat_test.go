@@ -14,3 +14,10 @@ func TestPrettyFormat(t *testing.T) {
 	}
 }
 
+func TestPrettyFormatParameterCount(t *testing.T) {
+	expectedParameterCount := 7
+	parameterCount := PrettyFormatStringParameterCount()
+	if parameterCount != expectedParameterCount {
+		t.Fatalf("Received incorrect number of parameters for PrettyFormatParameterCount: %d, expected %d", parameterCount, expectedParameterCount)
+	}
+}
