@@ -2,6 +2,7 @@ package git
 
 import (
 	"fmt"
+	"strings"
 )
 
 const PrettyFormatStringSeparator = "__SEPARATOR__"
@@ -16,3 +17,7 @@ func PrettyFormatString() string {
 		PrettyFormatStringSeparator)
 }
 
+func PrettyFormatStringParameterCount() int {
+	splitPrettyFormat := strings.Split(PrettyFormatString(), PrettyFormatStringSeparator)
+	return len(splitPrettyFormat)
+}
