@@ -15,6 +15,25 @@ var insertionsRegex = regexp.MustCompile("([0-9]+) insertions?")
 var deletionsRegex = regexp.MustCompile("([0-9]+) deletions?")
 
 /**
+ * Convenience function to get a specific number of changes in the changes line (i.e. 320 insertions).
+ */
+func parseChangesLine(changesLogLine string, specificChangesRegex *regexp.Regexp) (int, error) {
+	if !specificChangesRegex.MatchString(changesLogLine) {
+		return 0, nil
+	}
+
+	specificChangesString := specificChangesRegex.FindString(changesLogLine)
+	specificChangesNumberString := numberRegex.FindString(specificChangesString)
+	convertedChanges, err := strconv.Atoi(specificChangesNumberString)
+
+	if err != nil {
+		return 0, err
+	}
+
+	return convertedChanges, nil
+}
+
+/**
  * Parse the git pretty format log line.
  * This is heavily influenced by the format of the pretty format. Look at PrettyFormat for further
  * details on this.
