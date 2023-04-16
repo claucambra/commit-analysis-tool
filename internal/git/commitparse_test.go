@@ -36,6 +36,7 @@ modules/gui/macosx/library/video-library/VLCLibraryVideoViewController.m |  2 +-
 	expectedCommitData.committerEmail = "jb@videolan.org"
 	expectedCommitData.numInsertions = 32
 	expectedCommitData.numDeletions = 36
+	expectedCommitData.numFilesChanged = 6
 
 	commitData, err := ParseCommit(testCommit)
 	if err != nil {

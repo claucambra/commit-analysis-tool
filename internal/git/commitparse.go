@@ -13,6 +13,7 @@ var numberRegex = regexp.MustCompile("[0-9]+")
 var commitRegex = regexp.MustCompile(fmt.Sprintf("^[0-9a-f]+%s", PrettyFormatStringSeparator))
 var insertionsRegex = regexp.MustCompile("([0-9]+) insertions?")
 var deletionsRegex = regexp.MustCompile("([0-9]+) deletions?")
+var filesChangedRegex = regexp.MustCompile("([0-9]+) files changed?")
 var emptyNewLineRegex = regexp.MustCompile(`\n\s*\n`)
 
 func ParseCommitLog(commitLog string) ([]*CommitData, error) {
@@ -58,6 +59,7 @@ func ParseCommit(rawCommit string) (*CommitData, error) {
 
 	insertions, _ := parseChangesLine(changesLogLine, insertionsRegex)
 	deletions, _ := parseChangesLine(changesLogLine, deletionsRegex)
+	filesChanged, _ := parseChangesLine(changesLogLine, filesChangedRegex)
 
 	commit, err := parsePrettyLogLine(prettyLogLine)
 	if err != nil {
@@ -66,6 +68,7 @@ func ParseCommit(rawCommit string) (*CommitData, error) {
 
 	commit.numInsertions = insertions
 	commit.numDeletions = deletions
+	commit.numFilesChanged = filesChanged
 
 	return commit, nil
 }
