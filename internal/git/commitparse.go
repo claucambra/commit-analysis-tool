@@ -13,6 +13,26 @@ var numberRegex = regexp.MustCompile("[0-9]+")
 var commitRegex = regexp.MustCompile(fmt.Sprintf("^[0-9a-f]+%s", PrettyFormatStringSeparator))
 var insertionsRegex = regexp.MustCompile("([0-9]+) insertions?")
 var deletionsRegex = regexp.MustCompile("([0-9]+) deletions?")
+var emptyNewLineRegex = regexp.MustCompile(`\n\s*\n`)
+
+func ParseCommitLog(commitLog string) ([]*CommitData, error) {
+	splitCommitLog := emptyNewLineRegex.Split(commitLog, -1)
+	numCommits := len(splitCommitLog)
+	parsedCommits := make([]*CommitData, numCommits)
+
+	for i := 0; i < numCommits; i++ {
+		commitString := splitCommitLog[i]
+		parsedCommit, err := ParseCommit(commitString)
+
+		if err != nil {
+			return nil, err
+		}
+
+		parsedCommits[i] = parsedCommit
+	}
+
+	return parsedCommits, nil
+}
 
 /**
  * Parse a commit according to the standard format defined in commitformat.go
