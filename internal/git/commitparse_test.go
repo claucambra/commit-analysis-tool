@@ -48,3 +48,50 @@ modules/gui/macosx/library/video-library/VLCLibraryVideoViewController.m |  2 +-
 			Received: %+v`, expectedCommitData, commitData)
 	}
 }
+
+func TestParseCommitLog(t *testing.T) {
+	testCommitLog := `e130355483777647ab5fca208631dc18f4ef0d0a__SEPARATOR__Sun, 16 Apr 2023 17:28:40 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com__SEPARATOR__Sun, 16 Apr 2023 17:28:40 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com
+modules/gui/macosx/library/audio-library/VLCLibraryCollectionViewAudioGroupSupplementaryDetailView.m | 9 +++++++--
+1 file changed, 7 insertions(+), 2 deletions(-)
+
+68e12e00434561f03fbfd58bac96404a873e5a18__SEPARATOR__Sun, 16 Apr 2023 17:28:13 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com__SEPARATOR__Sun, 16 Apr 2023 17:28:13 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com
+modules/gui/macosx/library/audio-library/VLCLibraryAudioDataSource.m | 32 ++++++++++++++++++--------------
+1 file changed, 18 insertions(+), 14 deletions(-)
+
+91e0c789d8983c7c9c4a8874e8a3ce1f2ac4d330__SEPARATOR__Sun, 16 Apr 2023 16:58:03 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com__SEPARATOR__Sun, 16 Apr 2023 17:00:57 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com
+modules/gui/macosx/library/audio-library/VLCLibraryAudioGroupDataSource.h |  2 +-
+modules/gui/macosx/library/audio-library/VLCLibraryAudioGroupDataSource.m | 14 +++++++-------
+2 files changed, 8 insertions(+), 8 deletions(-)
+
+5129448f614ff5ac6475d23f77e700056d6e4076__SEPARATOR__Sun, 16 Apr 2023 16:49:17 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com__SEPARATOR__Sun, 16 Apr 2023 16:49:17 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com
+modules/gui/macosx/library/audio-library/VLCLibraryAlbumTableCellView.m                         | 7 ++++++-
+modules/gui/macosx/library/audio-library/VLCLibraryCollectionViewAlbumSupplementaryDetailView.m | 8 +++++++-
+2 files changed, 13 insertions(+), 2 deletions(-)
+
+d1de6dc7eab11db6accdf2b9ca2d30b91f41eb84__SEPARATOR__Sun, 16 Apr 2023 16:40:32 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com__SEPARATOR__Sun, 16 Apr 2023 16:40:32 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com
+modules/gui/macosx/library/audio-library/VLCLibraryAlbumTableCellView.m                         | 5 +++--
+modules/gui/macosx/library/audio-library/VLCLibraryCollectionViewAlbumSupplementaryDetailView.m | 6 +++---
+2 files changed, 6 insertions(+), 5 deletions(-)
+
+a256c8b2efbc82db85cd403457e63b2b9b5dec37__SEPARATOR__Sun, 16 Apr 2023 16:39:59 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com__SEPARATOR__Sun, 16 Apr 2023 16:39:59 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com
+modules/gui/macosx/library/audio-library/VLCLibraryAlbumTracksDataSource.h |  3 +++
+modules/gui/macosx/library/audio-library/VLCLibraryAlbumTracksDataSource.m | 14 +++++++++++++-
+2 files changed, 16 insertions(+), 1 deletion(-)
+
+254097627ba476a81ae4c628347a8c19130086c7__SEPARATOR__Sun, 16 Apr 2023 16:30:34 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com__SEPARATOR__Sun, 16 Apr 2023 16:30:34 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com
+modules/gui/macosx/library/audio-library/VLCLibraryAlbumTracksDataSource.m | 5 ++++-
+1 file changed, 4 insertions(+), 1 deletion(-)`
+
+	expectedCommitCount := 7
+	parsedCommitLog, err := ParseCommitLog(testCommitLog)
+	receivedCommitCount := len(parsedCommitLog)
+
+	if err != nil {
+		t.Fatalf("Received error parsing commit log: %s", err)
+	}
+
+	if receivedCommitCount != expectedCommitCount {
+		t.Fatalf(`Received a different amount of commits than expected. 
+			Expected %d, received %d`, expectedCommitCount, receivedCommitCount)
+	}
+}
