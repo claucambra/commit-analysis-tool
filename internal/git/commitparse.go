@@ -66,9 +66,9 @@ func ParseCommit(rawCommit string) (*CommitData, error) {
 		return nil, err
 	}
 
-	commit.numInsertions = insertions
-	commit.numDeletions = deletions
-	commit.numFilesChanged = filesChanged
+	commit.NumInsertions = insertions
+	commit.NumDeletions = deletions
+	commit.NumFilesChanged = filesChanged
 
 	return commit, nil
 }
@@ -115,13 +115,13 @@ func parsePrettyLogLine(prettyLogLine string) (*CommitData, error) {
 		return nil, committerParsedTimeErr
 	}
 
-	commitData.id = splitPrettyLogLine[0]
-	commitData.authorTime = authorParsedTime.Unix()
-	commitData.authorName = splitPrettyLogLine[2]
-	commitData.authorEmail = splitPrettyLogLine[3]
-	commitData.committerTime = committerParsedTime.Unix()
-	commitData.committerName = splitPrettyLogLine[5]
-	commitData.committerEmail = splitPrettyLogLine[6]
+	commitData.Id = splitPrettyLogLine[0]
+	commitData.AuthorTime = authorParsedTime.Unix()
+	commitData.AuthorName = splitPrettyLogLine[2]
+	commitData.AuthorEmail = splitPrettyLogLine[3]
+	commitData.CommitterTime = committerParsedTime.Unix()
+	commitData.CommitterName = splitPrettyLogLine[5]
+	commitData.CommitterEmail = splitPrettyLogLine[6]
 
 	return commitData, nil
 }

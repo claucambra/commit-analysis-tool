@@ -27,16 +27,16 @@ modules/gui/macosx/library/video-library/VLCLibraryVideoViewController.m |  2 +-
 	}
 
 	expectedCommitData := new(CommitData)
-	expectedCommitData.id = "1c915e7dd147d4b060c2c241bb966d6f6c6ecde9"
-	expectedCommitData.authorTime = time.Date(2023, 4, 8, 17, 47, 43, 0, expectedCommitAuthorLocation).Unix()
-	expectedCommitData.authorName = "Claudio Cambra"
-	expectedCommitData.authorEmail = "developer@claudiocambra.com"
-	expectedCommitData.committerTime = time.Date(2023, 4, 12, 23, 21, 43, 0, expectedCommitCommitterLocation).Unix()
-	expectedCommitData.committerName = "Jean-Baptiste Kempf"
-	expectedCommitData.committerEmail = "jb@videolan.org"
-	expectedCommitData.numInsertions = 32
-	expectedCommitData.numDeletions = 36
-	expectedCommitData.numFilesChanged = 6
+	expectedCommitData.Id = "1c915e7dd147d4b060c2c241bb966d6f6c6ecde9"
+	expectedCommitData.AuthorTime = time.Date(2023, 4, 8, 17, 47, 43, 0, expectedCommitAuthorLocation).Unix()
+	expectedCommitData.AuthorName = "Claudio Cambra"
+	expectedCommitData.AuthorEmail = "developer@claudiocambra.com"
+	expectedCommitData.CommitterTime = time.Date(2023, 4, 12, 23, 21, 43, 0, expectedCommitCommitterLocation).Unix()
+	expectedCommitData.CommitterName = "Jean-Baptiste Kempf"
+	expectedCommitData.CommitterEmail = "jb@videolan.org"
+	expectedCommitData.NumInsertions = 32
+	expectedCommitData.NumDeletions = 36
+	expectedCommitData.NumFilesChanged = 6
 
 	commitData, err := ParseCommit(testCommit)
 	if err != nil {

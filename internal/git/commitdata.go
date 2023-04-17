@@ -1,17 +1,17 @@
 package git
 
 type CommitData struct {
-	id              string
-	repoName        string
-	authorName      string
-	authorEmail     string
-	authorTime      int64
-	committerName   string
-	committerEmail  string
-	committerTime   int64
-	numInsertions   int
-	numDeletions    int
-	numFilesChanged int
+	Id              string
+	RepoName        string
+	AuthorName      string
+	AuthorEmail     string
+	AuthorTime      int64
+	CommitterName   string
+	CommitterEmail  string
+	CommitterTime   int64
+	NumInsertions   int
+	NumDeletions    int
+	NumFilesChanged int
 }
 
 // Similar to RFC1123Z but without trailing zero on day
