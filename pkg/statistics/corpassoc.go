@@ -62,3 +62,16 @@ func NewCorpAuthorsReport(commits []*git.CommitData, corporateEmailDomains map[s
 	report.CorpAuthorsPercent = (float32(report.NumCorpAuthors) / float32(report.TotalAuthors)) * 100
 	return report
 }
+
+func (report *CorpAuthorsReport) String() string {
+	reportString := "Corporate authors report\n"
+	reportString += fmt.Sprintf("Total repository authors: %d\n", report.TotalAuthors)
+	reportString += fmt.Sprintf("Number of corporate authors: %d (%f%%)\n", report.NumCorpAuthors, report.CorpAuthorsPercent)
+	reportString += "Number of authors by domain:\n"
+
+	for domain, count := range report.DomainCountMap {
+		reportString += fmt.Sprintf("\t%s: %d\n", domain, count)
+	}
+
+	return reportString
+}
