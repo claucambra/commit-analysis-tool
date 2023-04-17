@@ -1,21 +1,29 @@
 package statistics
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
 	"github.com/claucambra/commit-analysis-tool/internal/git"
 )
 
+const testNumAuthors = 3
+const testNumPersonalAuthors = 1
+const testNumCorpAuthors = 2
+const testPersonalDomain = "claudiocambra.com"
+const testCorpDomain = "corpdomain.com"
+
+var testCorpAuthorsPercent = (float32(testNumCorpAuthors) / float32(testNumAuthors)) * 100
 var testCommits = []*git.CommitData{
 	{
 		Id:              "8e13b181b601fed7ff4fedfd22e11821c6d621fd",
 		RepoName:        "test-repo",
 		AuthorName:      "Claudio Cambra",
-		AuthorEmail:     "developer@claudiocambra.com",
+		AuthorEmail:     fmt.Sprintf("developer@%s", testPersonalDomain),
 		AuthorTime:      time.Now().Unix(),
 		CommitterName:   "Claudio Cambra",
-		CommitterEmail:  "developer@claudiocambra.com",
+		CommitterEmail:  fmt.Sprintf("developer@%s", testPersonalDomain),
 		CommitterTime:   time.Now().Unix(),
 		NumInsertions:   2,
 		NumDeletions:    0,
@@ -25,10 +33,10 @@ var testCommits = []*git.CommitData{
 		Id:              "7c89d21d3bede3313d20f76b18aa82a1f6eba875",
 		RepoName:        "test-repo",
 		AuthorName:      "Claudio Cambra",
-		AuthorEmail:     "developer@claudiocambra.com",
+		AuthorEmail:     fmt.Sprintf("developer@%s", testPersonalDomain),
 		AuthorTime:      time.Now().AddDate(0, 0, -1).Unix(),
 		CommitterName:   "Claudio Cambra",
-		CommitterEmail:  "developer@claudiocambra.com",
+		CommitterEmail:  fmt.Sprintf("developer@%s", testPersonalDomain),
 		CommitterTime:   time.Now().AddDate(0, 0, -1).Unix(),
 		NumInsertions:   23,
 		NumDeletions:    23,
@@ -38,10 +46,10 @@ var testCommits = []*git.CommitData{
 		Id:              "c0f3fbd9a6a5acd0f0142d49fae6e4d02beb05c3",
 		RepoName:        "test-repo",
 		AuthorName:      "Mr. Big Wig",
-		AuthorEmail:     "bigwig@corpmail.com",
+		AuthorEmail:     fmt.Sprintf("bigwig@%s", testCorpDomain),
 		AuthorTime:      time.Now().AddDate(0, 0, -2).Unix(),
 		CommitterName:   "Claudio Cambra",
-		CommitterEmail:  "developer@claudiocambra.com",
+		CommitterEmail:  fmt.Sprintf("developer@%s", testPersonalDomain),
 		CommitterTime:   time.Now().AddDate(0, 0, -2).Unix(),
 		NumInsertions:   197,
 		NumDeletions:    10,
@@ -51,10 +59,10 @@ var testCommits = []*git.CommitData{
 		Id:              "37923f8d364b9b89fd5383885dc8a220580ebda5",
 		RepoName:        "test-repo",
 		AuthorName:      "Dr. Big Fish",
-		AuthorEmail:     "bigfish@corpmail.com",
+		AuthorEmail:     fmt.Sprintf("bigfish@%s", testCorpDomain),
 		AuthorTime:      time.Now().AddDate(0, 0, -3).Unix(),
 		CommitterName:   "Claudio Cambra",
-		CommitterEmail:  "developer@claudiocambra.com",
+		CommitterEmail:  fmt.Sprintf("developer@%s", testPersonalDomain),
 		CommitterTime:   time.Now().AddDate(0, 0, -3).Unix(),
 		NumInsertions:   5,
 		NumDeletions:    1,
@@ -64,11 +72,7 @@ var testCommits = []*git.CommitData{
 
 func TestNewCorporateAuthorsReport(t *testing.T) {
 	testCorpEmails := make(map[string]bool)
-	testCorpEmails["corpmail.com"] = true
-
-	testNumAuthors := 3
-	testNumCorpAuthors := 2
-	testCorpAuthorsPercent := (float32(testNumCorpAuthors) / float32(testNumAuthors)) * 100
+	testCorpEmails[testCorpDomain] = true
 
 	report := NewCorpAuthorsReport(testCommits, testCorpEmails)
 	if report.TotalAuthors != testNumAuthors {
@@ -78,4 +82,26 @@ func TestNewCorporateAuthorsReport(t *testing.T) {
 	} else if report.CorpAuthorsPercent != testCorpAuthorsPercent {
 		t.Fatalf("Unexpected corporate author percent: received %f, expected %f", report.CorpAuthorsPercent, testCorpAuthorsPercent)
 	}
+}
+
+func TestCorporateAuthorsString(t *testing.T) {
+	testString := "Corporate authors report\n"
+	testString += fmt.Sprintf("Total repository authors: %d\n", testNumAuthors)
+	testString += fmt.Sprintf("Number of corporate authors: %d (%f%%)\n", testNumCorpAuthors, testCorpAuthorsPercent)
+	testString += "Number of authors by domain:\n"
+	testString += fmt.Sprintf("\t%s: %d\n", testPersonalDomain, testNumPersonalAuthors)
+	testString += fmt.Sprintf("\t%s: %d\n", testCorpDomain, testNumCorpAuthors)
+
+	testCorpEmails := make(map[string]bool)
+	testCorpEmails[testCorpDomain] = true
+	report := NewCorpAuthorsReport(testCommits, testCorpEmails)
+
+	reportString := report.String()
+	if reportString != testString {
+		t.Fatalf(`Received stringification does not match expected.
+			Received: %s
+			Expected: %s`, reportString, testString)
+	}
+
+	t.Logf("Received correct stringification: %s", reportString)
 }
