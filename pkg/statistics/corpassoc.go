@@ -13,54 +13,64 @@ type CorpAuthorsReport struct {
 	NumCorpAuthors     int
 	CorpAuthorsPercent float32
 	DomainCountMap     map[string]int
+
+	authors               map[string]bool
+	domainCounts          map[string]int
+	corporateEmailDomains map[string]bool
 }
 
-func NewCorpAuthorsReport(commits []*git.CommitData, corporateEmailDomains map[string]bool) *CorpAuthorsReport {
-	report := &CorpAuthorsReport{
-		Commits:            commits,
+func NewCorpAuthorsReport(corporateEmailDomains map[string]bool) *CorpAuthorsReport {
+	return &CorpAuthorsReport{
+		Commits:            make([]*git.CommitData, 0),
 		TotalAuthors:       0,
 		NumCorpAuthors:     0,
 		CorpAuthorsPercent: 0,
 		DomainCountMap:     make(map[string]int),
-	}
 
+		authors:               make(map[string]bool),
+		domainCounts:          make(map[string]int),
+		corporateEmailDomains: corporateEmailDomains,
+	}
+}
+
+func (report *CorpAuthorsReport) ParseCommits(commits []*git.CommitData) {
 	if len(commits) == 0 {
-		return report
+		return
 	}
-
-	authorsSet := make(map[string]bool)
-	domainCounts := make(map[string]int)
 
 	for _, commit := range commits {
-		authorString := commit.AuthorEmail
-		if authorString == "" {
-			authorString = commit.AuthorName
-		}
+		report.AddCommit(*commit)
+	}
+}
 
-		if authorsSet[authorString] { // Already counted, skip
-			continue
-		} else if authorString != "" {
-			authorsSet[authorString] = true
-			report.TotalAuthors += 1
-		}
+func (report *CorpAuthorsReport) AddCommit(commit git.CommitData) {
+	authorString := commit.AuthorEmail
+	if authorString == "" {
+		authorString = commit.AuthorName
+	}
 
-		splitAuthorEmail := strings.Split(commit.AuthorEmail, "@")
+	if report.authors[authorString] { // Already counted, skip
+		return
+	} else if authorString != "" {
+		report.authors[authorString] = true
+		report.TotalAuthors += 1
+	}
 
-		if len(splitAuthorEmail) < 2 {
-			domainCounts["unknown"] += 1
-			continue
-		}
+	splitAuthorEmail := strings.Split(commit.AuthorEmail, "@")
 
-		emailDomain := splitAuthorEmail[1]
-		report.DomainCountMap[emailDomain] += 1
+	if len(splitAuthorEmail) < 2 {
+		report.domainCounts["unknown"] += 1
+		return
+	}
 
-		if corporateEmailDomains[emailDomain] {
-			report.NumCorpAuthors += 1
-		}
+	emailDomain := splitAuthorEmail[1]
+	report.DomainCountMap[emailDomain] += 1
+
+	if report.corporateEmailDomains[emailDomain] {
+		report.NumCorpAuthors += 1
 	}
 
 	report.CorpAuthorsPercent = (float32(report.NumCorpAuthors) / float32(report.TotalAuthors)) * 100
-	return report
 }
 
 func (report *CorpAuthorsReport) String() string {

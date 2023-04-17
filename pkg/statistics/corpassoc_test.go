@@ -74,7 +74,9 @@ func TestNewCorporateAuthorsReport(t *testing.T) {
 	testCorpEmails := make(map[string]bool)
 	testCorpEmails[testCorpDomain] = true
 
-	report := NewCorpAuthorsReport(testCommits, testCorpEmails)
+	report := NewCorpAuthorsReport(testCorpEmails)
+	report.ParseCommits(testCommits)
+
 	if report.TotalAuthors != testNumAuthors {
 		t.Fatalf("Unexpected number of authors: received %d, expected %d", report.TotalAuthors, testNumAuthors)
 	} else if report.NumCorpAuthors != testNumCorpAuthors {
@@ -94,7 +96,9 @@ func TestCorporateAuthorsString(t *testing.T) {
 
 	testCorpEmails := make(map[string]bool)
 	testCorpEmails[testCorpDomain] = true
-	report := NewCorpAuthorsReport(testCommits, testCorpEmails)
+
+	report := NewCorpAuthorsReport(testCorpEmails)
+	report.ParseCommits(testCommits)
 
 	reportString := report.String()
 	if reportString != testString {
