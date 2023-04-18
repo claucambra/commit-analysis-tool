@@ -123,32 +123,7 @@ func (report *DomainGroupsReport) String() string {
 	for _, groupName := range sortedDomainGroupNames {
 		groupStruct := report.DomainGroups[groupName]
 		reportString += fmt.Sprintf("\t\"%s\":\t%d (%f%%)\n", groupName, groupStruct.AuthorCount, report.GroupPercentageOfTotal(groupName))
-
-		// Get sorted domains
-		sortedDomainNames := make([]string, 0, len(groupStruct.DomainAuthors))
-		for domainName := range groupStruct.DomainAuthors {
-			sortedDomainNames = append(sortedDomainNames, domainName)
-		}
-
-		sort.SliceStable(sortedDomainNames, func(i, j int) bool {
-			domainA := sortedDomainNames[i]
-			domainB := sortedDomainNames[j]
-
-			domainACount := len(groupStruct.DomainAuthors[domainA])
-			domainBCount := len(groupStruct.DomainAuthors[domainB])
-
-			if domainACount == domainBCount {
-				return domainA < domainB
-			}
-
-			return domainACount > domainBCount
-		})
-
-		for _, domainName := range sortedDomainNames {
-			print(domainName)
-			domainCount := len(groupStruct.DomainAuthors[domainName])
-			reportString += fmt.Sprintf("\t\t%s:\t%d\n", domainName, domainCount)
-		}
+		reportString += groupStruct.domainsString()
 	}
 
 	return reportString
