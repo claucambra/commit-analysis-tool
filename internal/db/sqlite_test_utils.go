@@ -12,10 +12,11 @@ const testDirName = "sqlite_test"
 
 var testDir = ""
 
-func InitTestDB() (*SQLiteBackend, error) {
+func InitTestDB(t *testing.T) *SQLiteBackend {
 	testDir, err := os.MkdirTemp("", testDirName)
 	if err != nil {
-		return nil, err
+		t.Fatalf("Could not create temp test dir, received error: %s", err)
+		return nil
 	}
 
 	testDbPath := filepath.Join(testDir, testDbFileName)
@@ -25,17 +26,17 @@ func InitTestDB() (*SQLiteBackend, error) {
 	err = sqlb.Open(testDbPath)
 
 	if err != nil {
-		log.Fatalf("Could not open database: %s", err)
-		return nil, err
+		t.Fatalf("Could not open database: %s", err)
+		return nil
 	}
 
 	err = sqlb.Setup()
 	if err != nil {
-		log.Fatalf("Could not setup database: %s", err)
-		return nil, err
+		t.Fatalf("Could not setup database: %s", err)
+		return nil
 	}
 
-	return sqlb, err
+	return sqlb
 }
 
 func CleanupTestDB(sqlb *SQLiteBackend) {
