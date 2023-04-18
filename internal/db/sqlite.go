@@ -115,11 +115,6 @@ func (sqlb *SQLiteBackend) Commit(commitId string) (*common.CommitData, error) {
 
 	defer accStmt.Close()
 
-	if err != nil {
-		fmt.Printf("Encountered error adding commit: %s", err)
-		return nil, err
-	}
-
 	commit := new(common.CommitData)
 	accStmt.QueryRow(commitId).Scan(
 		&commit.Id,
@@ -137,3 +132,43 @@ func (sqlb *SQLiteBackend) Commit(commitId string) (*common.CommitData, error) {
 
 	return commit, nil
 }
+
+func (sqlb *SQLiteBackend) Commits() ([]*common.CommitData, error) {
+	stmt := "SELECT * FROM commits"
+	accStmt, err := sqlb.db.Prepare(stmt)
+	if err != nil {
+		log.Fatalf("Encountered error preparing commits retrieval statement: %s", err)
+		return nil, err
+	}
+
+	defer accStmt.Close()
+
+	rows, err := accStmt.Query()
+	if err != nil {
+		log.Fatalf("Error retrieving rows: %s", err)
+		return nil, err
+	}
+
+	commits := make([]*common.CommitData, 0)
+	for rows.Next() {
+		commit := new(common.CommitData)
+		rows.Scan(
+			&commit.Id,
+			&commit.RepoName,
+			&commit.AuthorName,
+			&commit.AuthorEmail,
+			&commit.AuthorTime,
+			&commit.CommitterName,
+			&commit.CommitterEmail,
+			&commit.CommitterTime,
+			&commit.NumInsertions,
+			&commit.NumDeletions,
+			&commit.NumFilesChanged,
+		)
+
+		commits = append(commits, commit)
+	}
+
+	return commits, nil
+}
+
