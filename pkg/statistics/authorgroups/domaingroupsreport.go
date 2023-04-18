@@ -9,8 +9,12 @@ import (
 const fallbackGroupName = "unknown"
 
 type DomainGroupsReport struct {
-	TotalAuthors          int
-	TotalCommits          int
+	TotalAuthors         int
+	TotalCommits         int
+	TotalInsertions      int
+	TotalDeletions       int
+	TotalNumFilesChanged int
+
 	DomainGroups          map[string][]string
 	DomainNumAuthors      map[string]int
 	DomainNumInsertions   map[string]int
@@ -22,14 +26,19 @@ type DomainGroupsReport struct {
 
 func NewDomainGroupsReport(domainGroups map[string][]string) *DomainGroupsReport {
 	report := &DomainGroupsReport{
-		TotalAuthors:          0,
-		TotalCommits:          0,
+		TotalAuthors:         0,
+		TotalCommits:         0,
+		TotalInsertions:      0,
+		TotalDeletions:       0,
+		TotalNumFilesChanged: 0,
+
 		DomainGroups:          domainGroups,
 		DomainNumAuthors:      map[string]int{},
 		DomainNumInsertions:   map[string]int{},
 		DomainNumDeletions:    map[string]int{},
 		DomainNumFilesChanged: map[string]int{},
-		domainToGroup:         map[string]string{},
+
+		domainToGroup: map[string]string{},
 	}
 
 	for groupName, domainNames := range domainGroups {
@@ -51,6 +60,10 @@ func (report *DomainGroupsReport) updateDomainChanges(authorDomain string, db *d
 		return
 	}
 
+	report.TotalInsertions += domainInsertions
+	report.TotalDeletions += domainDeletions
+	report.TotalNumFilesChanged += domainFilesChanged
+
 	report.DomainNumInsertions[authorDomain] += domainInsertions
 	report.DomainNumDeletions[authorDomain] += domainDeletions
 	report.DomainNumFilesChanged[authorDomain] += domainFilesChanged
@@ -58,8 +71,6 @@ func (report *DomainGroupsReport) updateDomainChanges(authorDomain string, db *d
 
 func (report *DomainGroupsReport) updateAuthors(authors []string, db *db.SQLiteBackend) {
 	for _, author := range authors {
-		report.TotalCommits += 1
-
 		if author == "" {
 			continue
 		}
