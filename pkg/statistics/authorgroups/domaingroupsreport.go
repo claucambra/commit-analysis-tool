@@ -1,130 +1,88 @@
 package authorgroups
 
 import (
-	"fmt"
-	"sort"
 	"strings"
 
-	"github.com/claucambra/commit-analysis-tool/pkg/common"
+	"github.com/claucambra/commit-analysis-tool/internal/db"
 )
 
 const fallbackGroupName = "unknown"
 
 type DomainGroupsReport struct {
-	AuthorCount  int
-	DomainGroups map[string]*DomainGroup
+	TotalAuthors          int
+	TotalCommits          int
+	DomainGroups          map[string][]string
+	DomainNumAuthors      map[string]int
+	DomainNumInsertions   map[string]int
+	DomainNumDeletions    map[string]int
+	DomainNumFilesChanged map[string]int
 
-	authors       map[string]bool
 	domainToGroup map[string]string
 }
 
-func NewDomainGroup() *DomainGroup {
-	return &DomainGroup{
-		AuthorCount:  0,
-		DomainCounts: make(map[string]int),
-	}
-}
-
-func NewDomainGroupsReport(domainGroups map[string]string) *DomainGroupsReport {
+func NewDomainGroupsReport(domainGroups map[string][]string) *DomainGroupsReport {
 	report := &DomainGroupsReport{
-		AuthorCount:  0,
-		DomainGroups: make(map[string]*DomainGroup),
-
-		authors:       make(map[string]bool),
-		domainToGroup: make(map[string]string),
+		TotalAuthors:          0,
+		TotalCommits:          0,
+		DomainGroups:          domainGroups,
+		DomainNumAuthors:      map[string]int{},
+		DomainNumInsertions:   map[string]int{},
+		DomainNumDeletions:    map[string]int{},
+		DomainNumFilesChanged: map[string]int{},
+		domainToGroup:         map[string]string{},
 	}
 
-	for group, domainName := range domainGroups {
-		report.domainToGroup[domainName] = group
+	for groupName, domainNames := range domainGroups {
+		for _, domainName := range domainNames {
+			report.domainToGroup[domainName] = groupName
+		}
 	}
 
 	return report
 }
 
-func (report *DomainGroupsReport) ParseCommits(commits []*common.CommitData) {
-	if len(commits) == 0 {
+func (report *DomainGroupsReport) updateDomainChanges(authorDomain string, db *db.SQLiteBackend) {
+	if authorDomain == "" {
 		return
 	}
 
-	for _, commit := range commits {
-		report.AddCommit(*commit)
-	}
-}
-
-func (report *DomainGroupsReport) AddCommit(commit common.CommitData) {
-	authorString := commit.AuthorEmail
-	if authorString == "" {
-		authorString = commit.AuthorName
-	}
-
-	if report.authors[authorString] { // Already counted, skip
+	domainInsertions, domainDeletions, domainFilesChanged, err := db.DomainChanges(authorDomain)
+	if err != nil {
 		return
-	} else if authorString != "" {
-		report.authors[authorString] = true
-		report.AuthorCount += 1
 	}
 
-	groupString := fallbackGroupName
-	emailDomain := "unknown"
-
-	if splitAuthorEmail := strings.Split(commit.AuthorEmail, "@"); len(splitAuthorEmail) == 2 {
-		emailDomain = splitAuthorEmail[1]
-		groupString = report.domainToGroup[emailDomain]
-
-		if groupString == "" {
-			groupString = fallbackGroupName
-		}
-	}
-
-	group := report.DomainGroups[groupString]
-	if group == nil {
-		group = NewDomainGroup()
-		report.DomainGroups[groupString] = group
-	}
-
-	group.AuthorCount += 1
-	group.DomainCounts[emailDomain] += 1
+	report.DomainNumInsertions[authorDomain] += domainInsertions
+	report.DomainNumDeletions[authorDomain] += domainDeletions
+	report.DomainNumFilesChanged[authorDomain] += domainFilesChanged
 }
 
-func (report *DomainGroupsReport) GroupPercentageOfTotal(group string) float32 {
-	DomainGroup := report.DomainGroups[group]
-	if DomainGroup == nil {
-		return 0
-	}
+func (report *DomainGroupsReport) updateAuthors(authors []string, db *db.SQLiteBackend) {
+	for _, author := range authors {
+		report.TotalCommits += 1
 
-	return (float32(DomainGroup.AuthorCount) / float32(report.AuthorCount)) * 100
-}
-
-func (report *DomainGroupsReport) String() string {
-	// Get sorted domain group names
-	sortedDomainGroupNames := make([]string, 0, len(report.DomainGroups))
-	for domainGroupName := range report.DomainGroups {
-		sortedDomainGroupNames = append(sortedDomainGroupNames, domainGroupName)
-	}
-
-	sort.SliceStable(sortedDomainGroupNames, func(i, j int) bool {
-		groupNameA := sortedDomainGroupNames[i]
-		groupNameB := sortedDomainGroupNames[j]
-
-		groupACount := report.DomainGroups[groupNameA].AuthorCount
-		groupBCount := report.DomainGroups[groupNameB].AuthorCount
-
-		if groupACount == groupBCount {
-			return groupNameA < groupNameB
+		if author == "" {
+			continue
 		}
 
-		return groupACount > groupBCount
-	})
+		splitAuthorEmail := strings.Split(author, "@")
+		if len(splitAuthorEmail) < 2 {
+			continue
+		}
 
-	reportString := "Author domain groups report\n"
-	reportString += fmt.Sprintf("Total repository authors: %d\n", report.AuthorCount)
-	reportString += "Number of authors by group:\n"
+		authorDomain := splitAuthorEmail[1]
+		print(authorDomain)
+		report.DomainNumAuthors[authorDomain] += 1
+		report.TotalAuthors += 1
 
-	for _, groupName := range sortedDomainGroupNames {
-		groupStruct := report.DomainGroups[groupName]
-		reportString += fmt.Sprintf("\t\"%s\":\t%d (%f%%)\n", groupName, groupStruct.AuthorCount, report.GroupPercentageOfTotal(groupName))
-		reportString += groupStruct.domainsString()
+		report.updateDomainChanges(authorDomain, db)
+	}
+}
+
+func (report *DomainGroupsReport) Generate(db *db.SQLiteBackend) {
+	authors, err := db.Authors()
+	if err != nil {
+		return
 	}
 
-	return reportString
+	report.updateAuthors(authors, db)
 }
