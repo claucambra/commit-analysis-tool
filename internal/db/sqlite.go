@@ -30,7 +30,7 @@ func (sqlb *SQLiteBackend) Open(path string) error {
 }
 
 func (sqlb *SQLiteBackend) Close() error {
-	err := sqlb.Close()
+	err := sqlb.db.Close()
 	if err != nil {
 		log.Fatalf("Could not close sqlite database: %s", err)
 	}
