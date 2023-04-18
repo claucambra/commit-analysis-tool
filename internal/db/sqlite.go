@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/claucambra/commit-analysis-tool/pkg/common"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -61,6 +62,42 @@ func (sqlb *SQLiteBackend) Setup() error {
 	_, err := sqlb.db.Exec(stmt)
 	if err != nil {
 		fmt.Printf("Setup failed, received error during table creation: %s", err)
+		return err
+	}
+
+	return nil
+}
+
+func (sqlb *SQLiteBackend) AddCommit(commit *common.CommitData) error {
+	stmt := `INSERT INTO commits (
+			id,
+			repo_name,
+			author_name,
+			author_email,
+			author_time,
+			committer_name,
+			committer_email,
+			committer_time,
+			num_insertions,
+			num_deletions,
+			num_files_changed
+		) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)`
+
+	_, err := sqlb.db.Exec(stmt,
+		commit.Id,
+		commit.RepoName,
+		commit.AuthorName,
+		commit.AuthorEmail,
+		commit.AuthorTime,
+		commit.CommitterName,
+		commit.CommitterEmail,
+		commit.CommitterTime,
+		commit.NumInsertions,
+		commit.NumDeletions,
+		commit.NumFilesChanged)
+
+	if err != nil {
+		fmt.Printf("Encountered error adding commit: %s", err)
 		return err
 	}
 
