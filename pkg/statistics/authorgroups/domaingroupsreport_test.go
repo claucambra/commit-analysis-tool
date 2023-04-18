@@ -12,7 +12,6 @@ const testGrouplessName = "unknown"
 const testNumGrouplessAuthors = 26
 const testNumGroupAuthors = 5
 const testGroupName = "VideoLAN"
-const testGrouplessDomain = "claudiocambra.com"
 const testGroupDomain = "videolan.org"
 
 var testGrouplessAuthorsPercent = (float32(testNumGrouplessAuthors) / float32(testNumAuthors)) * 100
@@ -41,7 +40,8 @@ func TestNewDomainGroupsReport(t *testing.T) {
 	report.ParseCommits(testCommits)
 
 	group := report.DomainGroups[testGroupName]
-	if group == nil {
+	grouplessGroup := report.DomainGroups[testGrouplessName]
+	if group == nil || grouplessGroup == nil {
 		t.Fatalf("Fetched author group was nil")
 	}
 
@@ -49,10 +49,14 @@ func TestNewDomainGroupsReport(t *testing.T) {
 		t.Fatalf("Unexpected number of authors: received %d, expected %d", report.AuthorCount, testNumAuthors)
 	} else if group.AuthorCount != testNumGroupAuthors {
 		t.Fatalf("Unexpected number of group authors: received %d, expected %d", group.AuthorCount, testNumGroupAuthors)
+	} else if grouplessGroup.AuthorCount != testNumGrouplessAuthors {
+		t.Fatalf("Unexpected number of unknown group authors: received %d, expected %d", grouplessGroup.AuthorCount, testNumGrouplessAuthors)
 	} else if grouplessAuthors := report.AuthorCount - group.AuthorCount; grouplessAuthors != testNumGrouplessAuthors {
 		t.Fatalf("Unexpected number of groupless authors: received %d, expected %d", grouplessAuthors, testNumGrouplessAuthors)
 	} else if groupPercentage := report.GroupPercentageOfTotal(testGroupName); groupPercentage != testGroupAuthorsPercent {
 		t.Fatalf("Unexpected group author percent: received %f, expected %f", groupPercentage, testGroupAuthorsPercent)
+	} else if grouplessGroupPercentage := report.GroupPercentageOfTotal(testGrouplessName); grouplessGroupPercentage != testGrouplessAuthorsPercent {
+		t.Fatalf("Unexpected groupless author percent: received %f, expected %f", grouplessGroupPercentage, testGrouplessAuthorsPercent)
 	}
 }
 
