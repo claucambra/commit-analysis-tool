@@ -97,16 +97,32 @@ func (report *DomainGroupsReport) Generate(db *db.SQLiteBackend) {
 	report.updateAuthors(authors, db)
 }
 
-func (report *DomainGroupsReport) PercentageGroupAuthors(group string) float32 {
+func (report *DomainGroupsReport) GroupData(group string) *GroupData {
 	if group == "" {
-		return 0
+		return nil
 	}
 
 	totalGroupAuthors := 0
+	totalGroupInsertions := 0
+	totalGroupDeletions := 0
+	totalGroupFilesChanged := 0
 
 	for _, domain := range report.DomainGroups[group] {
 		totalGroupAuthors += report.DomainNumAuthors[domain]
+		totalGroupInsertions += report.DomainNumInsertions[domain]
+		totalGroupDeletions += report.DomainNumDeletions[domain]
+		totalGroupFilesChanged += report.DomainNumFilesChanged[domain]
 	}
 
-	return (float32(totalGroupAuthors) / float32(report.TotalAuthors)) * 100
+	groupData := new(GroupData)
+	groupData.NumAuthors = totalGroupAuthors
+	groupData.NumInsertions = totalGroupInsertions
+	groupData.NumDeletions = totalGroupDeletions
+	groupData.NumFilesChanged = totalGroupFilesChanged
+	groupData.AuthorsPercent = (float32(totalGroupAuthors) / float32(report.TotalAuthors)) * 100
+	groupData.InsertionsPercent = (float32(totalGroupInsertions) / float32(report.TotalInsertions)) * 100
+	groupData.DeletionsPercent = (float32(totalGroupDeletions) / float32(report.TotalDeletions)) * 100
+	groupData.FilesChangedPercent = (float32(totalGroupFilesChanged) / float32(report.TotalNumFilesChanged)) * 100
+
+	return groupData
 }
