@@ -58,6 +58,15 @@ func IngestTestCommits(sqlb *SQLiteBackend, t *testing.T) {
 	if err != nil {
 		t.Fatalf("Error during test log file ingest: %s", err)
 	}
+
+	parsedCommits, err := sqlb.Commits()
+	if err != nil {
+		t.Fatalf("Error checking ingested commits: %s", err)
+	}
+
+	if len(parsedCommits) != 1000 {
+		t.Fatalf("Missing commits.")
+	}
 }
 
 func CleanupTestDB(sqlb *SQLiteBackend) {
