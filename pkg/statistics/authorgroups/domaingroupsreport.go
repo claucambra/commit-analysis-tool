@@ -107,6 +107,7 @@ func (report *DomainGroupsReport) GroupData(group string) *GroupData {
 	}
 
 	groupData := new(GroupData)
+	groupData.GroupName = group
 	groupData.NumAuthors = totalGroupAuthors
 	groupData.NumInsertions = totalGroupInsertions
 	groupData.NumDeletions = totalGroupDeletions
