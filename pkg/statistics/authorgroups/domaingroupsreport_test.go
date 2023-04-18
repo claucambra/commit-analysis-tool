@@ -52,5 +52,7 @@ func TestNewDomainGroupsReport(t *testing.T) {
 		t.Fatalf("Unexpected number of authors: received %d, expected %d", authorCount, testNumAuthors)
 	} else if report.DomainNumAuthors[testGroupDomain] != testNumGroupAuthors {
 		t.Fatalf("Unexpected number of domain authors: received %d, expected %d", report.DomainNumAuthors[testGroupDomain], testNumGroupAuthors)
+	} else if groupPc := report.PercentageGroupAuthors(testGroupName); groupPc != testGroupAuthorsPercent {
+		t.Fatalf("Unexpected percentage of group authors: received %f, expected %f", groupPc, testGroupAuthorsPercent)
 	}
 }

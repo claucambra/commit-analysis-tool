@@ -70,7 +70,6 @@ func (report *DomainGroupsReport) updateAuthors(authors []string, db *db.SQLiteB
 		}
 
 		authorDomain := splitAuthorEmail[1]
-		print(authorDomain)
 		report.DomainNumAuthors[authorDomain] += 1
 		report.TotalAuthors += 1
 
@@ -85,4 +84,18 @@ func (report *DomainGroupsReport) Generate(db *db.SQLiteBackend) {
 	}
 
 	report.updateAuthors(authors, db)
+}
+
+func (report *DomainGroupsReport) PercentageGroupAuthors(group string) float32 {
+	if group == "" {
+		return 0
+	}
+
+	totalGroupAuthors := 0
+
+	for _, domain := range report.DomainGroups[group] {
+		totalGroupAuthors += report.DomainNumAuthors[domain]
+	}
+
+	return (float32(totalGroupAuthors) / float32(report.TotalAuthors)) * 100
 }
