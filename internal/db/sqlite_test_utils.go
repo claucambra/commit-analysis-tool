@@ -64,6 +64,8 @@ func CleanupTestDB(sqlb *SQLiteBackend) {
 		return
 	}
 
+	sqlb.Close()
+
 	if testDir != "" {
 		os.RemoveAll(testDir)
 	}
