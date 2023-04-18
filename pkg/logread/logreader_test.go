@@ -39,7 +39,7 @@ func TestReadCommits(t *testing.T) {
 		t.Fatalf("Test setup failed: %s", err)
 	}
 
-	commits, err := ReadCommits(repoPath)
+	commits, err := ReadCommits(repoPath, nil)
 	if err != nil {
 		t.Fatalf("Error reading commits: %s", err)
 	}

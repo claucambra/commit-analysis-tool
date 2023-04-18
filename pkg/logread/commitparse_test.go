@@ -86,7 +86,7 @@ modules/gui/macosx/library/audio-library/VLCLibraryAlbumTracksDataSource.m | 5 +
 1 file changed, 4 insertions(+), 1 deletion(-)`
 
 	expectedCommitCount := 7
-	parsedCommitLog, err := ParseCommitLog(testCommitLog)
+	parsedCommitLog, err := ParseCommitLog(testCommitLog, nil)
 	receivedCommitCount := len(parsedCommitLog)
 
 	if err != nil {

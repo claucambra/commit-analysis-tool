@@ -8,7 +8,7 @@ import (
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
 )
 
-func ReadCommits(repoPath string) ([]*common.CommitData, error) {
+func ReadCommits(repoPath string, reports []common.Report) ([]*common.CommitData, error) {
 	cmd := exec.Command("git",
 		"-C", repoPath,
 		"log",
@@ -29,7 +29,7 @@ func ReadCommits(repoPath string) ([]*common.CommitData, error) {
 	}
 
 	outString := string(out)
-	commits, err := ParseCommitLog(outString)
+	commits, err := ParseCommitLog(outString, reports)
 	if err != nil {
 		return nil, err
 	}
