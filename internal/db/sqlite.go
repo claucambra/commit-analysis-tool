@@ -203,9 +203,21 @@ func (sqlb *SQLiteBackend) Authors() ([]string, error) {
 
 	authors := make([]string, 0)
 	for rows.Next() {
-		author := ""
-		rows.Scan(author)
-		authors = append(authors, author)
+		commit := new(common.CommitData)
+		rows.Scan(
+			&commit.Id,
+			&commit.RepoName,
+			&commit.AuthorName,
+			&commit.AuthorEmail,
+			&commit.AuthorTime,
+			&commit.CommitterName,
+			&commit.CommitterEmail,
+			&commit.CommitterTime,
+			&commit.NumInsertions,
+			&commit.NumDeletions,
+			&commit.NumFilesChanged,
+		)
+		authors = append(authors, commit.AuthorEmail)
 	}
 
 	return authors, nil
