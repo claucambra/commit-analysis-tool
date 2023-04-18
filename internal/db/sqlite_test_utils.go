@@ -2,9 +2,11 @@ package db
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
+	"testing"
+
+	"github.com/claucambra/commit-analysis-tool/pkg/logread"
 )
 
 const testDbFileName = "test.db"
@@ -37,6 +39,24 @@ func InitTestDB(t *testing.T) *SQLiteBackend {
 	}
 
 	return sqlb
+}
+
+func IngestTestCommits(sqlb *SQLiteBackend, t *testing.T) {
+	testCommitLogBytes, err := os.ReadFile("../../test/data/log.txt")
+	if err != nil {
+		t.Fatalf("Could not read test commits file")
+	}
+
+	testCommitLog := string(testCommitLogBytes)
+	parsedCommitLog, err := logread.ParseCommitLog(testCommitLog)
+	if err != nil {
+		t.Fatalf("Error during test log file parsing: %s", err)
+	}
+
+	err = sqlb.AddCommits(parsedCommitLog)
+	if err != nil {
+		t.Fatalf("Error during test log file ingest: %s", err)
+	}
 }
 
 func CleanupTestDB(sqlb *SQLiteBackend) {
