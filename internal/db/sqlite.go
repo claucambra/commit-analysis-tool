@@ -104,3 +104,36 @@ func (sqlb *SQLiteBackend) AddCommit(commit *common.CommitData) error {
 	return nil
 }
 
+func (sqlb *SQLiteBackend) Commit(commitId string) (*common.CommitData, error) {
+	stmt := "SELECT * FROM commits WHERE id = ?"
+
+	accStmt, err := sqlb.db.Prepare(stmt)
+	if err != nil {
+		log.Fatalf("Encountered error preparing commit retrieval statement: %s", err)
+		return nil, err
+	}
+
+	defer accStmt.Close()
+
+	if err != nil {
+		fmt.Printf("Encountered error adding commit: %s", err)
+		return nil, err
+	}
+
+	commit := new(common.CommitData)
+	accStmt.QueryRow(commitId).Scan(
+		&commit.Id,
+		&commit.RepoName,
+		&commit.AuthorName,
+		&commit.AuthorEmail,
+		&commit.AuthorTime,
+		&commit.CommitterName,
+		&commit.CommitterEmail,
+		&commit.CommitterTime,
+		&commit.NumInsertions,
+		&commit.NumDeletions,
+		&commit.NumFilesChanged,
+	)
+
+	return commit, nil
+}
