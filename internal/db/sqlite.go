@@ -172,3 +172,29 @@ func (sqlb *SQLiteBackend) Commits() ([]*common.CommitData, error) {
 	return commits, nil
 }
 
+func (sqlb *SQLiteBackend) Authors() ([]string, error) {
+	stmt := "SELECT DISTINCT author_email FROM commits"
+	accStmt, err := sqlb.db.Prepare(stmt)
+	if err != nil {
+		log.Fatalf("Encountered error preparing commits retrieval statement: %s", err)
+		return nil, err
+	}
+
+	defer accStmt.Close()
+
+	rows, err := accStmt.Query()
+	if err != nil {
+		log.Fatalf("Error retrieving rows: %s", err)
+		return nil, err
+	}
+
+	authors := make([]string, 0)
+	for rows.Next() {
+		author := ""
+		rows.Scan(author)
+		authors = append(authors, author)
+	}
+
+	return authors, nil
+}
+
