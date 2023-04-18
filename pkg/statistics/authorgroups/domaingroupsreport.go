@@ -9,34 +9,30 @@ import (
 const fallbackGroupName = "unknown"
 
 type DomainGroupsReport struct {
-	TotalAuthors         int
-	TotalCommits         int
-	TotalInsertions      int
-	TotalDeletions       int
-	TotalNumFilesChanged int
+	TotalAuthors    int
+	TotalCommits    int
+	TotalInsertions int
+	TotalDeletions  int
 
-	DomainGroups          map[string][]string
-	DomainNumAuthors      map[string]int
-	DomainNumInsertions   map[string]int
-	DomainNumDeletions    map[string]int
-	DomainNumFilesChanged map[string]int
+	DomainGroups        map[string][]string
+	DomainNumAuthors    map[string]int
+	DomainNumInsertions map[string]int
+	DomainNumDeletions  map[string]int
 
 	domainToGroup map[string]string
 }
 
 func NewDomainGroupsReport(domainGroups map[string][]string) *DomainGroupsReport {
 	report := &DomainGroupsReport{
-		TotalAuthors:         0,
-		TotalCommits:         0,
-		TotalInsertions:      0,
-		TotalDeletions:       0,
-		TotalNumFilesChanged: 0,
+		TotalAuthors:    0,
+		TotalCommits:    0,
+		TotalInsertions: 0,
+		TotalDeletions:  0,
 
-		DomainGroups:          domainGroups,
-		DomainNumAuthors:      map[string]int{},
-		DomainNumInsertions:   map[string]int{},
-		DomainNumDeletions:    map[string]int{},
-		DomainNumFilesChanged: map[string]int{},
+		DomainGroups:        domainGroups,
+		DomainNumAuthors:    map[string]int{},
+		DomainNumInsertions: map[string]int{},
+		DomainNumDeletions:  map[string]int{},
 
 		domainToGroup: map[string]string{},
 	}
@@ -55,18 +51,16 @@ func (report *DomainGroupsReport) updateDomainChanges(authorDomain string, db *d
 		return
 	}
 
-	domainInsertions, domainDeletions, domainFilesChanged, err := db.DomainChanges(authorDomain)
+	domainInsertions, domainDeletions, _, err := db.DomainChanges(authorDomain)
 	if err != nil {
 		return
 	}
 
 	report.TotalInsertions += domainInsertions
 	report.TotalDeletions += domainDeletions
-	report.TotalNumFilesChanged += domainFilesChanged
 
 	report.DomainNumInsertions[authorDomain] += domainInsertions
 	report.DomainNumDeletions[authorDomain] += domainDeletions
-	report.DomainNumFilesChanged[authorDomain] += domainFilesChanged
 }
 
 func (report *DomainGroupsReport) updateAuthors(authors []string, db *db.SQLiteBackend) {
@@ -105,24 +99,20 @@ func (report *DomainGroupsReport) GroupData(group string) *GroupData {
 	totalGroupAuthors := 0
 	totalGroupInsertions := 0
 	totalGroupDeletions := 0
-	totalGroupFilesChanged := 0
 
 	for _, domain := range report.DomainGroups[group] {
 		totalGroupAuthors += report.DomainNumAuthors[domain]
 		totalGroupInsertions += report.DomainNumInsertions[domain]
 		totalGroupDeletions += report.DomainNumDeletions[domain]
-		totalGroupFilesChanged += report.DomainNumFilesChanged[domain]
 	}
 
 	groupData := new(GroupData)
 	groupData.NumAuthors = totalGroupAuthors
 	groupData.NumInsertions = totalGroupInsertions
 	groupData.NumDeletions = totalGroupDeletions
-	groupData.NumFilesChanged = totalGroupFilesChanged
 	groupData.AuthorsPercent = (float32(totalGroupAuthors) / float32(report.TotalAuthors)) * 100
 	groupData.InsertionsPercent = (float32(totalGroupInsertions) / float32(report.TotalInsertions)) * 100
 	groupData.DeletionsPercent = (float32(totalGroupDeletions) / float32(report.TotalDeletions)) * 100
-	groupData.FilesChangedPercent = (float32(totalGroupFilesChanged) / float32(report.TotalNumFilesChanged)) * 100
 
 	return groupData
 }

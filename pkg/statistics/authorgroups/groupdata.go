@@ -3,13 +3,11 @@ package authorgroups
 type GroupData struct {
 	GroupName string
 
-	NumAuthors      int
-	NumInsertions   int
-	NumDeletions    int
-	NumFilesChanged int
+	NumAuthors    int
+	NumInsertions int
+	NumDeletions  int
 
-	AuthorsPercent      float32
-	InsertionsPercent   float32
-	DeletionsPercent    float32
-	FilesChangedPercent float32
+	AuthorsPercent    float32
+	InsertionsPercent float32
+	DeletionsPercent  float32
 }
