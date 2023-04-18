@@ -13,6 +13,7 @@ const testDbFileName = "test.db"
 const testDirName = "sqlite_test"
 
 var testDir = ""
+var TestLogFilePath = "../../test/data/log.txt"
 
 func InitTestDB(t *testing.T) *SQLiteBackend {
 	testDir, err := os.MkdirTemp("", testDirName)
@@ -42,7 +43,7 @@ func InitTestDB(t *testing.T) *SQLiteBackend {
 }
 
 func IngestTestCommits(sqlb *SQLiteBackend, t *testing.T) {
-	testCommitLogBytes, err := os.ReadFile("../../test/data/log.txt")
+	testCommitLogBytes, err := os.ReadFile(TestLogFilePath)
 	if err != nil {
 		t.Fatalf("Could not read test commits file")
 	}
