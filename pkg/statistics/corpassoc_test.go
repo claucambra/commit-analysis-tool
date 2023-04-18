@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/claucambra/commit-analysis-tool/internal/git"
+	"github.com/claucambra/commit-analysis-tool/pkg/common"
 )
 
 const testNumAuthors = 3
@@ -15,7 +15,7 @@ const testPersonalDomain = "claudiocambra.com"
 const testCorpDomain = "corpdomain.com"
 
 var testCorpAuthorsPercent = (float32(testNumCorpAuthors) / float32(testNumAuthors)) * 100
-var testCommits = []*git.CommitData{
+var testCommits = []*common.CommitData{
 	{
 		Id:              "8e13b181b601fed7ff4fedfd22e11821c6d621fd",
 		RepoName:        "test-repo",

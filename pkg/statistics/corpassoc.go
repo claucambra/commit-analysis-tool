@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/claucambra/commit-analysis-tool/internal/git"
+	"github.com/claucambra/commit-analysis-tool/pkg/common"
 )
 
 type CorpAuthorsReport struct {
-	Commits            []*git.CommitData
+	Commits            []*common.CommitData
 	TotalAuthors       int
 	NumCorpAuthors     int
 	CorpAuthorsPercent float32
@@ -21,7 +21,7 @@ type CorpAuthorsReport struct {
 
 func NewCorpAuthorsReport(corporateEmailDomains map[string]bool) *CorpAuthorsReport {
 	return &CorpAuthorsReport{
-		Commits:            make([]*git.CommitData, 0),
+		Commits:            make([]*common.CommitData, 0),
 		TotalAuthors:       0,
 		NumCorpAuthors:     0,
 		CorpAuthorsPercent: 0,
@@ -33,7 +33,7 @@ func NewCorpAuthorsReport(corporateEmailDomains map[string]bool) *CorpAuthorsRep
 	}
 }
 
-func (report *CorpAuthorsReport) ParseCommits(commits []*git.CommitData) {
+func (report *CorpAuthorsReport) ParseCommits(commits []*common.CommitData) {
 	if len(commits) == 0 {
 		return
 	}
@@ -43,7 +43,7 @@ func (report *CorpAuthorsReport) ParseCommits(commits []*git.CommitData) {
 	}
 }
 
-func (report *CorpAuthorsReport) AddCommit(commit git.CommitData) {
+func (report *CorpAuthorsReport) AddCommit(commit common.CommitData) {
 	authorString := commit.AuthorEmail
 	if authorString == "" {
 		authorString = commit.AuthorName

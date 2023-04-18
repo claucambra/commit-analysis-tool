@@ -1,4 +1,4 @@
-package git
+package logread
 
 import (
 	"errors"
@@ -7,19 +7,22 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/claucambra/commit-analysis-tool/internal/logformat"
+	"github.com/claucambra/commit-analysis-tool/pkg/common"
 )
 
 var numberRegex = regexp.MustCompile("[0-9]+")
-var commitRegex = regexp.MustCompile(fmt.Sprintf("^[0-9a-f]+%s", PrettyFormatStringSeparator))
+var commitRegex = regexp.MustCompile(fmt.Sprintf("^[0-9a-f]+%s", logformat.PrettyFormatStringSeparator))
 var insertionsRegex = regexp.MustCompile("([0-9]+) insertions?")
 var deletionsRegex = regexp.MustCompile("([0-9]+) deletions?")
 var filesChangedRegex = regexp.MustCompile("([0-9]+) files changed?")
 var emptyNewLineRegex = regexp.MustCompile(`\n\s*\n`)
 
-func ParseCommitLog(commitLog string) ([]*CommitData, error) {
+func ParseCommitLog(commitLog string) ([]*common.CommitData, error) {
 	splitCommitLog := emptyNewLineRegex.Split(commitLog, -1)
 	numCommits := len(splitCommitLog)
-	parsedCommits := make([]*CommitData, numCommits)
+	parsedCommits := make([]*common.CommitData, numCommits)
 
 	for i := 0; i < numCommits; i++ {
 		commitString := splitCommitLog[i]
@@ -51,7 +54,7 @@ func ParseCommitLog(commitLog string) ([]*CommitData, error) {
 
  **/
 
-func ParseCommit(rawCommit string) (*CommitData, error) {
+func ParseCommit(rawCommit string) (*common.CommitData, error) {
 	commitLogLines := strings.Split(rawCommit, "\n")
 	prettyLogLine := commitLogLines[0]
 
@@ -97,20 +100,20 @@ func parseChangesLine(changesLogLine string, specificChangesRegex *regexp.Regexp
  * This is heavily influenced by the format of the pretty format. Look at PrettyFormat for further
  * details on this.
  */
-func parsePrettyLogLine(prettyLogLine string) (*CommitData, error) {
-	commitData := new(CommitData)
-	splitPrettyLogLine := strings.Split(prettyLogLine, PrettyFormatStringSeparator)
+func parsePrettyLogLine(prettyLogLine string) (*common.CommitData, error) {
+	commitData := new(common.CommitData)
+	splitPrettyLogLine := strings.Split(prettyLogLine, logformat.PrettyFormatStringSeparator)
 
-	if len(splitPrettyLogLine) != PrettyFormatStringParameterCount() {
+	if len(splitPrettyLogLine) != logformat.PrettyFormatStringParameterCount() {
 		return nil, errors.New("pretty log has an unexpected amount of values")
 	}
 
-	authorParsedTime, authorParsedTimeErr := time.Parse(TimeFormat, splitPrettyLogLine[1])
+	authorParsedTime, authorParsedTimeErr := time.Parse(common.TimeFormat, splitPrettyLogLine[1])
 	if authorParsedTimeErr != nil {
 		return nil, authorParsedTimeErr
 	}
 
-	committerParsedTime, committerParsedTimeErr := time.Parse(TimeFormat, splitPrettyLogLine[4])
+	committerParsedTime, committerParsedTimeErr := time.Parse(common.TimeFormat, splitPrettyLogLine[4])
 	if committerParsedTimeErr != nil {
 		return nil, committerParsedTimeErr
 	}

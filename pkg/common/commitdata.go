@@ -1,4 +1,4 @@
-package git
+package common
 
 type CommitData struct {
 	Id              string

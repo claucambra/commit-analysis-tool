@@ -1,9 +1,11 @@
-package git
+package logread
 
 import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/claucambra/commit-analysis-tool/pkg/common"
 )
 
 func TestParseCommit(t *testing.T) {
@@ -26,7 +28,7 @@ modules/gui/macosx/library/video-library/VLCLibraryVideoViewController.m |  2 +-
 		t.Fatalf("Received an error while creating expected commit committer timezone: %s", err)
 	}
 
-	expectedCommitData := new(CommitData)
+	expectedCommitData := new(common.CommitData)
 	expectedCommitData.Id = "1c915e7dd147d4b060c2c241bb966d6f6c6ecde9"
 	expectedCommitData.AuthorTime = time.Date(2023, 4, 8, 17, 47, 43, 0, expectedCommitAuthorLocation).Unix()
 	expectedCommitData.AuthorName = "Claudio Cambra"

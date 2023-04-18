@@ -1,18 +1,21 @@
-package git
+package logread
 
 import (
 	"fmt"
 	"os/exec"
+
+	"github.com/claucambra/commit-analysis-tool/internal/logformat"
+	"github.com/claucambra/commit-analysis-tool/pkg/common"
 )
 
-func ReadCommits(repoPath string) ([]*CommitData, error) {
+func ReadCommits(repoPath string) ([]*common.CommitData, error) {
 	cmd := exec.Command("git",
 		"-C", repoPath,
 		"log",
 		"--no-merges",
 		"--branches",
 		"--remotes",
-		fmt.Sprintf("--pretty=format:%s", PrettyFormatString()),
+		fmt.Sprintf("--pretty=format:%s", logformat.PrettyFormatString()),
 		"--reverse",
 		"--date-order",
 		"HEAD",
