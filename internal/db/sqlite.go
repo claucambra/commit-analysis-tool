@@ -198,3 +198,41 @@ func (sqlb *SQLiteBackend) Authors() ([]string, error) {
 	return authors, nil
 }
 
+func (sqlb *SQLiteBackend) AuthorCommits(author string) ([]*common.CommitData, error) {
+	stmt := "SELECT * FROM commits WHERE author_email = ?"
+	accStmt, err := sqlb.db.Prepare(stmt)
+	if err != nil {
+		log.Fatalf("Encountered error preparing commits retrieval statement: %s", err)
+		return nil, err
+	}
+
+	defer accStmt.Close()
+
+	rows, err := accStmt.Query(author)
+	if err != nil {
+		log.Fatalf("Error retrieving rows: %s", err)
+		return nil, err
+	}
+
+	commits := make([]*common.CommitData, 0)
+	for rows.Next() {
+		commit := new(common.CommitData)
+		rows.Scan(
+			&commit.Id,
+			&commit.RepoName,
+			&commit.AuthorName,
+			&commit.AuthorEmail,
+			&commit.AuthorTime,
+			&commit.CommitterName,
+			&commit.CommitterEmail,
+			&commit.CommitterTime,
+			&commit.NumInsertions,
+			&commit.NumDeletions,
+			&commit.NumFilesChanged,
+		)
+
+		commits = append(commits, commit)
+	}
+
+	return commits, nil
+}
