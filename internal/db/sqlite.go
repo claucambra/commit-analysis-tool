@@ -201,23 +201,11 @@ func (sqlb *SQLiteBackend) Authors() ([]string, error) {
 		return nil, err
 	}
 
-	authors := make([]string, 0)
+	authors := []string{}
 	for rows.Next() {
-		commit := new(common.CommitData)
-		rows.Scan(
-			&commit.Id,
-			&commit.RepoName,
-			&commit.AuthorName,
-			&commit.AuthorEmail,
-			&commit.AuthorTime,
-			&commit.CommitterName,
-			&commit.CommitterEmail,
-			&commit.CommitterTime,
-			&commit.NumInsertions,
-			&commit.NumDeletions,
-			&commit.NumFilesChanged,
-		)
-		authors = append(authors, commit.AuthorEmail)
+		author := new(string)
+		rows.Scan(author)
+		authors = append(authors, *author)
 	}
 
 	return authors, nil
