@@ -104,6 +104,19 @@ func (sqlb *SQLiteBackend) AddCommit(commit *common.CommitData) error {
 	return nil
 }
 
+func (sqlb *SQLiteBackend) AddCommits(commits []*common.CommitData) error {
+	for _, commit := range commits {
+		err := sqlb.AddCommit(commit)
+
+		if err != nil {
+			log.Fatalf("Error adding commit: %s", err)
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (sqlb *SQLiteBackend) Commit(commitId string) (*common.CommitData, error) {
 	stmt := "SELECT * FROM commits WHERE id = ?"
 
