@@ -10,6 +10,7 @@ import (
 
 func ReadCommits(repoPath string, reports []common.Report) ([]*common.CommitData, error) {
 	cmd := exec.Command("git",
+		"--no-pager",
 		"-C", repoPath,
 		"log",
 		"--no-merges",
@@ -25,6 +26,7 @@ func ReadCommits(repoPath string, reports []common.Report) ([]*common.CommitData
 
 	out, err := cmd.Output()
 	if err != nil {
+		fmt.Printf("Error running git: %s", err)
 		return nil, err
 	}
 
