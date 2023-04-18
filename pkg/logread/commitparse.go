@@ -124,8 +124,10 @@ func parsePrettyLogLine(prettyLogLine string) (*common.CommitData, error) {
 
 	commitData.Id = splitPrettyLogLine[0]
 	commitData.AuthorTime = authorParsedTime.Unix()
-	commitData.AuthorName = splitPrettyLogLine[2]
-	commitData.AuthorEmail = splitPrettyLogLine[3]
+	commitData.Author = &common.Author{
+		Name:  splitPrettyLogLine[2],
+		Email: splitPrettyLogLine[3],
+	}
 	commitData.CommitterTime = committerParsedTime.Unix()
 	commitData.CommitterName = splitPrettyLogLine[5]
 	commitData.CommitterEmail = splitPrettyLogLine[6]

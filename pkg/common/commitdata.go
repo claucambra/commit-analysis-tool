@@ -3,8 +3,7 @@ package common
 type CommitData struct {
 	Id              string
 	RepoName        string
-	AuthorName      string
-	AuthorEmail     string
+	Author          *Author
 	AuthorTime      int64
 	CommitterName   string
 	CommitterEmail  string

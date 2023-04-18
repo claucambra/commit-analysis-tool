@@ -11,8 +11,8 @@ import (
 const fallbackGroupName = "unknown"
 
 type DomainGroup struct {
-	AuthorCount  int
-	DomainCounts map[string]int
+	AuthorCount   int
+	DomainAuthors map[string][]*common.Author
 }
 
 type DomainGroupsReport struct {
@@ -25,8 +25,8 @@ type DomainGroupsReport struct {
 
 func NewDomainGroup() *DomainGroup {
 	return &DomainGroup{
-		AuthorCount:  0,
-		DomainCounts: make(map[string]int),
+		AuthorCount:   0,
+		DomainAuthors: make(map[string][]*common.Author),
 	}
 }
 
@@ -57,9 +57,9 @@ func (report *DomainGroupsReport) ParseCommits(commits []*common.CommitData) {
 }
 
 func (report *DomainGroupsReport) AddCommit(commit common.CommitData) {
-	authorString := commit.AuthorEmail
+	authorString := commit.Author.Email
 	if authorString == "" {
-		authorString = commit.AuthorName
+		authorString = commit.Author.Name
 	}
 
 	if report.authors[authorString] { // Already counted, skip
@@ -72,7 +72,7 @@ func (report *DomainGroupsReport) AddCommit(commit common.CommitData) {
 	groupString := fallbackGroupName
 	emailDomain := "unknown"
 
-	if splitAuthorEmail := strings.Split(commit.AuthorEmail, "@"); len(splitAuthorEmail) == 2 {
+	if splitAuthorEmail := strings.Split(commit.Author.Email, "@"); len(splitAuthorEmail) == 2 {
 		emailDomain = splitAuthorEmail[1]
 		groupString = report.domainToGroup[emailDomain]
 
@@ -88,7 +88,7 @@ func (report *DomainGroupsReport) AddCommit(commit common.CommitData) {
 	}
 
 	group.AuthorCount += 1
-	group.DomainCounts[emailDomain] += 1
+	group.DomainAuthors[emailDomain] = append(group.DomainAuthors[emailDomain], commit.Author)
 }
 
 func (report *DomainGroupsReport) GroupPercentageOfTotal(group string) float32 {
@@ -130,8 +130,8 @@ func (report *DomainGroupsReport) String() string {
 		reportString += fmt.Sprintf("\t\"%s\":\t%d (%f%%)\n", groupName, groupStruct.AuthorCount, report.GroupPercentageOfTotal(groupName))
 
 		// Get sorted domains
-		sortedDomainNames := make([]string, 0, len(groupStruct.DomainCounts))
-		for domainName := range groupStruct.DomainCounts {
+		sortedDomainNames := make([]string, 0, len(groupStruct.DomainAuthors))
+		for domainName := range groupStruct.DomainAuthors {
 			sortedDomainNames = append(sortedDomainNames, domainName)
 		}
 
@@ -139,8 +139,8 @@ func (report *DomainGroupsReport) String() string {
 			domainA := sortedDomainNames[i]
 			domainB := sortedDomainNames[j]
 
-			domainACount := groupStruct.DomainCounts[domainA]
-			domainBCount := groupStruct.DomainCounts[domainB]
+			domainACount := len(groupStruct.DomainAuthors[domainA])
+			domainBCount := len(groupStruct.DomainAuthors[domainB])
 
 			if domainACount == domainBCount {
 				return domainA < domainB
@@ -151,7 +151,7 @@ func (report *DomainGroupsReport) String() string {
 
 		for _, domainName := range sortedDomainNames {
 			print(domainName)
-			domainCount := groupStruct.DomainCounts[domainName]
+			domainCount := len(groupStruct.DomainAuthors[domainName])
 			reportString += fmt.Sprintf("\t\t%s:\t%d\n", domainName, domainCount)
 		}
 	}

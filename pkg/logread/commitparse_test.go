@@ -31,9 +31,11 @@ modules/gui/macosx/library/video-library/VLCLibraryVideoViewController.m |  2 +-
 
 	expectedCommitData := new(common.CommitData)
 	expectedCommitData.Id = "1c915e7dd147d4b060c2c241bb966d6f6c6ecde9"
+	expectedCommitData.Author = &common.Author{
+		Name:  "Claudio Cambra",
+		Email: "developer@claudiocambra.com",
+	}
 	expectedCommitData.AuthorTime = time.Date(2023, 4, 8, 17, 47, 43, 0, expectedCommitAuthorLocation).Unix()
-	expectedCommitData.AuthorName = "Claudio Cambra"
-	expectedCommitData.AuthorEmail = "developer@claudiocambra.com"
 	expectedCommitData.CommitterTime = time.Date(2023, 4, 12, 23, 21, 43, 0, expectedCommitCommitterLocation).Unix()
 	expectedCommitData.CommitterName = "Jean-Baptiste Kempf"
 	expectedCommitData.CommitterEmail = "jb@videolan.org"
