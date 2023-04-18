@@ -10,11 +10,6 @@ import (
 
 const fallbackGroupName = "unknown"
 
-type DomainGroup struct {
-	AuthorCount   int
-	DomainAuthors map[string][]*common.Author
-}
-
 type DomainGroupsReport struct {
 	AuthorCount  int
 	DomainGroups map[string]*DomainGroup
