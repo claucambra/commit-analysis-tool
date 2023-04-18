@@ -38,6 +38,7 @@ func TestCommitsFile(t *testing.T) {
 }
 
 func TestNewDomainGroupsReport(t *testing.T) {
+	db.TestLogFilePath = "../../../test/data/log.txt"
 	sqlb := db.InitTestDB(t)
 	cleanup := func() { db.CleanupTestDB(sqlb) }
 	t.Cleanup(cleanup)
