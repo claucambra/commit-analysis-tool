@@ -58,13 +58,28 @@ func TestNewDomainGroupsReport(t *testing.T) {
 
 func TestDomainGroupsString(t *testing.T) {
 	testString := "Author domain groups report\n"
-	testString += fmt.Sprintf("Total repository authors: %d\n", testNumAuthors)
-
+	testString += "Total repository authors: 31\n"
 	testString += "Number of authors by group:\n"
-	testString += fmt.Sprintf("\t\"%s\":\t%d (%f%%)\n", testGrouplessName, testNumGrouplessAuthors, testGrouplessAuthorsPercent)
-	testString += fmt.Sprintf("\t\t%s:\t%d\n", testGrouplessDomain, testNumGrouplessAuthors)
-	testString += fmt.Sprintf("\t\"%s\":\t%d (%f%%)\n", testGroupName, testNumGroupAuthors, testGroupAuthorsPercent)
-	testString += fmt.Sprintf("\t\t%s:\t%d\n", testGroupDomain, testNumGroupAuthors)
+	testString += "\t\"unknown\":\t26 (83.870964%)\n"
+	testString += "\t\tvideolabs.io:\t6\n"
+	testString += "\t\tgmail.com:\t5\n"
+	testString += "\t\tbeauzee.fr:\t1\n"
+	testString += "\t\tchollian.net:\t1\n"
+	testString += "\t\tclaudiocambra.com:\t1\n"
+	testString += "\t\tcrossbowffs.com:\t1\n"
+	testString += "\t\tfree.fr:\t1\n"
+	testString += "\t\tgllm.fr:\t1\n"
+	testString += "\t\thaasn.dev:\t1\n"
+	testString += "\t\thotmail.com:\t1\n"
+	testString += "\t\tkerrickstaley.com:\t1\n"
+	testString += "\t\tmartin.st:\t1\n"
+	testString += "\t\toutlook.com:\t1\n"
+	testString += "\t\tposteo.net:\t1\n"
+	testString += "\t\tremlab.net:\t1\n"
+	testString += "\t\tyahoo.fr:\t1\n"
+	testString += "\t\tycbcr.xyz:\t1\n"
+	testString += "\t\"VideoLAN\":\t5 (16.129032%)\n"
+	testString += "\t\tvideolan.org:\t5\n"
 
 	report := NewDomainGroupsReport(testEmailGroups)
 	report.ParseCommits(testCommits)

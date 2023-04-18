@@ -2,6 +2,7 @@ package authorgroups
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
@@ -100,14 +101,57 @@ func (report *DomainGroupsReport) GroupPercentageOfTotal(group string) float32 {
 }
 
 func (report *DomainGroupsReport) String() string {
+	// Get sorted domain group names
+	sortedDomainGroupNames := make([]string, 0, len(report.DomainGroups))
+	for domainGroupName := range report.DomainGroups {
+		sortedDomainGroupNames = append(sortedDomainGroupNames, domainGroupName)
+	}
+
+	sort.SliceStable(sortedDomainGroupNames, func(i, j int) bool {
+		groupNameA := sortedDomainGroupNames[i]
+		groupNameB := sortedDomainGroupNames[j]
+
+		groupACount := report.DomainGroups[groupNameA].AuthorCount
+		groupBCount := report.DomainGroups[groupNameB].AuthorCount
+
+		if groupACount == groupBCount {
+			return groupNameA < groupNameB
+		}
+
+		return groupACount > groupBCount
+	})
+
 	reportString := "Author domain groups report\n"
 	reportString += fmt.Sprintf("Total repository authors: %d\n", report.AuthorCount)
 	reportString += "Number of authors by group:\n"
 
-	for groupName, groupStruct := range report.DomainGroups {
+	for _, groupName := range sortedDomainGroupNames {
+		groupStruct := report.DomainGroups[groupName]
 		reportString += fmt.Sprintf("\t\"%s\":\t%d (%f%%)\n", groupName, groupStruct.AuthorCount, report.GroupPercentageOfTotal(groupName))
 
-		for domainName, domainCount := range groupStruct.DomainCounts {
+		// Get sorted domains
+		sortedDomainNames := make([]string, 0, len(groupStruct.DomainCounts))
+		for domainName := range groupStruct.DomainCounts {
+			sortedDomainNames = append(sortedDomainNames, domainName)
+		}
+
+		sort.SliceStable(sortedDomainNames, func(i, j int) bool {
+			domainA := sortedDomainNames[i]
+			domainB := sortedDomainNames[j]
+
+			domainACount := groupStruct.DomainCounts[domainA]
+			domainBCount := groupStruct.DomainCounts[domainB]
+
+			if domainACount == domainBCount {
+				return domainA < domainB
+			}
+
+			return domainACount > domainBCount
+		})
+
+		for _, domainName := range sortedDomainNames {
+			print(domainName)
+			domainCount := groupStruct.DomainCounts[domainName]
 			reportString += fmt.Sprintf("\t\t%s:\t%d\n", domainName, domainCount)
 		}
 	}
