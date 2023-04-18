@@ -3,20 +3,17 @@ package authorgroups
 import (
 	"fmt"
 	"sort"
-
-	"github.com/claucambra/commit-analysis-tool/pkg/common"
 )
 
 type DomainGroup struct {
-	Name          string
-	AuthorCount   int
-	DomainAuthors map[string][]*common.Author
+	AuthorCount  int
+	DomainCounts map[string]int
 }
 
 func (group *DomainGroup) domainsString() string {
 	// Get sorted domains
-	sortedDomainNames := make([]string, 0, len(group.DomainAuthors))
-	for domainName := range group.DomainAuthors {
+	sortedDomainNames := make([]string, 0, len(group.DomainCounts))
+	for domainName := range group.DomainCounts {
 		sortedDomainNames = append(sortedDomainNames, domainName)
 	}
 
@@ -24,8 +21,8 @@ func (group *DomainGroup) domainsString() string {
 		domainA := sortedDomainNames[i]
 		domainB := sortedDomainNames[j]
 
-		domainACount := len(group.DomainAuthors[domainA])
-		domainBCount := len(group.DomainAuthors[domainB])
+		domainACount := group.DomainCounts[domainA]
+		domainBCount := group.DomainCounts[domainB]
 
 		if domainACount == domainBCount {
 			return domainA < domainB
@@ -38,8 +35,8 @@ func (group *DomainGroup) domainsString() string {
 
 	for _, domainName := range sortedDomainNames {
 		print(domainName)
-		domainCount := len(group.DomainAuthors[domainName])
-		reportString += fmt.Sprintf("\t\t%s:\t%d\n", domainName, domainCount)
+		DomainCounts := group.DomainCounts[domainName]
+		reportString += fmt.Sprintf("\t\t%s:\t%d\n", domainName, DomainCounts)
 	}
 
 	return reportString

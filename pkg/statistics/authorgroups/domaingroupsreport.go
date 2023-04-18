@@ -20,8 +20,8 @@ type DomainGroupsReport struct {
 
 func NewDomainGroup() *DomainGroup {
 	return &DomainGroup{
-		AuthorCount:   0,
-		DomainAuthors: make(map[string][]*common.Author),
+		AuthorCount:  0,
+		DomainCounts: make(map[string]int),
 	}
 }
 
@@ -52,9 +52,9 @@ func (report *DomainGroupsReport) ParseCommits(commits []*common.CommitData) {
 }
 
 func (report *DomainGroupsReport) AddCommit(commit common.CommitData) {
-	authorString := commit.Author.Email
+	authorString := commit.AuthorEmail
 	if authorString == "" {
-		authorString = commit.Author.Name
+		authorString = commit.AuthorName
 	}
 
 	if report.authors[authorString] { // Already counted, skip
@@ -67,7 +67,7 @@ func (report *DomainGroupsReport) AddCommit(commit common.CommitData) {
 	groupString := fallbackGroupName
 	emailDomain := "unknown"
 
-	if splitAuthorEmail := strings.Split(commit.Author.Email, "@"); len(splitAuthorEmail) == 2 {
+	if splitAuthorEmail := strings.Split(commit.AuthorEmail, "@"); len(splitAuthorEmail) == 2 {
 		emailDomain = splitAuthorEmail[1]
 		groupString = report.domainToGroup[emailDomain]
 
@@ -83,7 +83,7 @@ func (report *DomainGroupsReport) AddCommit(commit common.CommitData) {
 	}
 
 	group.AuthorCount += 1
-	group.DomainAuthors[emailDomain] = append(group.DomainAuthors[emailDomain], commit.Author)
+	group.DomainCounts[emailDomain] += 1
 }
 
 func (report *DomainGroupsReport) GroupPercentageOfTotal(group string) float32 {
