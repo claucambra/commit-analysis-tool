@@ -19,7 +19,7 @@ var deletionsRegex = regexp.MustCompile("([0-9]+) deletions?")
 var filesChangedRegex = regexp.MustCompile("([0-9]+) files changed?")
 var emptyNewLineRegex = regexp.MustCompile(`\n\s*\n`)
 
-func ParseCommitLog(commitLog string, reports []common.Report) ([]*common.CommitData, error) {
+func ParseCommitLog(commitLog string) ([]*common.CommitData, error) {
 	splitCommitLog := emptyNewLineRegex.Split(commitLog, -1)
 	numCommits := len(splitCommitLog)
 	parsedCommits := make([]*common.CommitData, numCommits)
@@ -33,10 +33,6 @@ func ParseCommitLog(commitLog string, reports []common.Report) ([]*common.Commit
 		}
 
 		parsedCommits[i] = parsedCommit
-
-		for _, report := range reports {
-			report.AddCommit(*parsedCommit)
-		}
 	}
 
 	return parsedCommits, nil

@@ -22,7 +22,7 @@ func TestSqliteDbAddCommit(t *testing.T) {
 	}
 
 	testCommitLog := string(testCommitLogBytes)
-	parsedCommitLog, err := logread.ParseCommitLog(testCommitLog, nil)
+	parsedCommitLog, err := logread.ParseCommitLog(testCommitLog)
 	if err != nil {
 		t.Fatalf("Error during test log file parsing: %s", err)
 	}

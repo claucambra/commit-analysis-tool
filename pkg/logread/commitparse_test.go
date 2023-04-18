@@ -62,7 +62,7 @@ func TestParseCommitLog(t *testing.T) {
 	testCommitLog := string(testCommitLogBytes)
 
 	expectedCommitCount := 1000
-	parsedCommitLog, err := ParseCommitLog(testCommitLog, nil)
+	parsedCommitLog, err := ParseCommitLog(testCommitLog)
 	receivedCommitCount := len(parsedCommitLog)
 
 	if err != nil {
