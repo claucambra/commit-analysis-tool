@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -79,7 +78,7 @@ func printDomainGroups(readDbPath string, domainGroupsFilePath string) {
 		os.Exit(0)
 	}
 
-	groupsJsonBytes, err := ioutil.ReadFile(domainGroupsFilePath)
+	groupsJsonBytes, err := os.ReadFile(domainGroupsFilePath)
 	if err != nil {
 		log.Fatalf("Error opening domain groups json file: %s", err)
 		os.Exit(0)
@@ -96,7 +95,7 @@ func printDomainGroups(readDbPath string, domainGroupsFilePath string) {
 	report.Generate(sqlb)
 
 	for groupName, _ := range groups {
-		fmt.Printf("%+v", report.GroupData(groupName))
+		fmt.Printf("%+v\n", report.GroupData(groupName))
 	}
 
 	sqlb.Close()
