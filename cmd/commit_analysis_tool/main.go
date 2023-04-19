@@ -59,8 +59,9 @@ func ingestRepoCommits(ingestDbPath string, repoPath string) {
 		log.Fatalf("Error reading commits at %s: %s", repoPath, err)
 	}
 
+	log.Println("Starting commit ingest.")
 	sqlb.AddCommits(commits)
-	fmt.Printf("Done!\n")
+	log.Println("Finished ingesting commits!")
 	sqlb.Close()
 	os.Exit(0)
 }

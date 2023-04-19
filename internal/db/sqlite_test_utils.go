@@ -1,7 +1,7 @@
 package db
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"testing"
@@ -24,7 +24,7 @@ func InitTestDB(t *testing.T) *SQLiteBackend {
 
 	testDbPath := filepath.Join(testDir, testDbFileName)
 
-	fmt.Printf("Setting up test database at %s\n", testDir)
+	log.Printf("Setting up test database at %s\n", testDir)
 	var sqlb = new(SQLiteBackend)
 	err = sqlb.Open(testDbPath)
 

@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
@@ -61,7 +60,7 @@ func (sqlb *SQLiteBackend) Setup() error {
 
 	_, err := sqlb.db.Exec(stmt)
 	if err != nil {
-		fmt.Printf("Setup failed, received error during table creation: %s", err)
+		log.Fatalf("Setup failed, received error during table creation: %s", err)
 		return err
 	}
 
@@ -97,7 +96,7 @@ func (sqlb *SQLiteBackend) AddCommit(commit *common.CommitData) error {
 		commit.NumFilesChanged)
 
 	if err != nil {
-		fmt.Printf("Encountered error adding commit: %s", err)
+		log.Printf("Encountered error adding commit: %s", err)
 		return err
 	}
 

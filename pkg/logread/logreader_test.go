@@ -1,7 +1,7 @@
 package logread
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"testing"
@@ -16,7 +16,7 @@ func setupTestRepo() (string, error) {
 		return "", err
 	}
 
-	fmt.Printf("Setting up test git environment at %s\n", testDir)
+	log.Printf("Setting up test git environment at %s\n", testDir)
 	cmd := exec.Command("git",
 		"clone",
 		repoUrl,
