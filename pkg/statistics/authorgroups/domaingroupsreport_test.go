@@ -41,6 +41,7 @@ func TestNewDomainGroupsReport(t *testing.T) {
 	}
 
 	testGroupData := &GroupData{
+		GroupName:         testGroupName,
 		NumAuthors:        testNumGroupAuthors,
 		NumInsertions:     testGroupInsertions,
 		NumDeletions:      testGroupDeletions,
