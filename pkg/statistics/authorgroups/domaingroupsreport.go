@@ -93,17 +93,31 @@ func (report *DomainGroupsReport) Generate(db *db.SQLiteBackend) {
 	report.updateAuthors(authors, db)
 }
 
+// Returns authors, insertions, deletions
+func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (int, int, int) {
+	totalGroupAuthors := 0
+	totalGroupInsertions := 0
+	totalGroupDeletions := 0
+
+	for _, domain := range report.DomainGroups[groupName] {
+		totalGroupAuthors += report.DomainNumAuthors[domain]
+		totalGroupInsertions += report.DomainNumInsertions[domain]
+		totalGroupDeletions += report.DomainNumDeletions[domain]
+	}
+
+	return totalGroupAuthors, totalGroupInsertions, totalGroupDeletions
+}
+
 func (report *DomainGroupsReport) unknownGroupData() *GroupData {
 	totalGroupAuthors := 0
 	totalGroupInsertions := 0
 	totalGroupDeletions := 0
 
-	for _, domains := range report.DomainGroups {
-		for _, domain := range domains {
-			totalGroupAuthors += report.DomainNumAuthors[domain]
-			totalGroupInsertions += report.DomainNumInsertions[domain]
-			totalGroupDeletions += report.DomainNumDeletions[domain]
-		}
+	for groupName := range report.DomainGroups {
+		domainAuthors, domainInserts, domainDeletes := report.accumulateGroupCounts(groupName)
+		totalGroupAuthors += domainAuthors
+		totalGroupInsertions += domainInserts
+		totalGroupDeletions += domainDeletes
 	}
 
 	unknownGroupTotalAuthors := report.TotalAuthors - totalGroupAuthors
@@ -127,15 +141,7 @@ func (report *DomainGroupsReport) GroupData(groupName string) *GroupData {
 		return report.unknownGroupData()
 	}
 
-	totalGroupAuthors := 0
-	totalGroupInsertions := 0
-	totalGroupDeletions := 0
-
-	for _, domain := range report.DomainGroups[groupName] {
-		totalGroupAuthors += report.DomainNumAuthors[domain]
-		totalGroupInsertions += report.DomainNumInsertions[domain]
-		totalGroupDeletions += report.DomainNumDeletions[domain]
-	}
+	totalGroupAuthors, totalGroupInsertions, totalGroupDeletions := report.accumulateGroupCounts(groupName)
 
 	groupData := new(GroupData)
 	groupData.GroupName = groupName
