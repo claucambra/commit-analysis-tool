@@ -93,9 +93,6 @@ func (report *DomainGroupsReport) Generate(db *db.SQLiteBackend) {
 	report.updateAuthors(authors, db)
 }
 
-func (report *DomainGroupsReport) GroupData(group string) *GroupData {
-	if group == "" {
-		return nil
 func (report *DomainGroupsReport) unknownGroupData() *GroupData {
 	totalGroupAuthors := 0
 	totalGroupInsertions := 0
@@ -125,20 +122,23 @@ func (report *DomainGroupsReport) unknownGroupData() *GroupData {
 	return groupData
 }
 
+func (report *DomainGroupsReport) GroupData(groupName string) *GroupData {
+	if groupName == "" || groupName == fallbackGroupName {
+		return report.unknownGroupData()
 	}
 
 	totalGroupAuthors := 0
 	totalGroupInsertions := 0
 	totalGroupDeletions := 0
 
-	for _, domain := range report.DomainGroups[group] {
+	for _, domain := range report.DomainGroups[groupName] {
 		totalGroupAuthors += report.DomainNumAuthors[domain]
 		totalGroupInsertions += report.DomainNumInsertions[domain]
 		totalGroupDeletions += report.DomainNumDeletions[domain]
 	}
 
 	groupData := new(GroupData)
-	groupData.GroupName = group
+	groupData.GroupName = groupName
 	groupData.NumAuthors = totalGroupAuthors
 	groupData.NumInsertions = totalGroupInsertions
 	groupData.NumDeletions = totalGroupDeletions
