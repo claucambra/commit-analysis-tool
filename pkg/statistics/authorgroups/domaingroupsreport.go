@@ -124,16 +124,7 @@ func (report *DomainGroupsReport) unknownGroupData() *GroupData {
 	unknownGroupTotalInsertions := report.TotalInsertions - totalGroupInsertions
 	unknownGroupTotalDeletions := report.TotalDeletions - totalGroupDeletions
 
-	groupData := new(GroupData)
-	groupData.GroupName = fallbackGroupName
-	groupData.NumAuthors = unknownGroupTotalAuthors
-	groupData.NumInsertions = unknownGroupTotalInsertions
-	groupData.NumDeletions = unknownGroupTotalDeletions
-	groupData.AuthorsPercent = (float32(unknownGroupTotalAuthors) / float32(report.TotalAuthors)) * 100
-	groupData.InsertionsPercent = (float32(unknownGroupTotalInsertions) / float32(report.TotalInsertions)) * 100
-	groupData.DeletionsPercent = (float32(unknownGroupTotalDeletions) / float32(report.TotalDeletions)) * 100
-
-	return groupData
+	return NewGroupData(report, fallbackGroupName, unknownGroupTotalAuthors, unknownGroupTotalInsertions, unknownGroupTotalDeletions)
 }
 
 func (report *DomainGroupsReport) GroupData(groupName string) *GroupData {
@@ -142,15 +133,5 @@ func (report *DomainGroupsReport) GroupData(groupName string) *GroupData {
 	}
 
 	totalGroupAuthors, totalGroupInsertions, totalGroupDeletions := report.accumulateGroupCounts(groupName)
-
-	groupData := new(GroupData)
-	groupData.GroupName = groupName
-	groupData.NumAuthors = totalGroupAuthors
-	groupData.NumInsertions = totalGroupInsertions
-	groupData.NumDeletions = totalGroupDeletions
-	groupData.AuthorsPercent = (float32(totalGroupAuthors) / float32(report.TotalAuthors)) * 100
-	groupData.InsertionsPercent = (float32(totalGroupInsertions) / float32(report.TotalInsertions)) * 100
-	groupData.DeletionsPercent = (float32(totalGroupDeletions) / float32(report.TotalDeletions)) * 100
-
-	return groupData
+	return NewGroupData(report, groupName, totalGroupAuthors, totalGroupInsertions, totalGroupDeletions)
 }
