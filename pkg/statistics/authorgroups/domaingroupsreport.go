@@ -6,6 +6,7 @@ import (
 	"github.com/claucambra/commit-analysis-tool/internal/db"
 )
 
+const fallbackDomain = "unknown-domain"
 const fallbackGroupName = "unknown"
 
 type DomainGroupsReport struct {
@@ -69,12 +70,13 @@ func (report *DomainGroupsReport) updateAuthors(authors []string, db *db.SQLiteB
 			continue
 		}
 
+		authorDomain := fallbackDomain
 		splitAuthorEmail := strings.Split(author, "@")
-		if len(splitAuthorEmail) < 2 {
-			continue
+
+		if len(splitAuthorEmail) >= 2 {
+			authorDomain = splitAuthorEmail[1]
 		}
 
-		authorDomain := splitAuthorEmail[1]
 		report.DomainNumAuthors[authorDomain] += 1
 		report.TotalAuthors += 1
 
