@@ -99,6 +99,8 @@ func printDomainGroups(readDbPath string, domainGroupsFilePath string) {
 		fmt.Printf("%+v\n", report.GroupData(groupName))
 	}
 
+	fmt.Printf("%+v\n", report.GroupData("")) // Print "unknown/other" group
+
 	sqlb.Close()
 	os.Exit(0)
 }
