@@ -15,7 +15,7 @@ type DomainGroupsReport struct {
 	TotalInsertions int
 	TotalDeletions  int
 
-	DomainGroups        map[string][]string
+	GroupsOfDomains     map[string][]string
 	DomainNumAuthors    map[string]int
 	DomainNumInsertions map[string]int
 	DomainNumDeletions  map[string]int
@@ -30,7 +30,7 @@ func NewDomainGroupsReport(domainGroups map[string][]string) *DomainGroupsReport
 		TotalInsertions: 0,
 		TotalDeletions:  0,
 
-		DomainGroups:        domainGroups,
+		GroupsOfDomains:     domainGroups,
 		DomainNumAuthors:    map[string]int{},
 		DomainNumInsertions: map[string]int{},
 		DomainNumDeletions:  map[string]int{},
@@ -99,7 +99,7 @@ func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (int, 
 	totalGroupInsertions := 0
 	totalGroupDeletions := 0
 
-	for _, domain := range report.DomainGroups[groupName] {
+	for _, domain := range report.GroupsOfDomains[groupName] {
 		totalGroupAuthors += report.DomainNumAuthors[domain]
 		totalGroupInsertions += report.DomainNumInsertions[domain]
 		totalGroupDeletions += report.DomainNumDeletions[domain]
@@ -113,7 +113,7 @@ func (report *DomainGroupsReport) unknownGroupData() *GroupData {
 	totalGroupInsertions := 0
 	totalGroupDeletions := 0
 
-	for groupName := range report.DomainGroups {
+	for groupName := range report.GroupsOfDomains {
 		domainAuthors, domainInserts, domainDeletes := report.accumulateGroupCounts(groupName)
 		totalGroupAuthors += domainAuthors
 		totalGroupInsertions += domainInserts
