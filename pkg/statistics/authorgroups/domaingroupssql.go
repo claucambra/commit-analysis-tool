@@ -54,8 +54,10 @@ func domainChanges(sqlb *db.SQLiteBackend, domain string) (*common.Changes, erro
 	}
 
 	return &common.Changes{
-		NumInsertions:   numInsertions,
-		NumDeletions:    numDeletions,
+		LineChanges: common.LineChanges{
+			NumInsertions: numInsertions,
+			NumDeletions:  numDeletions,
+		},
 		NumFilesChanged: numFilesChanged,
 	}, nil
 }

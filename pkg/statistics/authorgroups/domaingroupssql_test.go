@@ -37,8 +37,10 @@ func TestDomainChanges(t *testing.T) {
 
 	parsedCommitLog := dbtesting.ParsedTestCommitLog(t)
 	testDomainChanges := &common.Changes{
-		NumInsertions:   0,
-		NumDeletions:    0,
+		LineChanges: common.LineChanges{
+			NumInsertions: 0,
+			NumDeletions:  0,
+		},
 		NumFilesChanged: 0,
 	}
 

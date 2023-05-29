@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	dbtesting "github.com/claucambra/commit-analysis-tool/internal/db/testing"
+	"github.com/claucambra/commit-analysis-tool/pkg/common"
 )
 
 const testNumAuthors = 31
@@ -16,7 +17,6 @@ const testGroupDomain = "videolan.org"
 const testGroupInsertions = 660
 const testGroupDeletions = 685
 
-var testGroupAuthorsPercent = (float32(testNumGroupAuthors) / float32(testNumAuthors)) * 100
 var testCommitsFile = "../../../test/data/log.txt"
 
 var testEmailGroups = map[string][]string{
@@ -36,15 +36,17 @@ func TestNewDomainGroupsReport(t *testing.T) {
 
 	if authorCount := report.TotalAuthors; authorCount != testNumAuthors {
 		t.Fatalf("Unexpected number of authors: received %d, expected %d", authorCount, testNumAuthors)
-	} else if numGroupAuthors := report.DomainNumAuthors[testGroupDomain]; numGroupAuthors != testNumGroupAuthors {
+	} else if numGroupAuthors := report.DomainTotalNumAuthors[testGroupDomain]; numGroupAuthors != testNumGroupAuthors {
 		t.Fatalf("Unexpected number of domain authors: received %d, expected %d", numGroupAuthors, testNumGroupAuthors)
 	}
 
 	testGroupData := &GroupData{
-		GroupName:         testGroupName,
-		NumAuthors:        testNumGroupAuthors,
-		NumInsertions:     testGroupInsertions,
-		NumDeletions:      testGroupDeletions,
+		GroupName:  testGroupName,
+		NumAuthors: testNumGroupAuthors,
+		NumChanges: &common.LineChanges{
+			NumInsertions: testGroupInsertions,
+			NumDeletions:  testGroupDeletions,
+		},
 		AuthorsPercent:    (float32(testNumGroupAuthors) / float32(testNumAuthors)) * 100,
 		InsertionsPercent: (float32(testGroupInsertions) / float32(testNumInsertions)) * 100,
 		DeletionsPercent:  (float32(testGroupDeletions) / float32(testNumDeletions)) * 100,

@@ -11,38 +11,23 @@ const fallbackDomain = "unknown-domain"
 const fallbackGroupName = "unknown"
 
 type DomainGroupsReport struct {
-	TotalAuthors    int
-	TotalCommits    int
-	TotalInsertions int
-	TotalDeletions  int
+	TotalAuthors int
+	TotalCommits int
+	TotalChanges *common.LineChanges
 
-	GroupsOfDomains     map[string][]string
-	DomainNumAuthors    map[string]int
-	DomainNumInsertions map[string]int
-	DomainNumDeletions  map[string]int
+	GroupsOfDomains map[string][]string
 
-	domainToGroup map[string]string
+	DomainTotalNumAuthors   map[string]int
+	DomainTotalLineChanges  map[string]*common.LineChanges
+	DomainTotalNumDeletions map[string]int
 }
 
 func NewDomainGroupsReport(domainGroups map[string][]string) *DomainGroupsReport {
 	report := &DomainGroupsReport{
-		TotalAuthors:    0,
-		TotalCommits:    0,
-		TotalInsertions: 0,
-		TotalDeletions:  0,
-
-		GroupsOfDomains:     domainGroups,
-		DomainNumAuthors:    map[string]int{},
-		DomainNumInsertions: map[string]int{},
-		DomainNumDeletions:  map[string]int{},
-
-		domainToGroup: map[string]string{},
-	}
-
-	for groupName, domainNames := range domainGroups {
-		for _, domainName := range domainNames {
-			report.domainToGroup[domainName] = groupName
-		}
+		TotalChanges:           &common.LineChanges{},
+		GroupsOfDomains:        domainGroups,
+		DomainTotalNumAuthors:  map[string]int{},
+		DomainTotalLineChanges: map[string]*common.LineChanges{},
 	}
 
 	return report
@@ -58,11 +43,14 @@ func (report *DomainGroupsReport) updateDomainChanges(authorDomain string, sqlb 
 		return
 	}
 
-	report.TotalInsertions += changes.NumInsertions
-	report.TotalDeletions += changes.NumDeletions
+	report.TotalChanges.AddLineChanges(&changes.LineChanges)
 
-	report.DomainNumInsertions[authorDomain] += changes.NumInsertions
-	report.DomainNumDeletions[authorDomain] += changes.NumDeletions
+	if existingDomainLineChanges, ok := report.DomainTotalLineChanges[authorDomain]; ok {
+		existingDomainLineChanges.AddLineChanges(&changes.LineChanges)
+		report.DomainTotalLineChanges[authorDomain] = existingDomainLineChanges
+	} else {
+		report.DomainTotalLineChanges[authorDomain] = &changes.LineChanges
+	}
 }
 
 func (report *DomainGroupsReport) updateAuthors(authors []string, db *db.SQLiteBackend) {
@@ -78,7 +66,7 @@ func (report *DomainGroupsReport) updateAuthors(authors []string, db *db.SQLiteB
 			authorDomain = splitAuthorEmail[1]
 		}
 
-		report.DomainNumAuthors[authorDomain] += 1
+		report.DomainTotalNumAuthors[authorDomain] += 1
 		report.TotalAuthors += 1
 
 		report.updateDomainChanges(authorDomain, db)
@@ -95,37 +83,40 @@ func (report *DomainGroupsReport) Generate(db *db.SQLiteBackend) {
 }
 
 // Returns authors, insertions, deletions
-func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (int, int, int) {
+func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (int, *common.LineChanges) {
 	totalGroupAuthors := 0
-	totalGroupInsertions := 0
-	totalGroupDeletions := 0
-
-	for _, domain := range report.GroupsOfDomains[groupName] {
-		totalGroupAuthors += report.DomainNumAuthors[domain]
-		totalGroupInsertions += report.DomainNumInsertions[domain]
-		totalGroupDeletions += report.DomainNumDeletions[domain]
+	totalGroupLineChanges := common.LineChanges{
+		NumInsertions: 0,
+		NumDeletions:  0,
 	}
 
-	return totalGroupAuthors, totalGroupInsertions, totalGroupDeletions
+	for _, domain := range report.GroupsOfDomains[groupName] {
+		reportChanges := report.DomainTotalLineChanges[domain]
+		totalGroupLineChanges.AddLineChanges(reportChanges)
+		totalGroupAuthors += report.DomainTotalNumAuthors[domain]
+	}
+
+	return totalGroupAuthors, &totalGroupLineChanges
 }
 
 func (report *DomainGroupsReport) unknownGroupData() *GroupData {
 	totalGroupAuthors := 0
-	totalGroupInsertions := 0
-	totalGroupDeletions := 0
+	totalGroupChanges := &common.LineChanges{
+		NumInsertions: 0,
+		NumDeletions:  0,
+	}
 
 	for groupName := range report.GroupsOfDomains {
-		domainAuthors, domainInserts, domainDeletes := report.accumulateGroupCounts(groupName)
-		totalGroupAuthors += domainAuthors
-		totalGroupInsertions += domainInserts
-		totalGroupDeletions += domainDeletes
+		groupAuthors, groupLineChanges := report.accumulateGroupCounts(groupName)
+		totalGroupAuthors += groupAuthors
+		totalGroupChanges.AddLineChanges(groupLineChanges)
 	}
 
 	unknownGroupTotalAuthors := report.TotalAuthors - totalGroupAuthors
-	unknownGroupTotalInsertions := report.TotalInsertions - totalGroupInsertions
-	unknownGroupTotalDeletions := report.TotalDeletions - totalGroupDeletions
+	unknownGroupTotalLineChanges := report.TotalChanges
+	unknownGroupTotalLineChanges.SubtractLineChanges(totalGroupChanges)
 
-	return NewGroupData(report, fallbackGroupName, unknownGroupTotalAuthors, unknownGroupTotalInsertions, unknownGroupTotalDeletions)
+	return NewGroupData(report, fallbackGroupName, unknownGroupTotalAuthors, unknownGroupTotalLineChanges)
 }
 
 func (report *DomainGroupsReport) GroupData(groupName string) *GroupData {
@@ -133,6 +124,6 @@ func (report *DomainGroupsReport) GroupData(groupName string) *GroupData {
 		return report.unknownGroupData()
 	}
 
-	totalGroupAuthors, totalGroupInsertions, totalGroupDeletions := report.accumulateGroupCounts(groupName)
-	return NewGroupData(report, groupName, totalGroupAuthors, totalGroupInsertions, totalGroupDeletions)
+	totalGroupAuthors, totalGroupChanges := report.accumulateGroupCounts(groupName)
+	return NewGroupData(report, groupName, totalGroupAuthors, totalGroupChanges)
 }
