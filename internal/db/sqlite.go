@@ -249,17 +249,20 @@ func (sqlb *SQLiteBackend) AuthorCommits(author string) ([]*common.CommitData, e
 	return commits, nil
 }
 
-func (sqlb *SQLiteBackend) DomainChanges(domain string) (int, int, int, error) {
+func (sqlb *SQLiteBackend) DomainChangeRows(domain string) (*sql.Rows, error) {
 	stmt := "SELECT * FROM commits WHERE instr(author_email, ?) > 0"
 	accStmt, err := sqlb.db.Prepare(stmt)
 	if err != nil {
 		log.Fatalf("Encountered error preparing commits retrieval statement: %s", err)
-		return 0, 0, 0, err
+		return nil, err
 	}
 
 	defer accStmt.Close()
+	return accStmt.Query(domain)
+}
 
-	rows, err := accStmt.Query(domain)
+func (sqlb *SQLiteBackend) DomainChanges(domain string) (int, int, int, error) {
+	rows, err := sqlb.DomainChangeRows(domain)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
 		return 0, 0, 0, err
