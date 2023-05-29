@@ -68,7 +68,7 @@ func (sqlb *SQLiteBackend) Setup() error {
 	return nil
 }
 
-func (sqlb *SQLiteBackend) AddCommit(commit *common.CommitData) error {
+func (sqlb *SQLiteBackend) AddCommit(commit *common.Commit) error {
 	stmt := `INSERT INTO commits (
 			id,
 			repo_name,
@@ -104,7 +104,7 @@ func (sqlb *SQLiteBackend) AddCommit(commit *common.CommitData) error {
 	return nil
 }
 
-func (sqlb *SQLiteBackend) AddCommits(commits []*common.CommitData) error {
+func (sqlb *SQLiteBackend) AddCommits(commits []*common.Commit) error {
 	for _, commit := range commits {
 		err := sqlb.AddCommit(commit)
 
@@ -117,7 +117,7 @@ func (sqlb *SQLiteBackend) AddCommits(commits []*common.CommitData) error {
 	return nil
 }
 
-func (sqlb *SQLiteBackend) Commit(commitId string) (*common.CommitData, error) {
+func (sqlb *SQLiteBackend) Commit(commitId string) (*common.Commit, error) {
 	stmt := "SELECT * FROM commits WHERE id = ?"
 
 	accStmt, err := sqlb.Db.Prepare(stmt)
@@ -128,7 +128,7 @@ func (sqlb *SQLiteBackend) Commit(commitId string) (*common.CommitData, error) {
 
 	defer accStmt.Close()
 
-	commit := new(common.CommitData)
+	commit := new(common.Commit)
 	accStmt.QueryRow(commitId).Scan(
 		&commit.Id,
 		&commit.RepoName,
@@ -146,7 +146,7 @@ func (sqlb *SQLiteBackend) Commit(commitId string) (*common.CommitData, error) {
 	return commit, nil
 }
 
-func (sqlb *SQLiteBackend) Commits() ([]*common.CommitData, error) {
+func (sqlb *SQLiteBackend) Commits() ([]*common.Commit, error) {
 	stmt := "SELECT * FROM commits"
 	accStmt, err := sqlb.Db.Prepare(stmt)
 	if err != nil {
@@ -162,9 +162,9 @@ func (sqlb *SQLiteBackend) Commits() ([]*common.CommitData, error) {
 		return nil, err
 	}
 
-	commits := make([]*common.CommitData, 0)
+	commits := make([]*common.Commit, 0)
 	for rows.Next() {
-		commit := new(common.CommitData)
+		commit := new(common.Commit)
 		rows.Scan(
 			&commit.Id,
 			&commit.RepoName,
@@ -211,7 +211,7 @@ func (sqlb *SQLiteBackend) Authors() ([]string, error) {
 	return authors, nil
 }
 
-func (sqlb *SQLiteBackend) AuthorCommits(author string) ([]*common.CommitData, error) {
+func (sqlb *SQLiteBackend) AuthorCommits(author string) ([]*common.Commit, error) {
 	stmt := "SELECT * FROM commits WHERE author_email = ?"
 	accStmt, err := sqlb.Db.Prepare(stmt)
 	if err != nil {
@@ -227,9 +227,9 @@ func (sqlb *SQLiteBackend) AuthorCommits(author string) ([]*common.CommitData, e
 		return nil, err
 	}
 
-	commits := make([]*common.CommitData, 0)
+	commits := make([]*common.Commit, 0)
 	for rows.Next() {
-		commit := new(common.CommitData)
+		commit := new(common.Commit)
 		rows.Scan(
 			&commit.Id,
 			&commit.RepoName,
@@ -262,7 +262,7 @@ func (sqlb *SQLiteBackend) DomainChangeRows(domain string) (*sql.Rows, error) {
 	return accStmt.Query(domain)
 }
 
-func (sqlb *SQLiteBackend) DomainChanges(domain string) (*common.CommitChanges, error) {
+func (sqlb *SQLiteBackend) DomainChanges(domain string) (*common.Changes, error) {
 	rows, err := sqlb.DomainChangeRows(domain)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
@@ -274,7 +274,7 @@ func (sqlb *SQLiteBackend) DomainChanges(domain string) (*common.CommitChanges, 
 	numFilesChanged := 0
 
 	for rows.Next() {
-		commit := new(common.CommitData)
+		commit := new(common.Commit)
 		rows.Scan(
 			&commit.Id,
 			&commit.RepoName,
@@ -294,10 +294,10 @@ func (sqlb *SQLiteBackend) DomainChanges(domain string) (*common.CommitChanges, 
 		numFilesChanged += commit.NumFilesChanged
 	}
 
-	return &common.CommitChanges{
-		Insertions:   numInsertions,
-		Deletions:    numDeletions,
-		FilesChanged: numFilesChanged,
+	return &common.Changes{
+		NumInsertions:   numInsertions,
+		NumDeletions:    numDeletions,
+		NumFilesChanged: numFilesChanged,
 	}, nil
 }
 
@@ -311,7 +311,7 @@ func (sqlb *SQLiteBackend) DomainYearlyChanges(domain string) (common.YearlyChan
 	yearBuckets := make(common.YearlyChangeMap)
 
 	for rows.Next() {
-		commit := new(common.CommitData)
+		commit := new(common.Commit)
 
 		rows.Scan(
 			&commit.Id,
@@ -330,17 +330,17 @@ func (sqlb *SQLiteBackend) DomainYearlyChanges(domain string) (common.YearlyChan
 		commitYear := time.Unix(commit.AuthorTime, 0).Year()
 
 		if _, ok := yearBuckets[commitYear]; !ok {
-			yearBuckets[commitYear] = common.CommitChanges{
-				Insertions:   commit.NumInsertions,
-				Deletions:    commit.NumDeletions,
-				FilesChanged: commit.NumFilesChanged,
+			yearBuckets[commitYear] = common.Changes{
+				NumInsertions:   commit.NumInsertions,
+				NumDeletions:    commit.NumDeletions,
+				NumFilesChanged: commit.NumFilesChanged,
 			}
 		} else {
 			existingChanges := yearBuckets[commitYear]
 
-			existingChanges.Insertions += commit.NumInsertions
-			existingChanges.Deletions += commit.NumDeletions
-			existingChanges.FilesChanged += commit.NumFilesChanged
+			existingChanges.NumInsertions += commit.NumInsertions
+			existingChanges.NumDeletions += commit.NumDeletions
+			existingChanges.NumFilesChanged += commit.NumFilesChanged
 
 			yearBuckets[commitYear] = existingChanges
 		}

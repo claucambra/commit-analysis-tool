@@ -9,7 +9,7 @@ import (
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
 )
 
-func ReadCommits(repoPath string) ([]*common.CommitData, error) {
+func ReadCommits(repoPath string) ([]*common.Commit, error) {
 	log.Println("Running git log.")
 
 	cmd := exec.Command("git",

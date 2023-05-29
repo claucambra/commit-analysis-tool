@@ -19,10 +19,10 @@ var deletionsRegex = regexp.MustCompile("([0-9]+) deletions?")
 var filesChangedRegex = regexp.MustCompile("([0-9]+) files changed?")
 var emptyNewLineRegex = regexp.MustCompile(`\n\s*\n`)
 
-func ParseCommitLog(commitLog string) ([]*common.CommitData, error) {
+func ParseCommitLog(commitLog string) ([]*common.Commit, error) {
 	splitCommitLog := emptyNewLineRegex.Split(commitLog, -1)
 	numCommits := len(splitCommitLog)
-	parsedCommits := make([]*common.CommitData, numCommits)
+	parsedCommits := make([]*common.Commit, numCommits)
 
 	for i := 0; i < numCommits; i++ {
 		commitString := splitCommitLog[i]
@@ -54,7 +54,7 @@ func ParseCommitLog(commitLog string) ([]*common.CommitData, error) {
 
  **/
 
-func ParseCommit(rawCommit string) (*common.CommitData, error) {
+func ParseCommit(rawCommit string) (*common.Commit, error) {
 	commitLogLines := strings.Split(rawCommit, "\n")
 	prettyLogLine := commitLogLines[0]
 
@@ -100,8 +100,8 @@ func parseChangesLine(changesLogLine string, specificChangesRegex *regexp.Regexp
  * This is heavily influenced by the format of the pretty format. Look at PrettyFormat for further
  * details on this.
  */
-func parsePrettyLogLine(prettyLogLine string) (*common.CommitData, error) {
-	commitData := new(common.CommitData)
+func parsePrettyLogLine(prettyLogLine string) (*common.Commit, error) {
+	commitData := new(common.Commit)
 	splitPrettyLogLine := strings.Split(prettyLogLine, logformat.PrettyFormatStringSeparator)
 
 	if len(splitPrettyLogLine) != logformat.PrettyFormatStringParameterCount() {
