@@ -15,7 +15,7 @@ func TestSqliteDbAddCommit(t *testing.T) {
 	cleanup := func() { CleanupTestDB(sqlb) }
 	t.Cleanup(cleanup)
 
-	testCommitLogBytes, err := os.ReadFile("../../test/data/log.txt")
+	testCommitLogBytes, err := os.ReadFile(TestLogFilePath)
 	if err != nil {
 		t.Fatalf("Could not read test commits file")
 	}
