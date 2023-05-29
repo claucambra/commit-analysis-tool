@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/claucambra/commit-analysis-tool/pkg/common"
 	"github.com/claucambra/commit-analysis-tool/pkg/logread"
 )
 
@@ -51,14 +52,20 @@ func ReadTestLogFile(t *testing.T) string {
 	return string(testCommitLogBytes)
 }
 
-func IngestTestCommits(sqlb *SQLiteBackend, t *testing.T) {
+func ParsedTestCommitLog(t *testing.T) []*common.Commit {
 	testCommitLog := ReadTestLogFile(t)
-	parsedCommitLog, err := logread.ParseCommitLog(testCommitLog)
+	testCommits, err := logread.ParseCommitLog(testCommitLog)
 	if err != nil {
-		t.Fatalf("Error during test log file parsing: %s", err)
+		t.Fatalf("Could not parse test commit log")
 	}
 
-	err = sqlb.AddCommits(parsedCommitLog)
+	return testCommits
+}
+
+func IngestTestCommits(sqlb *SQLiteBackend, t *testing.T) {
+	parsedCommitLog := ParsedTestCommitLog(t)
+
+	err := sqlb.AddCommits(parsedCommitLog)
 	if err != nil {
 		t.Fatalf("Error during test log file ingest: %s", err)
 	}

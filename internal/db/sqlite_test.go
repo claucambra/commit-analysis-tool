@@ -1,12 +1,10 @@
 package db
 
 import (
-	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
-	"github.com/claucambra/commit-analysis-tool/pkg/logread"
 )
 
 func TestSqliteDbAddCommit(t *testing.T) {
@@ -14,11 +12,7 @@ func TestSqliteDbAddCommit(t *testing.T) {
 	cleanup := func() { CleanupTestDB(sqlb) }
 	t.Cleanup(cleanup)
 
-	testCommitLog := ReadTestLogFile(t)
-	parsedCommitLog, err := logread.ParseCommitLog(testCommitLog)
-	if err != nil {
-		t.Fatalf("Error during test log file parsing: %s", err)
-	}
+	parsedCommitLog := ParsedTestCommitLog(t)
 
 	commit := parsedCommitLog[0]
 
@@ -42,11 +36,7 @@ func TestSqliteCommits(t *testing.T) {
 
 	IngestTestCommits(sqlb, t)
 
-	testCommitLog := ReadTestLogFile(t)
-	testCommits, err := logread.ParseCommitLog(testCommitLog)
-	if err != nil {
-		t.Fatalf("Could not parse test commit log")
-	}
+	testCommits := ParsedTestCommitLog(t)
 
 	retrievedCommits, err := sqlb.Commits()
 	if err != nil {
@@ -105,16 +95,11 @@ func TestSqliteAuthorCommits(t *testing.T) {
 		t.Fatalf("Could not retrieve commits for author in database")
 	}
 
-	testCommitLog := ReadTestLogFile(t)
-	testCommits, err := logread.ParseCommitLog(testCommitLog)
-	if err != nil {
-		t.Fatalf("Could not parse test commit log")
-	}
+	testCommits := ParsedTestCommitLog(t)
 
 	testAuthorCommits := make([]*common.Commit, 0)
 	for _, testCommit := range testCommits {
 		if testCommit.AuthorEmail == testAuthorEmail {
-			fmt.Printf("%+v", testCommit)
 			testAuthorCommits = append(testAuthorCommits, testCommit)
 		}
 	}
