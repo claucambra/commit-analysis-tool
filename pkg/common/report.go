@@ -1,6 +1,6 @@
 package common
 
 type Report interface {
-	AddCommit(CommitData)
+	AddCommit(Commit)
 	String() string
 }
