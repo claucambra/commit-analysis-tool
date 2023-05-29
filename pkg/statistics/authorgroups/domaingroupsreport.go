@@ -47,12 +47,12 @@ func NewDomainGroupsReport(domainGroups map[string][]string) *DomainGroupsReport
 	return report
 }
 
-func (report *DomainGroupsReport) updateDomainChanges(authorDomain string, db *db.SQLiteBackend) {
+func (report *DomainGroupsReport) updateDomainChanges(authorDomain string, sqlb *db.SQLiteBackend) {
 	if authorDomain == "" {
 		return
 	}
 
-	changes, err := db.DomainChanges(authorDomain)
+	changes, err := DomainChanges(sqlb, authorDomain)
 	if err != nil {
 		return
 	}
