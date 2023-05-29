@@ -11,6 +11,7 @@ type Changes struct {
 	NumFilesChanged int
 }
 
+type YearlyLineChangeMap map[int]LineChanges
 type YearlyChangeMap map[int]Changes
 
 func (lc *LineChanges) AddLineChanges(lcToAdd *LineChanges) {
@@ -53,4 +54,14 @@ func (ycm *YearlyChangeMap) SubtractChanges(changesToAdd *Changes, commitYear in
 		changes.SubtractChanges(changesToAdd)
 		(*ycm)[commitYear] = changes
 	}
+}
+
+func (ycm *YearlyChangeMap) LineChanges() *YearlyLineChangeMap {
+	ylcm := &YearlyLineChangeMap{}
+
+	for year, changes := range *ycm {
+		(*ylcm)[year] = changes.LineChanges
+	}
+
+	return ylcm
 }
