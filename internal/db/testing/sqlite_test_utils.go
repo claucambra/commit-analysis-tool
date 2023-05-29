@@ -16,7 +16,7 @@ const testDbFileName = "test.db"
 const testDirName = "sqlite_test"
 
 var testDir = ""
-var TestLogFilePath = "../../test/data/log.txt"
+var TestLogFilePath = "../../../test/data/log.txt"
 
 func InitTestDB(t *testing.T) *db.SQLiteBackend {
 	testDir, err := os.MkdirTemp("", testDirName)
