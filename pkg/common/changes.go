@@ -18,10 +18,19 @@ func (lc *LineChanges) AddLineChanges(lcToAdd *LineChanges) {
 	lc.NumDeletions += lcToAdd.NumDeletions
 }
 
+func (lc *LineChanges) SubtractLineChanges(lcToSubtract *LineChanges) {
+	lc.NumInsertions -= lcToSubtract.NumInsertions
+	lc.NumDeletions -= lcToSubtract.NumDeletions
+}
+
 func (changes *Changes) AddChanges(changesToAdd *Changes) {
-	changes.NumInsertions += changesToAdd.NumInsertions
-	changes.NumDeletions += changesToAdd.NumDeletions
+	changes.LineChanges.AddLineChanges(&changesToAdd.LineChanges)
 	changes.NumFilesChanged += changesToAdd.NumDeletions // FIXME: This needs to take the files into account!
+}
+
+func (changes *Changes) SubtractChanges(changesToSubtract *Changes) {
+	changes.LineChanges.SubtractLineChanges(&changesToSubtract.LineChanges)
+	changes.NumFilesChanged += changesToSubtract.NumDeletions // FIXME: This needs to take the files into account!
 }
 
 func (ycm *YearlyChangeMap) AddChanges(changesToAdd *Changes, commitYear int) {
@@ -36,5 +45,12 @@ func (ycm *YearlyChangeMap) AddChanges(changesToAdd *Changes, commitYear int) {
 			},
 			NumFilesChanged: changes.NumFilesChanged,
 		}
+	}
+}
+
+func (ycm *YearlyChangeMap) SubtractChanges(changesToAdd *Changes, commitYear int) {
+	if changes, ok := (*ycm)[commitYear]; ok {
+		changes.SubtractChanges(changesToAdd)
+		(*ycm)[commitYear] = changes
 	}
 }
