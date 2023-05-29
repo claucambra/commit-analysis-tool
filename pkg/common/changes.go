@@ -74,11 +74,11 @@ func (ycm *YearlyChangeMap) SubtractChanges(changesToSubtract *Changes, commitYe
 	}
 }
 
-func (ycm *YearlyChangeMap) LineChanges() *YearlyLineChangeMap {
-	ylcm := &YearlyLineChangeMap{}
+func (ycm *YearlyChangeMap) LineChanges() YearlyLineChangeMap {
+	ylcm := make(YearlyLineChangeMap, 0)
 
 	for year, changes := range *ycm {
-		(*ylcm)[year] = changes.LineChanges
+		ylcm[year] = changes.LineChanges
 	}
 
 	return ylcm
