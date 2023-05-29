@@ -88,20 +88,18 @@ func domainYearlyChanges(sqlb *db.SQLiteBackend, domain string) (common.YearlyCh
 
 		commitYear := time.Unix(commit.AuthorTime, 0).Year()
 
-		if _, ok := yearBuckets[commitYear]; !ok {
+		if changes, ok := yearBuckets[commitYear]; ok {
+			changes.NumInsertions += commit.NumInsertions
+			changes.NumDeletions += commit.NumDeletions
+			changes.NumFilesChanged += commit.NumFilesChanged
+
+			yearBuckets[commitYear] = changes
+		} else {
 			yearBuckets[commitYear] = common.Changes{
 				NumInsertions:   commit.NumInsertions,
 				NumDeletions:    commit.NumDeletions,
 				NumFilesChanged: commit.NumFilesChanged,
 			}
-		} else {
-			existingChanges := yearBuckets[commitYear]
-
-			existingChanges.NumInsertions += commit.NumInsertions
-			existingChanges.NumDeletions += commit.NumDeletions
-			existingChanges.NumFilesChanged += commit.NumFilesChanged
-
-			yearBuckets[commitYear] = existingChanges
 		}
 	}
 
