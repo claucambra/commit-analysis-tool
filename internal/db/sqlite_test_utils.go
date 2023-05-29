@@ -42,13 +42,17 @@ func InitTestDB(t *testing.T) *SQLiteBackend {
 	return sqlb
 }
 
-func IngestTestCommits(sqlb *SQLiteBackend, t *testing.T) {
+func ReadTestLogFile(t *testing.T) string {
 	testCommitLogBytes, err := os.ReadFile(TestLogFilePath)
 	if err != nil {
 		t.Fatalf("Could not read test commits file")
 	}
 
-	testCommitLog := string(testCommitLogBytes)
+	return string(testCommitLogBytes)
+}
+
+func IngestTestCommits(sqlb *SQLiteBackend, t *testing.T) {
+	testCommitLog := ReadTestLogFile(t)
 	parsedCommitLog, err := logread.ParseCommitLog(testCommitLog)
 	if err != nil {
 		t.Fatalf("Error during test log file parsing: %s", err)

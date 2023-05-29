@@ -2,7 +2,6 @@ package db
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"testing"
 
@@ -15,12 +14,7 @@ func TestSqliteDbAddCommit(t *testing.T) {
 	cleanup := func() { CleanupTestDB(sqlb) }
 	t.Cleanup(cleanup)
 
-	testCommitLogBytes, err := os.ReadFile(TestLogFilePath)
-	if err != nil {
-		t.Fatalf("Could not read test commits file")
-	}
-
-	testCommitLog := string(testCommitLogBytes)
+	testCommitLog := ReadTestLogFile(t)
 	parsedCommitLog, err := logread.ParseCommitLog(testCommitLog)
 	if err != nil {
 		t.Fatalf("Error during test log file parsing: %s", err)
@@ -48,12 +42,7 @@ func TestSqliteCommits(t *testing.T) {
 
 	IngestTestCommits(sqlb, t)
 
-	testCommitLogBytes, err := os.ReadFile(TestLogFilePath)
-	if err != nil {
-		t.Fatalf("Could not read test commits file")
-	}
-
-	testCommitLog := string(testCommitLogBytes)
+	testCommitLog := ReadTestLogFile(t)
 	testCommits, err := logread.ParseCommitLog(testCommitLog)
 	if err != nil {
 		t.Fatalf("Could not parse test commit log")
@@ -116,12 +105,7 @@ func TestSqliteAuthorCommits(t *testing.T) {
 		t.Fatalf("Could not retrieve commits for author in database")
 	}
 
-	testCommitLogBytes, err := os.ReadFile(TestLogFilePath)
-	if err != nil {
-		t.Fatalf("Could not read test commits file")
-	}
-
-	testCommitLog := string(testCommitLogBytes)
+	testCommitLog := ReadTestLogFile(t)
 	testCommits, err := logread.ParseCommitLog(testCommitLog)
 	if err != nil {
 		t.Fatalf("Could not parse test commit log")
