@@ -1,10 +1,12 @@
 package db
 
 import (
+	"fmt"
 	"os"
 	"reflect"
 	"testing"
 
+	"github.com/claucambra/commit-analysis-tool/pkg/common"
 	"github.com/claucambra/commit-analysis-tool/pkg/logread"
 )
 
@@ -97,5 +99,59 @@ func TestSqliteAuthors(t *testing.T) {
 
 	if len(authors) != 31 {
 		t.Fatalf("Received unexpected number of authors: expected %d, received %d", 1, len(authors))
+	}
+}
+
+func TestSqliteAuthorCommits(t *testing.T) {
+	sqlb := InitTestDB(t)
+	cleanup := func() { CleanupTestDB(sqlb) }
+	t.Cleanup(cleanup)
+
+	IngestTestCommits(sqlb, t)
+
+	testAuthorEmail := "developer@claudiocambra.com"
+
+	retrievedAuthorCommits, err := sqlb.AuthorCommits(testAuthorEmail)
+	if err != nil {
+		t.Fatalf("Could not retrieve commits for author in database")
+	}
+
+	testCommitLogBytes, err := os.ReadFile(TestLogFilePath)
+	if err != nil {
+		t.Fatalf("Could not read test commits file")
+	}
+
+	testCommitLog := string(testCommitLogBytes)
+	testCommits, err := logread.ParseCommitLog(testCommitLog)
+	if err != nil {
+		t.Fatalf("Could not parse test commit log")
+	}
+
+	testAuthorCommits := make([]*common.Commit, 0)
+	for _, testCommit := range testCommits {
+		if testCommit.AuthorEmail == testAuthorEmail {
+			fmt.Printf("%+v", testCommit)
+			testAuthorCommits = append(testAuthorCommits, testCommit)
+		}
+	}
+
+	numTestAuthorCommits := len(testAuthorCommits)
+	numRetrievedAuthorCommits := len(retrievedAuthorCommits)
+
+	if numRetrievedAuthorCommits != numTestAuthorCommits {
+		t.Fatalf(`Database commit count does not equal expected commit count.
+			Expected: %+v commits
+			Received: %+v commits`, numTestAuthorCommits, numRetrievedAuthorCommits)
+	}
+
+	for i := 0; i < numTestAuthorCommits; i++ {
+		testAuthorCommit := testAuthorCommits[i]
+		retrievedAuthorCommit := retrievedAuthorCommits[i]
+
+		if !reflect.DeepEqual(testAuthorCommit, retrievedAuthorCommit) {
+			t.Fatalf(`Database commits does not equal expected commits.
+				Expected: %+v
+				Received: %+v`, testAuthorCommit, retrievedAuthorCommit)
+		}
 	}
 }

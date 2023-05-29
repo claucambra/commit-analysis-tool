@@ -210,7 +210,7 @@ func (sqlb *SQLiteBackend) Authors() ([]string, error) {
 	return authors, nil
 }
 
-func (sqlb *SQLiteBackend) AuthorCommits(author string) ([]*common.Commit, error) {
+func (sqlb *SQLiteBackend) AuthorCommits(authorEmail string) ([]*common.Commit, error) {
 	stmt := "SELECT * FROM commits WHERE author_email = ?"
 	accStmt, err := sqlb.Db.Prepare(stmt)
 	if err != nil {
@@ -220,7 +220,7 @@ func (sqlb *SQLiteBackend) AuthorCommits(author string) ([]*common.Commit, error
 
 	defer accStmt.Close()
 
-	rows, err := accStmt.Query(author)
+	rows, err := accStmt.Query(authorEmail)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
 		return nil, err
