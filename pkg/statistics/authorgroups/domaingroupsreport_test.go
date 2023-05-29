@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/claucambra/commit-analysis-tool/internal/db"
+	dbtesting "github.com/claucambra/commit-analysis-tool/internal/db/testing"
 )
 
 const testNumAuthors = 31
@@ -24,12 +24,12 @@ var testEmailGroups = map[string][]string{
 }
 
 func TestNewDomainGroupsReport(t *testing.T) {
-	db.TestLogFilePath = testCommitsFile
-	sqlb := db.InitTestDB(t)
-	cleanup := func() { db.CleanupTestDB(sqlb) }
+	dbtesting.TestLogFilePath = testCommitsFile
+	sqlb := dbtesting.InitTestDB(t)
+	cleanup := func() { dbtesting.CleanupTestDB(sqlb) }
 	t.Cleanup(cleanup)
 
-	db.IngestTestCommits(sqlb, t)
+	dbtesting.IngestTestCommits(sqlb, t)
 
 	report := NewDomainGroupsReport(testEmailGroups)
 	report.Generate(sqlb)

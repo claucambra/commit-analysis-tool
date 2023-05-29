@@ -1,4 +1,4 @@
-package db
+package dbtesting
 
 import (
 	"log"
@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/claucambra/commit-analysis-tool/internal/db"
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
 	"github.com/claucambra/commit-analysis-tool/pkg/logread"
 )
@@ -17,7 +18,7 @@ const testDirName = "sqlite_test"
 var testDir = ""
 var TestLogFilePath = "../../test/data/log.txt"
 
-func InitTestDB(t *testing.T) *SQLiteBackend {
+func InitTestDB(t *testing.T) *db.SQLiteBackend {
 	testDir, err := os.MkdirTemp("", testDirName)
 	if err != nil {
 		t.Fatalf("Could not create temp test dir, received error: %s", err)
@@ -27,7 +28,7 @@ func InitTestDB(t *testing.T) *SQLiteBackend {
 	testDbPath := filepath.Join(testDir, testDbFileName)
 
 	log.Printf("Setting up test database at %s\n", testDir)
-	var sqlb = new(SQLiteBackend)
+	var sqlb = new(db.SQLiteBackend)
 	err = sqlb.Open(testDbPath)
 
 	if err != nil {
@@ -63,7 +64,7 @@ func ParsedTestCommitLog(t *testing.T) []*common.Commit {
 	return testCommits
 }
 
-func IngestTestCommits(sqlb *SQLiteBackend, t *testing.T) {
+func IngestTestCommits(sqlb *db.SQLiteBackend, t *testing.T) {
 	parsedCommitLog := ParsedTestCommitLog(t)
 
 	err := sqlb.AddCommits(parsedCommitLog)
@@ -81,7 +82,7 @@ func IngestTestCommits(sqlb *SQLiteBackend, t *testing.T) {
 	}
 }
 
-func CleanupTestDB(sqlb *SQLiteBackend) {
+func CleanupTestDB(sqlb *db.SQLiteBackend) {
 	if sqlb == nil {
 		return
 	}
