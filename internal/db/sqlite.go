@@ -8,6 +8,12 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+type CommitChanges struct {
+	Insertions   int
+	Deletions    int
+	FilesChanged int
+}
+
 type SQLiteBackend struct {
 	db *sql.DB
 }
