@@ -9,14 +9,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-type CommitChanges struct {
-	Insertions   int
-	Deletions    int
-	FilesChanged int
-}
-
-type YearlyChangeMap map[int]CommitChanges
-
 type SQLiteBackend struct {
 	Db *sql.DB
 }
@@ -270,7 +262,7 @@ func (sqlb *SQLiteBackend) DomainChangeRows(domain string) (*sql.Rows, error) {
 	return accStmt.Query(domain)
 }
 
-func (sqlb *SQLiteBackend) DomainChanges(domain string) (*CommitChanges, error) {
+func (sqlb *SQLiteBackend) DomainChanges(domain string) (*common.CommitChanges, error) {
 	rows, err := sqlb.DomainChangeRows(domain)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
@@ -302,21 +294,21 @@ func (sqlb *SQLiteBackend) DomainChanges(domain string) (*CommitChanges, error) 
 		numFilesChanged += commit.NumFilesChanged
 	}
 
-	return &CommitChanges{
+	return &common.CommitChanges{
 		Insertions:   numInsertions,
 		Deletions:    numDeletions,
 		FilesChanged: numFilesChanged,
 	}, nil
 }
 
-func (sqlb *SQLiteBackend) DomainYearlyChanges(domain string) (YearlyChangeMap, error) {
+func (sqlb *SQLiteBackend) DomainYearlyChanges(domain string) (common.YearlyChangeMap, error) {
 	rows, err := sqlb.DomainChangeRows(domain)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
 		return nil, err
 	}
 
-	yearBuckets := make(YearlyChangeMap)
+	yearBuckets := make(common.YearlyChangeMap)
 
 	for rows.Next() {
 		commit := new(common.CommitData)
@@ -338,7 +330,7 @@ func (sqlb *SQLiteBackend) DomainYearlyChanges(domain string) (YearlyChangeMap, 
 		commitYear := time.Unix(commit.AuthorTime, 0).Year()
 
 		if _, ok := yearBuckets[commitYear]; !ok {
-			yearBuckets[commitYear] = CommitChanges{
+			yearBuckets[commitYear] = common.CommitChanges{
 				Insertions:   commit.NumInsertions,
 				Deletions:    commit.NumDeletions,
 				FilesChanged: commit.NumFilesChanged,
