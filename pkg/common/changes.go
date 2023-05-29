@@ -13,3 +13,16 @@ func (changes *Changes) AddChanges(changesToAdd *Changes) {
 	changes.NumDeletions += changesToAdd.NumDeletions
 	changes.NumFilesChanged += changesToAdd.NumDeletions // FIXME: This needs to take the files into account!
 }
+
+func (ycm *YearlyChangeMap) AddChanges(changesToAdd *Changes, commitYear int) {
+	if changes, ok := (*ycm)[commitYear]; ok {
+		changes.AddChanges(changesToAdd)
+		(*ycm)[commitYear] = changes
+	} else {
+		(*ycm)[commitYear] = Changes{
+			NumInsertions:   changes.NumInsertions,
+			NumDeletions:    changes.NumDeletions,
+			NumFilesChanged: changes.NumFilesChanged,
+		}
+	}
+}

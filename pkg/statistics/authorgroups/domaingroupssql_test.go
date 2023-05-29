@@ -80,17 +80,7 @@ func TestDomainYearlyChanges(t *testing.T) {
 		}
 
 		commitYear := time.Unix(commit.AuthorTime, 0).Year()
-
-		if changes, ok := testDomainYearlyChanges[commitYear]; ok {
-			changes.AddChanges(&(commit.Changes))
-			testDomainYearlyChanges[commitYear] = changes
-		} else {
-			testDomainYearlyChanges[commitYear] = common.Changes{
-				NumInsertions:   commit.NumInsertions,
-				NumDeletions:    commit.NumDeletions,
-				NumFilesChanged: commit.NumFilesChanged,
-			}
-		}
+		testDomainYearlyChanges.AddChanges(&(commit.Changes), commitYear)
 	}
 
 	numTestYears := len(testDomainYearlyChanges)
