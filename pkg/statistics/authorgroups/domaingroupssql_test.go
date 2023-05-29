@@ -9,14 +9,25 @@ import (
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
 )
 
+var testDomain = "claudiocambra.com"
+
+func emailHasDomain(email string, domain string) bool {
+	splitEmail := strings.Split(email, "@")
+
+	if len(splitEmail) != 2 {
+		return false
+	}
+
+	domainFromEmail := splitEmail[1]
+	return domainFromEmail == domain
+}
+
 func TestDomainChanges(t *testing.T) {
 	sqlb := dbtesting.InitTestDB(t)
 	cleanup := func() { dbtesting.CleanupTestDB(sqlb) }
 	t.Cleanup(cleanup)
 
 	dbtesting.IngestTestCommits(sqlb, t)
-
-	testDomain := "claudiocambra.com"
 
 	retrievedDomainChanges, err := domainChanges(sqlb, testDomain)
 	if err != nil {
@@ -31,14 +42,7 @@ func TestDomainChanges(t *testing.T) {
 	}
 
 	for _, commit := range parsedCommitLog {
-		splitAuthorEmail := strings.Split(commit.AuthorEmail, "@")
-
-		if len(splitAuthorEmail) != 2 {
-			continue
-		}
-
-		authorDomain := splitAuthorEmail[1]
-		if authorDomain != testDomain {
+		if !emailHasDomain(commit.AuthorEmail, testDomain) {
 			continue
 		}
 
