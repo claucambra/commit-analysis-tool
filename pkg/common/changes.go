@@ -1,12 +1,22 @@
 package common
 
+type LineChanges struct {
+	NumInsertions int
+	NumDeletions  int
+}
+
 type Changes struct {
-	NumInsertions   int
-	NumDeletions    int
+	LineChanges
+
 	NumFilesChanged int
 }
 
 type YearlyChangeMap map[int]Changes
+
+func (lc *LineChanges) AddLineChanges(lcToAdd *LineChanges) {
+	lc.NumInsertions += lcToAdd.NumInsertions
+	lc.NumDeletions += lcToAdd.NumDeletions
+}
 
 func (changes *Changes) AddChanges(changesToAdd *Changes) {
 	changes.NumInsertions += changesToAdd.NumInsertions
@@ -20,8 +30,10 @@ func (ycm *YearlyChangeMap) AddChanges(changesToAdd *Changes, commitYear int) {
 		(*ycm)[commitYear] = changes
 	} else {
 		(*ycm)[commitYear] = Changes{
-			NumInsertions:   changes.NumInsertions,
-			NumDeletions:    changes.NumDeletions,
+			LineChanges: LineChanges{
+				NumInsertions: changes.NumInsertions,
+				NumDeletions:  changes.NumDeletions,
+			},
 			NumFilesChanged: changes.NumFilesChanged,
 		}
 	}
