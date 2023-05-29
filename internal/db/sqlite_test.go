@@ -39,6 +39,50 @@ func TestSqliteDbAddCommit(t *testing.T) {
 	}
 }
 
+func TestSqliteCommits(t *testing.T) {
+	sqlb := InitTestDB(t)
+	cleanup := func() { CleanupTestDB(sqlb) }
+	t.Cleanup(cleanup)
+
+	IngestTestCommits(sqlb, t)
+
+	testCommitLogBytes, err := os.ReadFile(TestLogFilePath)
+	if err != nil {
+		t.Fatalf("Could not read test commits file")
+	}
+
+	testCommitLog := string(testCommitLogBytes)
+	testCommits, err := logread.ParseCommitLog(testCommitLog)
+	if err != nil {
+		t.Fatalf("Could not parse test commit log")
+	}
+
+	retrievedCommits, err := sqlb.Commits()
+	if err != nil {
+		t.Fatalf("Could not retrieve commits in database")
+	}
+
+	numTestCommits := len(testCommits)
+	numRetrievedCommits := len(retrievedCommits)
+
+	if numRetrievedCommits != numTestCommits {
+		t.Fatalf(`Database commit count does not equal expected commit count.
+			Expected: %+v commits
+			Received: %+v commits`, numTestCommits, numRetrievedCommits)
+	}
+
+	for i := 0; i < numTestCommits; i++ {
+		testCommit := testCommits[i]
+		retrievedCommit := retrievedCommits[i]
+
+		if !reflect.DeepEqual(testCommit, retrievedCommit) {
+			t.Fatalf(`Database commits does not equal expected commits.
+				Expected: %+v
+				Received: %+v`, testCommit, retrievedCommit)
+		}
+	}
+}
+
 func TestSqliteAuthors(t *testing.T) {
 	sqlb := InitTestDB(t)
 	cleanup := func() { CleanupTestDB(sqlb) }
