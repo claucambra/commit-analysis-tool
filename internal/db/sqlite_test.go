@@ -43,25 +43,7 @@ func TestSqliteCommits(t *testing.T) {
 		t.Fatalf("Could not retrieve commits in database")
 	}
 
-	numTestCommits := len(testCommits)
-	numRetrievedCommits := len(retrievedCommits)
-
-	if numRetrievedCommits != numTestCommits {
-		t.Fatalf(`Database commit count does not equal expected commit count.
-			Expected: %+v commits
-			Received: %+v commits`, numTestCommits, numRetrievedCommits)
-	}
-
-	for i := 0; i < numTestCommits; i++ {
-		testCommit := testCommits[i]
-		retrievedCommit := retrievedCommits[i]
-
-		if !reflect.DeepEqual(testCommit, retrievedCommit) {
-			t.Fatalf(`Database commits does not equal expected commits.
-				Expected: %+v
-				Received: %+v`, testCommit, retrievedCommit)
-		}
-	}
+	CompareCommitArrays(t, testCommits, retrievedCommits)
 }
 
 func TestSqliteAuthors(t *testing.T) {
@@ -104,23 +86,5 @@ func TestSqliteAuthorCommits(t *testing.T) {
 		}
 	}
 
-	numTestAuthorCommits := len(testAuthorCommits)
-	numRetrievedAuthorCommits := len(retrievedAuthorCommits)
-
-	if numRetrievedAuthorCommits != numTestAuthorCommits {
-		t.Fatalf(`Database commit count does not equal expected commit count.
-			Expected: %+v commits
-			Received: %+v commits`, numTestAuthorCommits, numRetrievedAuthorCommits)
-	}
-
-	for i := 0; i < numTestAuthorCommits; i++ {
-		testAuthorCommit := testAuthorCommits[i]
-		retrievedAuthorCommit := retrievedAuthorCommits[i]
-
-		if !reflect.DeepEqual(testAuthorCommit, retrievedAuthorCommit) {
-			t.Fatalf(`Database commits does not equal expected commits.
-				Expected: %+v
-				Received: %+v`, testAuthorCommit, retrievedAuthorCommit)
-		}
-	}
+	CompareCommitArrays(t, testAuthorCommits, retrievedAuthorCommits)
 }

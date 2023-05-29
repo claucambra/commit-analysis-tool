@@ -4,6 +4,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
@@ -89,5 +90,27 @@ func CleanupTestDB(sqlb *SQLiteBackend) {
 
 	if testDir != "" {
 		os.RemoveAll(testDir)
+	}
+}
+
+func CompareCommitArrays(t *testing.T, expectedCommitArray []*common.Commit, testingCommitArray []*common.Commit) {
+	numExpectedCommits := len(expectedCommitArray)
+	numTestingCommits := len(testingCommitArray)
+
+	if numExpectedCommits != numTestingCommits {
+		t.Fatalf(`Expected commit count does not equal tested commit count.
+			Expected: %+v commits
+			Received: %+v commits`, numExpectedCommits, numTestingCommits)
+	}
+
+	for i := 0; i < numExpectedCommits; i++ {
+		expectedCommit := expectedCommitArray[i]
+		testingCommit := testingCommitArray[i]
+
+		if !reflect.DeepEqual(expectedCommit, testingCommit) {
+			t.Fatalf(`Tested commits do not equal expected commits.
+				Expected: %+v
+				Received: %+v`, expectedCommit, testingCommit)
+		}
 	}
 }
