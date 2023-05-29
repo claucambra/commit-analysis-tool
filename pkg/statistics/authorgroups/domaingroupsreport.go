@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/claucambra/commit-analysis-tool/internal/db"
+	"github.com/claucambra/commit-analysis-tool/pkg/common"
 )
 
 const fallbackDomain = "unknown-domain"
