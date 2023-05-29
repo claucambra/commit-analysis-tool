@@ -267,11 +267,11 @@ func (sqlb *SQLiteBackend) DomainChangeRows(domain string) (*sql.Rows, error) {
 	return accStmt.Query(domain)
 }
 
-func (sqlb *SQLiteBackend) DomainChanges(domain string) (int, int, int, error) {
+func (sqlb *SQLiteBackend) DomainChanges(domain string) (*CommitChanges, error) {
 	rows, err := sqlb.DomainChangeRows(domain)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
-		return 0, 0, 0, err
+		return nil, err
 	}
 
 	numInsertions := 0
@@ -299,5 +299,9 @@ func (sqlb *SQLiteBackend) DomainChanges(domain string) (int, int, int, error) {
 		numFilesChanged += commit.NumFilesChanged
 	}
 
-	return numInsertions, numDeletions, numFilesChanged, nil
+	return &CommitChanges{
+		Insertions:   numInsertions,
+		Deletions:    numDeletions,
+		FilesChanged: numFilesChanged,
+	}, nil
 }

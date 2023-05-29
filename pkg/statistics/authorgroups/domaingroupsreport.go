@@ -52,16 +52,16 @@ func (report *DomainGroupsReport) updateDomainChanges(authorDomain string, db *d
 		return
 	}
 
-	domainInsertions, domainDeletions, _, err := db.DomainChanges(authorDomain)
+	changes, err := db.DomainChanges(authorDomain)
 	if err != nil {
 		return
 	}
 
-	report.TotalInsertions += domainInsertions
-	report.TotalDeletions += domainDeletions
+	report.TotalInsertions += changes.Insertions
+	report.TotalDeletions += changes.Deletions
 
-	report.DomainNumInsertions[authorDomain] += domainInsertions
-	report.DomainNumDeletions[authorDomain] += domainDeletions
+	report.DomainNumInsertions[authorDomain] += changes.Insertions
+	report.DomainNumDeletions[authorDomain] += changes.Deletions
 }
 
 func (report *DomainGroupsReport) updateAuthors(authors []string, db *db.SQLiteBackend) {
