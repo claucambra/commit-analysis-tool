@@ -7,7 +7,6 @@ type LineChanges struct {
 
 type Changes struct {
 	LineChanges
-
 	NumFilesChanged int
 }
 
@@ -34,6 +33,25 @@ func (changes *Changes) SubtractChanges(changesToSubtract *Changes) {
 	changes.NumFilesChanged += changesToSubtract.NumDeletions // FIXME: This needs to take the files into account!
 }
 
+func (ylcm *YearlyLineChangeMap) AddLineChanges(lineChangesToAdd *LineChanges, commitYear int) {
+	if changes, ok := (*ylcm)[commitYear]; ok {
+		changes.AddLineChanges(lineChangesToAdd)
+		(*ylcm)[commitYear] = changes
+	} else {
+		(*ylcm)[commitYear] = LineChanges{
+			NumInsertions: changes.NumInsertions,
+			NumDeletions:  changes.NumDeletions,
+		}
+	}
+}
+
+func (ylcm *YearlyLineChangeMap) SubtractLineChanges(lineChangesToSubtract *LineChanges, commitYear int) {
+	if changes, ok := (*ylcm)[commitYear]; ok {
+		changes.SubtractLineChanges(lineChangesToSubtract)
+		(*ylcm)[commitYear] = changes
+	}
+}
+
 func (ycm *YearlyChangeMap) AddChanges(changesToAdd *Changes, commitYear int) {
 	if changes, ok := (*ycm)[commitYear]; ok {
 		changes.AddChanges(changesToAdd)
@@ -49,9 +67,9 @@ func (ycm *YearlyChangeMap) AddChanges(changesToAdd *Changes, commitYear int) {
 	}
 }
 
-func (ycm *YearlyChangeMap) SubtractChanges(changesToAdd *Changes, commitYear int) {
+func (ycm *YearlyChangeMap) SubtractChanges(changesToSubtract *Changes, commitYear int) {
 	if changes, ok := (*ycm)[commitYear]; ok {
-		changes.SubtractChanges(changesToAdd)
+		changes.SubtractChanges(changesToSubtract)
 		(*ycm)[commitYear] = changes
 	}
 }
