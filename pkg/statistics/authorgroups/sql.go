@@ -9,7 +9,7 @@ import (
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
 )
 
-func DomainChangeRows(sqlb *db.SQLiteBackend, domain string) (*sql.Rows, error) {
+func domainChangeRows(sqlb *db.SQLiteBackend, domain string) (*sql.Rows, error) {
 	stmt := "SELECT * FROM commits WHERE instr(author_email, ?) > 0"
 	accStmt, err := sqlb.Db.Prepare(stmt)
 	if err != nil {
@@ -21,8 +21,8 @@ func DomainChangeRows(sqlb *db.SQLiteBackend, domain string) (*sql.Rows, error) 
 	return accStmt.Query(domain)
 }
 
-func DomainChanges(sqlb *db.SQLiteBackend, domain string) (*common.Changes, error) {
-	rows, err := DomainChangeRows(sqlb, domain)
+func domainChanges(sqlb *db.SQLiteBackend, domain string) (*common.Changes, error) {
+	rows, err := domainChangeRows(sqlb, domain)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
 		return nil, err
@@ -60,8 +60,8 @@ func DomainChanges(sqlb *db.SQLiteBackend, domain string) (*common.Changes, erro
 	}, nil
 }
 
-func DomainYearlyChanges(sqlb *db.SQLiteBackend, domain string) (common.YearlyChangeMap, error) {
-	rows, err := DomainChangeRows(sqlb, domain)
+func domainYearlyChanges(sqlb *db.SQLiteBackend, domain string) (common.YearlyChangeMap, error) {
+	rows, err := domainChangeRows(sqlb, domain)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
 		return nil, err

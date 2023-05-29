@@ -52,7 +52,7 @@ func (report *DomainGroupsReport) updateDomainChanges(authorDomain string, sqlb 
 		return
 	}
 
-	changes, err := DomainChanges(sqlb, authorDomain)
+	changes, err := domainChanges(sqlb, authorDomain)
 	if err != nil {
 		return
 	}
