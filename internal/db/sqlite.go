@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
 	_ "github.com/mattn/go-sqlite3"
@@ -13,6 +14,8 @@ type CommitChanges struct {
 	Deletions    int
 	FilesChanged int
 }
+
+type YearlyChangeMap map[int]CommitChanges
 
 type SQLiteBackend struct {
 	db *sql.DB
@@ -304,4 +307,52 @@ func (sqlb *SQLiteBackend) DomainChanges(domain string) (*CommitChanges, error) 
 		Deletions:    numDeletions,
 		FilesChanged: numFilesChanged,
 	}, nil
+}
+
+func (sqlb *SQLiteBackend) DomainYearlyChanges(domain string) (YearlyChangeMap, error) {
+	rows, err := sqlb.DomainChangeRows(domain)
+	if err != nil {
+		log.Fatalf("Error retrieving rows: %s", err)
+		return nil, err
+	}
+
+	yearBuckets := make(YearlyChangeMap)
+
+	for rows.Next() {
+		commit := new(common.CommitData)
+
+		rows.Scan(
+			&commit.Id,
+			&commit.RepoName,
+			&commit.AuthorName,
+			&commit.AuthorEmail,
+			&commit.AuthorTime,
+			&commit.CommitterName,
+			&commit.CommitterEmail,
+			&commit.CommitterTime,
+			&commit.NumInsertions,
+			&commit.NumDeletions,
+			&commit.NumFilesChanged,
+		)
+
+		commitYear := time.Unix(commit.AuthorTime, 0).Year()
+
+		if _, ok := yearBuckets[commitYear]; !ok {
+			yearBuckets[commitYear] = CommitChanges{
+				Insertions:   commit.NumInsertions,
+				Deletions:    commit.NumDeletions,
+				FilesChanged: commit.NumFilesChanged,
+			}
+		} else {
+			existingChanges := yearBuckets[commitYear]
+
+			existingChanges.Insertions += commit.NumInsertions
+			existingChanges.Deletions += commit.NumDeletions
+			existingChanges.FilesChanged += commit.NumFilesChanged
+
+			yearBuckets[commitYear] = existingChanges
+		}
+	}
+
+	return yearBuckets, nil
 }
