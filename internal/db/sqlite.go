@@ -18,11 +18,11 @@ type CommitChanges struct {
 type YearlyChangeMap map[int]CommitChanges
 
 type SQLiteBackend struct {
-	db *sql.DB
+	Db *sql.DB
 }
 
 func (sqlb *SQLiteBackend) DB() *sql.DB {
-	return sqlb.db
+	return sqlb.Db
 }
 
 func (sqlb *SQLiteBackend) Open(path string) error {
@@ -32,13 +32,13 @@ func (sqlb *SQLiteBackend) Open(path string) error {
 		return err
 	}
 
-	sqlb.db = db
+	sqlb.Db = db
 
 	return err
 }
 
 func (sqlb *SQLiteBackend) Close() error {
-	err := sqlb.db.Close()
+	err := sqlb.Db.Close()
 	if err != nil {
 		log.Fatalf("Could not close sqlite database: %s", err)
 	}
@@ -67,7 +67,7 @@ func (sqlb *SQLiteBackend) Setup() error {
 		CREATE INDEX IF NOT EXISTS index_committer_email ON commits (committer_email);
 		CREATE INDEX IF NOT EXISTS index_committer_time ON commits (committer_time);`
 
-	_, err := sqlb.db.Exec(stmt)
+	_, err := sqlb.Db.Exec(stmt)
 	if err != nil {
 		log.Fatalf("Setup failed, received error during table creation: %s", err)
 		return err
@@ -91,7 +91,7 @@ func (sqlb *SQLiteBackend) AddCommit(commit *common.CommitData) error {
 			num_files_changed
 		) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)`
 
-	_, err := sqlb.db.Exec(stmt,
+	_, err := sqlb.Db.Exec(stmt,
 		commit.Id,
 		commit.RepoName,
 		commit.AuthorName,
@@ -128,7 +128,7 @@ func (sqlb *SQLiteBackend) AddCommits(commits []*common.CommitData) error {
 func (sqlb *SQLiteBackend) Commit(commitId string) (*common.CommitData, error) {
 	stmt := "SELECT * FROM commits WHERE id = ?"
 
-	accStmt, err := sqlb.db.Prepare(stmt)
+	accStmt, err := sqlb.Db.Prepare(stmt)
 	if err != nil {
 		log.Fatalf("Encountered error preparing commit retrieval statement: %s", err)
 		return nil, err
@@ -156,7 +156,7 @@ func (sqlb *SQLiteBackend) Commit(commitId string) (*common.CommitData, error) {
 
 func (sqlb *SQLiteBackend) Commits() ([]*common.CommitData, error) {
 	stmt := "SELECT * FROM commits"
-	accStmt, err := sqlb.db.Prepare(stmt)
+	accStmt, err := sqlb.Db.Prepare(stmt)
 	if err != nil {
 		log.Fatalf("Encountered error preparing commits retrieval statement: %s", err)
 		return nil, err
@@ -195,7 +195,7 @@ func (sqlb *SQLiteBackend) Commits() ([]*common.CommitData, error) {
 
 func (sqlb *SQLiteBackend) Authors() ([]string, error) {
 	stmt := "SELECT DISTINCT author_email FROM commits"
-	accStmt, err := sqlb.db.Prepare(stmt)
+	accStmt, err := sqlb.Db.Prepare(stmt)
 	if err != nil {
 		log.Fatalf("Encountered error preparing commits retrieval statement: %s", err)
 		return nil, err
@@ -221,7 +221,7 @@ func (sqlb *SQLiteBackend) Authors() ([]string, error) {
 
 func (sqlb *SQLiteBackend) AuthorCommits(author string) ([]*common.CommitData, error) {
 	stmt := "SELECT * FROM commits WHERE author_email = ?"
-	accStmt, err := sqlb.db.Prepare(stmt)
+	accStmt, err := sqlb.Db.Prepare(stmt)
 	if err != nil {
 		log.Fatalf("Encountered error preparing commits retrieval statement: %s", err)
 		return nil, err
@@ -260,7 +260,7 @@ func (sqlb *SQLiteBackend) AuthorCommits(author string) ([]*common.CommitData, e
 
 func (sqlb *SQLiteBackend) DomainChangeRows(domain string) (*sql.Rows, error) {
 	stmt := "SELECT * FROM commits WHERE instr(author_email, ?) > 0"
-	accStmt, err := sqlb.db.Prepare(stmt)
+	accStmt, err := sqlb.Db.Prepare(stmt)
 	if err != nil {
 		log.Fatalf("Encountered error preparing commits retrieval statement: %s", err)
 		return nil, err
