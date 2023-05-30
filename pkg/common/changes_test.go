@@ -168,3 +168,36 @@ func TestAddYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 			Received %+v`, addedLineChange, expectedAddLineChanges)
 	}
 }
+
+func TestSubtractYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
+	ylcmA := make(YearlyLineChangeMap, 0)
+	ylcmB := make(YearlyLineChangeMap, 0)
+	lineChangeA, lineChangeB := generateRandomLineChanges()
+	testYearA := 2023
+	testYearB := 2004
+
+	ylcmA.AddLineChanges(lineChangeA, testYearA)
+	ylcmB.AddLineChanges(lineChangeB, testYearB)
+
+	ylcmA.SubtractYearlyLineChangeMap(ylcmB)
+
+	if _, ok := ylcmA[testYearB]; ok {
+		t.Fatalf("Subtracting YLCM B line changes from a year not present in YLCM A should not add this year to YLCM A.")
+	}
+
+	ylcmA.AddLineChanges(lineChangeA, testYearB)
+	ylcmA.SubtractYearlyLineChangeMap(ylcmB)
+
+	expectedSubLineChanges := LineChanges{
+		NumInsertions: lineChangeA.NumInsertions - lineChangeB.NumInsertions,
+		NumDeletions:  lineChangeA.NumDeletions - lineChangeB.NumDeletions,
+	}
+
+	if testYearBSubLineChanges, ok := ylcmA[testYearB]; !ok {
+		t.Fatalf("Test year B should now be present in YLCM A")
+	} else if !reflect.DeepEqual(testYearBSubLineChanges, expectedSubLineChanges) {
+		t.Fatalf(`Subtracted YLCM B line changes to yearly line change map does not match expected changes:
+			Expected %+v
+			Received %+v`, expectedSubLineChanges, testYearBSubLineChanges)
+	}
+}
