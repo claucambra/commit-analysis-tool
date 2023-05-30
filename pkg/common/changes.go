@@ -61,6 +61,12 @@ func (ylcm *YearlyLineChangeMap) AddYearlyLineChangeMap(ylcmToAdd YearlyLineChan
 	}
 }
 
+func (ylcm *YearlyLineChangeMap) SubtractYearlyLineChangeMap(ylcmToSubtract YearlyLineChangeMap) {
+	for year, lineChangesToSubtract := range ylcmToSubtract {
+		ylcm.SubtractLineChanges(&lineChangesToSubtract, year)
+	}
+}
+
 // YearlyChangeMap
 func (ycm *YearlyChangeMap) AddChanges(changesToAdd *Changes, commitYear int) {
 	if changes, ok := (*ycm)[commitYear]; ok {
