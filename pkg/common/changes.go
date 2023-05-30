@@ -32,7 +32,7 @@ func (changes *Changes) AddChanges(changesToAdd *Changes) {
 
 func (changes *Changes) SubtractChanges(changesToSubtract *Changes) {
 	changes.LineChanges.SubtractLineChanges(&changesToSubtract.LineChanges)
-	changes.NumFilesChanged += changesToSubtract.NumFilesChanged // FIXME: This needs to take the files into account!
+	changes.NumFilesChanged -= changesToSubtract.NumFilesChanged // FIXME: This needs to take the files into account!
 }
 
 // YearlyLineChangeMap
