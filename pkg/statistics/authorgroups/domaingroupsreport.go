@@ -24,11 +24,10 @@ type DomainGroupsReport struct {
 
 func NewDomainGroupsReport(domainGroups map[string][]string) *DomainGroupsReport {
 	report := &DomainGroupsReport{
-		TotalChanges:                 &common.LineChanges{},
-		GroupsOfDomains:              domainGroups,
-		DomainTotalNumAuthors:        map[string]int{},
-		DomainTotalLineChanges:       map[string]*common.LineChanges{},
-		DomainYearlyTotalLineChanges: map[string]common.YearlyLineChangeMap{},
+		TotalChanges:           &common.LineChanges{},
+		GroupsOfDomains:        domainGroups,
+		DomainTotalNumAuthors:  map[string]int{},
+		DomainTotalLineChanges: map[string]*common.LineChanges{},
 	}
 
 	return report
