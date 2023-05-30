@@ -9,7 +9,6 @@ import (
 
 const randomChangeMaxLimit = (math.MaxInt / 2) - 1
 
-// Returns lineChangeA, lineChangeB
 func generateRandomLineChanges() (*LineChanges, *LineChanges) {
 	testChangeAInsertions := rand.Intn(randomChangeMaxLimit)
 	testChangeADeletions := rand.Intn(randomChangeMaxLimit)
@@ -23,6 +22,24 @@ func generateRandomLineChanges() (*LineChanges, *LineChanges) {
 	changeB := &LineChanges{
 		NumInsertions: testChangeBInsertions,
 		NumDeletions:  testChangeBDeletions,
+	}
+
+	return changeA, changeB
+}
+
+func generateRandomChanges() (*Changes, *Changes) {
+	changeAFilesChanged := rand.Intn(randomChangeMaxLimit)
+	changeBFilesChanged := rand.Intn(randomChangeMaxLimit)
+	changesALineChanges, changeBLineChanges := generateRandomLineChanges()
+
+	changeA := &Changes{
+		LineChanges:     *changesALineChanges,
+		NumFilesChanged: changeAFilesChanged,
+	}
+
+	changeB := &Changes{
+		LineChanges:     *changeBLineChanges,
+		NumFilesChanged: changeBFilesChanged,
 	}
 
 	return changeA, changeB
@@ -59,5 +76,19 @@ func TestSubtractLineChanges(t *testing.T) {
 }
 
 func TestAddChanges(t *testing.T) {
+	changeA, changeB := generateRandomChanges()
+	testChange := &Changes{
+		LineChanges: LineChanges{
+			NumInsertions: changeA.NumInsertions + changeB.NumInsertions,
+			NumDeletions:  changeA.NumDeletions + changeB.NumDeletions,
+		},
+		NumFilesChanged: changeA.NumFilesChanged + changeB.NumFilesChanged,
+	}
 
+	changeA.AddChanges(changeB)
+	if !reflect.DeepEqual(changeA, testChange) {
+		t.Fatalf(`Added changes do not match expected changes:
+			Expected %+v
+			Received %+v`, testChange, changeA)
+	}
 }
