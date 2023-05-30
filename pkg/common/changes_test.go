@@ -92,3 +92,21 @@ func TestAddChanges(t *testing.T) {
 			Received %+v`, testChange, changeA)
 	}
 }
+
+func TestSubtractChanges(t *testing.T) {
+	changeA, changeB := generateRandomChanges()
+	testChange := &Changes{
+		LineChanges: LineChanges{
+			NumInsertions: changeA.NumInsertions - changeB.NumInsertions,
+			NumDeletions:  changeA.NumDeletions - changeB.NumDeletions,
+		},
+		NumFilesChanged: changeA.NumFilesChanged - changeB.NumFilesChanged,
+	}
+
+	changeA.SubtractChanges(changeB)
+	if !reflect.DeepEqual(changeA, testChange) {
+		t.Fatalf(`Subtracted changes do not match expected changes:
+			Expected %+v
+			Received %+v`, testChange, changeA)
+	}
+}
