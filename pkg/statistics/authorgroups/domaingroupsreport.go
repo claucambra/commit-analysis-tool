@@ -148,7 +148,7 @@ func (report *DomainGroupsReport) unknownGroupData() *GroupData {
 	unknownGroupTotalYearlyLineChanges := report.TotalYearlyLineChanges
 	unknownGroupTotalYearlyLineChanges.SubtractYearlyLineChangeMap(totalGroupYearlyLineChanges)
 
-	return NewGroupData(report, fallbackGroupName, unknownGroupTotalAuthors, unknownGroupTotalLineChanges)
+	return NewGroupData(report, fallbackGroupName, unknownGroupTotalAuthors, unknownGroupTotalLineChanges, unknownGroupTotalYearlyLineChanges)
 }
 
 func (report *DomainGroupsReport) GroupData(groupName string) *GroupData {
@@ -156,6 +156,6 @@ func (report *DomainGroupsReport) GroupData(groupName string) *GroupData {
 		return report.unknownGroupData()
 	}
 
-	totalGroupAuthors, totalGroupChanges := report.accumulateGroupCounts(groupName)
-	return NewGroupData(report, groupName, totalGroupAuthors, totalGroupChanges)
+	totalGroupAuthors, totalGroupLineChanges, totalGroupYearlyLineChanges := report.accumulateGroupCounts(groupName)
+	return NewGroupData(report, groupName, totalGroupAuthors, totalGroupLineChanges, totalGroupYearlyLineChanges)
 }
