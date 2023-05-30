@@ -11,23 +11,28 @@ const fallbackDomain = "unknown-domain"
 const fallbackGroupName = "unknown"
 
 type DomainGroupsReport struct {
-	TotalAuthors int
-	TotalCommits int
-	TotalChanges *common.LineChanges
+	TotalAuthors           int
+	TotalCommits           int
+	TotalChanges           *common.LineChanges
+	TotalYearlyLineChanges common.YearlyLineChangeMap
 
 	GroupsOfDomains map[string][]string
 
 	DomainTotalNumAuthors   map[string]int
 	DomainTotalLineChanges  map[string]*common.LineChanges
 	DomainTotalNumDeletions map[string]int
+
+	DomainTotalYearlyLineChanges map[string]common.YearlyLineChangeMap
 }
 
 func NewDomainGroupsReport(domainGroups map[string][]string) *DomainGroupsReport {
 	report := &DomainGroupsReport{
-		TotalChanges:           &common.LineChanges{},
-		GroupsOfDomains:        domainGroups,
-		DomainTotalNumAuthors:  map[string]int{},
-		DomainTotalLineChanges: map[string]*common.LineChanges{},
+		TotalChanges:                 &common.LineChanges{},
+		TotalYearlyLineChanges:       common.YearlyLineChangeMap{},
+		GroupsOfDomains:              domainGroups,
+		DomainTotalNumAuthors:        map[string]int{},
+		DomainTotalLineChanges:       map[string]*common.LineChanges{},
+		DomainTotalYearlyLineChanges: map[string]common.YearlyLineChangeMap{},
 	}
 
 	return report
@@ -50,6 +55,21 @@ func (report *DomainGroupsReport) updateDomainChanges(authorDomain string, sqlb 
 		report.DomainTotalLineChanges[authorDomain] = existingDomainLineChanges
 	} else {
 		report.DomainTotalLineChanges[authorDomain] = &changes.LineChanges
+	}
+
+	yearlyChanges, err := domainYearlyChanges(sqlb, authorDomain)
+	if err != nil {
+		return
+	}
+
+	yearlyLineChanges := yearlyChanges.LineChanges()
+	report.TotalYearlyLineChanges.AddYearlyLineChangeMap(yearlyLineChanges)
+
+	if existingDomainYearLineChanges, ok := report.DomainTotalYearlyLineChanges[authorDomain]; ok {
+		existingDomainYearLineChanges.AddYearlyLineChangeMap(yearlyLineChanges)
+		report.DomainTotalYearlyLineChanges[authorDomain] = existingDomainYearLineChanges
+	} else {
+		report.DomainTotalYearlyLineChanges[authorDomain] = yearlyLineChanges
 	}
 }
 
@@ -83,20 +103,28 @@ func (report *DomainGroupsReport) Generate(db *db.SQLiteBackend) {
 }
 
 // Returns authors, insertions, deletions
-func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (int, *common.LineChanges) {
+func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (int, *common.LineChanges, common.YearlyLineChangeMap) {
 	totalGroupAuthors := 0
 	totalGroupLineChanges := common.LineChanges{
 		NumInsertions: 0,
 		NumDeletions:  0,
 	}
+	totalGroupYearlyLineChanges := make(common.YearlyLineChangeMap, 0)
 
 	for _, domain := range report.GroupsOfDomains[groupName] {
-		reportChanges := report.DomainTotalLineChanges[domain]
+		reportChanges, ok := report.DomainTotalLineChanges[domain]
+		if !ok {
+			continue
+		}
+
 		totalGroupLineChanges.AddLineChanges(reportChanges)
 		totalGroupAuthors += report.DomainTotalNumAuthors[domain]
+
+		reportYearlyChanges := report.DomainTotalYearlyLineChanges[domain]
+		totalGroupYearlyLineChanges.AddYearlyLineChangeMap(reportYearlyChanges)
 	}
 
-	return totalGroupAuthors, &totalGroupLineChanges
+	return totalGroupAuthors, &totalGroupLineChanges, totalGroupYearlyLineChanges
 }
 
 func (report *DomainGroupsReport) unknownGroupData() *GroupData {
@@ -105,16 +133,20 @@ func (report *DomainGroupsReport) unknownGroupData() *GroupData {
 		NumInsertions: 0,
 		NumDeletions:  0,
 	}
+	totalGroupYearlyLineChanges := make(common.YearlyLineChangeMap, 0)
 
 	for groupName := range report.GroupsOfDomains {
-		groupAuthors, groupLineChanges := report.accumulateGroupCounts(groupName)
+		groupAuthors, groupLineChanges, yearlyGroupLineChanges := report.accumulateGroupCounts(groupName)
 		totalGroupAuthors += groupAuthors
 		totalGroupChanges.AddLineChanges(groupLineChanges)
+		totalGroupYearlyLineChanges.AddYearlyLineChangeMap(yearlyGroupLineChanges)
 	}
 
 	unknownGroupTotalAuthors := report.TotalAuthors - totalGroupAuthors
 	unknownGroupTotalLineChanges := report.TotalChanges
 	unknownGroupTotalLineChanges.SubtractLineChanges(totalGroupChanges)
+	unknownGroupTotalYearlyLineChanges := report.TotalYearlyLineChanges
+	unknownGroupTotalYearlyLineChanges.SubtractYearlyLineChangeMap(totalGroupYearlyLineChanges)
 
 	return NewGroupData(report, fallbackGroupName, unknownGroupTotalAuthors, unknownGroupTotalLineChanges)
 }
