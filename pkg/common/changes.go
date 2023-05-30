@@ -42,8 +42,8 @@ func (ylcm *YearlyLineChangeMap) AddLineChanges(lineChangesToAdd *LineChanges, c
 		(*ylcm)[commitYear] = changes
 	} else {
 		(*ylcm)[commitYear] = LineChanges{
-			NumInsertions: changes.NumInsertions,
-			NumDeletions:  changes.NumDeletions,
+			NumInsertions: lineChangesToAdd.NumInsertions,
+			NumDeletions:  lineChangesToAdd.NumDeletions,
 		}
 	}
 }
