@@ -133,3 +133,38 @@ func TestAddLineChangesInYearlyLineChangeMap(t *testing.T) {
 			Received %+v`, summedLineChanges, ylcmASummedLineChange)
 	}
 }
+
+func TestAddYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
+	ylcmA := make(YearlyLineChangeMap, 0)
+	ylcmB := make(YearlyLineChangeMap, 0)
+	lineChangeA, lineChangeB := generateRandomLineChanges()
+	testYearA := 2023
+	testYearB := 2004
+
+	ylcmA.AddLineChanges(lineChangeA, testYearA)
+	ylcmB.AddLineChanges(lineChangeB, testYearB)
+
+	ylcmA.AddYearlyLineChangeMap(ylcmB)
+
+	if addedLineChangeB, ok := ylcmA[testYearB]; !ok {
+		t.Fatalf("Adding line changes from a year of YLCM B not present in YLCM A should add this year to YLCM A.")
+	} else if !reflect.DeepEqual(addedLineChangeB, *lineChangeB) {
+		t.Fatalf(`Added YLCM B to YLCM A does not match expected line changes:
+			Expected %+v
+			Received %+v`, *lineChangeB, addedLineChangeB)
+	}
+
+	ylcmB.AddLineChanges(lineChangeB, testYearA)
+	ylcmA.AddYearlyLineChangeMap(ylcmB)
+
+	expectedAddLineChanges := LineChanges{
+		NumInsertions: lineChangeA.NumInsertions + lineChangeB.NumInsertions,
+		NumDeletions:  lineChangeA.NumDeletions + lineChangeB.NumDeletions,
+	}
+
+	if addedLineChange := ylcmA[testYearA]; !reflect.DeepEqual(addedLineChange, expectedAddLineChanges) {
+		t.Fatalf(`Added YLCM B line changes to YLCM A does not match expected line changes:
+			Expected %+v
+			Received %+v`, addedLineChange, expectedAddLineChanges)
+	}
+}
