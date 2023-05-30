@@ -35,3 +35,33 @@ func TestAddLineChanges(t *testing.T) {
 			Received %+v`, testChange, changeA)
 	}
 }
+
+func TestSubtractLineChanges(t *testing.T) {
+	testChangeAInsertions := rand.Int()
+	testChangeADeletions := rand.Int()
+	testChangeBInsertions := rand.Intn(testChangeAInsertions)
+	testChangeBDeletions := rand.Intn(testChangeADeletions)
+	testChangeFinalInsertions := testChangeAInsertions - testChangeBInsertions
+	testChangeFinalDeletions := testChangeADeletions - testChangeBDeletions
+
+	testChange := &LineChanges{
+		NumInsertions: testChangeFinalInsertions,
+		NumDeletions:  testChangeFinalDeletions,
+	}
+
+	changeA := &LineChanges{
+		NumInsertions: testChangeAInsertions,
+		NumDeletions:  testChangeADeletions,
+	}
+	changeB := &LineChanges{
+		NumInsertions: testChangeBInsertions,
+		NumDeletions:  testChangeBDeletions,
+	}
+
+	changeA.SubtractLineChanges(changeB)
+	if !reflect.DeepEqual(changeA, testChange) {
+		t.Fatalf(`Subtracted line changes do not match expected changes:
+			Expected %+v
+			Received %+v`, testChange, changeA)
+	}
+}
