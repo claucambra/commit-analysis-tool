@@ -1,23 +1,20 @@
 package common
 
 import (
+	"math"
 	"math/rand"
 	"reflect"
 	"testing"
 )
 
-func TestAddLineChanges(t *testing.T) {
-	testTotalInsertions := rand.Int()
-	testTotalDeletions := rand.Int()
-	testChangeAInsertions := rand.Intn(testTotalInsertions)
-	testChangeADeletions := rand.Intn(testTotalDeletions)
-	testChangeBInsertions := testTotalInsertions - testChangeAInsertions
-	testChangeBDeletions := testTotalDeletions - testChangeADeletions
+const randomChangeMaxLimit = (math.MaxInt / 2) - 1
 
-	testChange := &LineChanges{
-		NumInsertions: testTotalInsertions,
-		NumDeletions:  testTotalDeletions,
-	}
+// Returns lineChangeA, lineChangeB
+func generateRandomLineChanges() (*LineChanges, *LineChanges) {
+	testChangeAInsertions := rand.Intn(randomChangeMaxLimit)
+	testChangeADeletions := rand.Intn(randomChangeMaxLimit)
+	testChangeBInsertions := rand.Intn(randomChangeMaxLimit)
+	testChangeBDeletions := rand.Intn(randomChangeMaxLimit)
 
 	changeA := &LineChanges{
 		NumInsertions: testChangeAInsertions,
@@ -26,6 +23,16 @@ func TestAddLineChanges(t *testing.T) {
 	changeB := &LineChanges{
 		NumInsertions: testChangeBInsertions,
 		NumDeletions:  testChangeBDeletions,
+	}
+
+	return changeA, changeB
+}
+
+func TestAddLineChanges(t *testing.T) {
+	changeA, changeB := generateRandomLineChanges()
+	testChange := &LineChanges{
+		NumInsertions: changeA.NumInsertions + changeB.NumInsertions,
+		NumDeletions:  changeA.NumDeletions + changeB.NumDeletions,
 	}
 
 	changeA.AddLineChanges(changeB)
@@ -37,25 +44,10 @@ func TestAddLineChanges(t *testing.T) {
 }
 
 func TestSubtractLineChanges(t *testing.T) {
-	testChangeAInsertions := rand.Int()
-	testChangeADeletions := rand.Int()
-	testChangeBInsertions := rand.Intn(testChangeAInsertions)
-	testChangeBDeletions := rand.Intn(testChangeADeletions)
-	testChangeFinalInsertions := testChangeAInsertions - testChangeBInsertions
-	testChangeFinalDeletions := testChangeADeletions - testChangeBDeletions
-
+	changeA, changeB := generateRandomLineChanges()
 	testChange := &LineChanges{
-		NumInsertions: testChangeFinalInsertions,
-		NumDeletions:  testChangeFinalDeletions,
-	}
-
-	changeA := &LineChanges{
-		NumInsertions: testChangeAInsertions,
-		NumDeletions:  testChangeADeletions,
-	}
-	changeB := &LineChanges{
-		NumInsertions: testChangeBInsertions,
-		NumDeletions:  testChangeBDeletions,
+		NumInsertions: changeA.NumInsertions - changeB.NumInsertions,
+		NumDeletions:  changeA.NumDeletions - changeB.NumDeletions,
 	}
 
 	changeA.SubtractLineChanges(changeB)
@@ -64,4 +56,8 @@ func TestSubtractLineChanges(t *testing.T) {
 			Expected %+v
 			Received %+v`, testChange, changeA)
 	}
+}
+
+func TestAddChanges(t *testing.T) {
+
 }
