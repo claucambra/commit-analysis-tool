@@ -21,3 +21,12 @@ func SortedMapKeys[K constraints.Ordered, V any, M ~map[K]V](inMap M) []K {
 
 	return sortedKeys
 }
+
+func AdditiveValueMapInsert[K comparable, V any, M ~map[K]V](inMap map[K]V, key K, additiveFunc func(V, V) V, valueToAdd V) {
+	completeValue := valueToAdd
+	if existingValue, ok := inMap[key]; ok {
+		completeValue = additiveFunc(valueToAdd, existingValue)
+	}
+
+	inMap[key] = completeValue
+}
