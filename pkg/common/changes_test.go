@@ -163,14 +163,11 @@ func TestSubtractLineChangesInYearlyLineChangeMap(t *testing.T) {
 }
 
 func TestAddYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
-	ylcmA := make(YearlyLineChangeMap, 0)
-	ylcmB := make(YearlyLineChangeMap, 0)
 	lineChangeA, lineChangeB := generateRandomLineChanges()
 	testYearA := 2023
 	testYearB := 2004
-
-	ylcmA.AddLineChanges(lineChangeA, testYearA)
-	ylcmB.AddLineChanges(lineChangeB, testYearB)
+	ylcmA := YearlyLineChangeMap{testYearA: *lineChangeA}
+	ylcmB := YearlyLineChangeMap{testYearB: *lineChangeB}
 
 	ylcmA.AddYearlyLineChangeMap(ylcmB)
 
@@ -182,7 +179,7 @@ func TestAddYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 			Received %+v`, *lineChangeB, addedLineChangeB)
 	}
 
-	ylcmB.AddLineChanges(lineChangeB, testYearA)
+	ylcmB = YearlyLineChangeMap{testYearA: *lineChangeB}
 	ylcmA.AddYearlyLineChangeMap(ylcmB)
 
 	expectedAddLineChanges := LineChanges{
@@ -198,14 +195,11 @@ func TestAddYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 }
 
 func TestSubtractYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
-	ylcmA := make(YearlyLineChangeMap, 0)
-	ylcmB := make(YearlyLineChangeMap, 0)
 	lineChangeA, lineChangeB := generateRandomLineChanges()
 	testYearA := 2023
 	testYearB := 2004
-
-	ylcmA.AddLineChanges(lineChangeA, testYearA)
-	ylcmB.AddLineChanges(lineChangeB, testYearB)
+	ylcmA := YearlyLineChangeMap{testYearA: *lineChangeA}
+	ylcmB := YearlyLineChangeMap{testYearB: *lineChangeB}
 
 	ylcmA.SubtractYearlyLineChangeMap(ylcmB)
 
