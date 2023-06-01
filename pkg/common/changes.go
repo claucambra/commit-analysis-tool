@@ -64,6 +64,28 @@ func (ylcm *YearlyLineChangeMap) SubtractYearlyLineChangeMap(ylcmToSubtract Year
 	}
 }
 
+func (ylcm *YearlyLineChangeMap) InsertionsArray() []int {
+	sortedYears := make([]int, len(*ylcm))
+
+	i := 0
+	for year := range *ylcm {
+		sortedYears[i] = year
+		i++
+	}
+
+	sort.Slice(sortedYears, func(i, j int) bool {
+		return sortedYears[i] < sortedYears[j]
+	})
+
+	insertionsArray := make([]int, len(*ylcm))
+
+	for i, year := range sortedYears {
+		insertionsArray[i] = (*ylcm)[year].NumInsertions
+	}
+
+	return insertionsArray
+}
+
 // YearlyChangeMap
 func (ycm *YearlyChangeMap) AddChanges(changesToAdd *Changes, commitYear int) {
 	if changes, ok := (*ycm)[commitYear]; ok {
