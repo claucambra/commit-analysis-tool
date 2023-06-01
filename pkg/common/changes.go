@@ -13,6 +13,23 @@ type Changes struct {
 type YearlyLineChangeMap map[int]LineChanges
 type YearlyChangeMap map[int]Changes
 
+func AddLineChanges(a LineChanges, b LineChanges) LineChanges {
+	return LineChanges{
+		NumInsertions: a.NumInsertions + b.NumInsertions,
+		NumDeletions:  a.NumDeletions + b.NumDeletions,
+	}
+}
+
+func AddChanges(a Changes, b Changes) Changes {
+	return Changes{
+		LineChanges: LineChanges{
+			NumInsertions: a.NumInsertions + b.NumInsertions,
+			NumDeletions:  a.NumDeletions + b.NumDeletions,
+		},
+		NumFilesChanged: a.NumFilesChanged + b.NumFilesChanged,
+	}
+}
+
 // Line changes
 func (lc *LineChanges) AddLineChanges(lcToAdd *LineChanges) {
 	lc.NumInsertions += lcToAdd.NumInsertions
@@ -37,12 +54,7 @@ func (changes *Changes) SubtractChanges(changesToSubtract *Changes) {
 
 // YearlyLineChangeMap
 func (ylcm *YearlyLineChangeMap) AddLineChanges(lineChangesToAdd *LineChanges, commitYear int) {
-	if changes, ok := (*ylcm)[commitYear]; ok {
-		changes.AddLineChanges(lineChangesToAdd)
-		(*ylcm)[commitYear] = changes
-	} else {
-		(*ylcm)[commitYear] = *lineChangesToAdd
-	}
+	AdditiveValueMapInsert[int, LineChanges, YearlyLineChangeMap](*ylcm, commitYear, AddLineChanges, *lineChangesToAdd)
 }
 
 func (ylcm *YearlyLineChangeMap) SubtractLineChanges(lineChangesToSubtract *LineChanges, commitYear int) {
@@ -85,12 +97,7 @@ func (ylcm *YearlyLineChangeMap) SeparatedChangeArrays(years []int) ([]int, []in
 
 // YearlyChangeMap
 func (ycm *YearlyChangeMap) AddChanges(changesToAdd *Changes, commitYear int) {
-	if changes, ok := (*ycm)[commitYear]; ok {
-		changes.AddChanges(changesToAdd)
-		(*ycm)[commitYear] = changes
-	} else {
-		(*ycm)[commitYear] = *changesToAdd
-	}
+	AdditiveValueMapInsert[int, Changes, YearlyChangeMap](*ycm, commitYear, AddChanges, *changesToAdd)
 }
 
 func (ycm *YearlyChangeMap) SubtractChanges(changesToSubtract *Changes, commitYear int) {
