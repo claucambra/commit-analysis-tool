@@ -201,3 +201,26 @@ func TestSubtractYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 			Received %+v`, expectedSubLineChanges, testYearBSubLineChanges)
 	}
 }
+
+func TestAddChangesToYearlyChangeMap(t *testing.T) {
+	changeA, changeB := generateRandomChanges()
+	testYear := 2023
+	ycm := make(YearlyChangeMap, 0)
+
+	ycm.AddChanges(changeA, testYear)
+	if ycmAChangeA := *(ycm[testYear]); !reflect.DeepEqual(ycmAChangeA, *changeA) {
+		t.Fatalf(`Added changes to yearly change map when year not already in map does not match expected changes:
+			Expected %+v
+			Received %+v`, *changeA, ycmAChangeA)
+	}
+
+	ycm.AddChanges(changeB, testYear)
+	summedChanges := *changeA
+	summedChanges.AddChanges(changeB)
+
+	if ycmASummedChange := *(ycm[testYear]); !reflect.DeepEqual(ycmASummedChange, summedChanges) {
+		t.Fatalf(`Added changes to yearly change map when year already in map does not match expected changes:
+			Expected %+v
+			Received %+v`, summedChanges, ycmASummedChange)
+	}
+}
