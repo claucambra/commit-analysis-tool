@@ -69,23 +69,29 @@ func (ylcm *YearlyLineChangeMap) SubtractYearlyLineChangeMap(ylcmToSubtract Year
 }
 
 // Returns insertions and deletions in two separate arraus
-func (ylcm *YearlyLineChangeMap) SeparatedChangeArrays() ([]int, []int) {
-	sortedYears := make([]int, len(*ylcm))
+func (ylcm *YearlyLineChangeMap) SeparatedChangeArrays(years []int) ([]int, []int) {
+	yearsToReturn := years
 
-	i := 0
-	for year := range *ylcm {
-		sortedYears[i] = year
-		i++
+	if yearsToReturn == nil {
+		sortedYears := make([]int, len(*ylcm))
+
+		i := 0
+		for year := range *ylcm {
+			sortedYears[i] = year
+			i++
+		}
+
+		sort.Slice(sortedYears, func(i, j int) bool {
+			return sortedYears[i] < sortedYears[j]
+		})
+
+		yearsToReturn = sortedYears
 	}
 
-	sort.Slice(sortedYears, func(i, j int) bool {
-		return sortedYears[i] < sortedYears[j]
-	})
+	insertionsArray := make([]int, len(yearsToReturn))
+	deletionsArray := make([]int, len(yearsToReturn))
 
-	insertionsArray := make([]int, len(*ylcm))
-	deletionsArray := make([]int, len(*ylcm))
-
-	for i, year := range sortedYears {
+	for i, year := range yearsToReturn {
 		insertionsArray[i] = (*ylcm)[year].NumInsertions
 		deletionsArray[i] = (*ylcm)[year].NumDeletions
 	}

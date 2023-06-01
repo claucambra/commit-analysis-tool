@@ -224,7 +224,7 @@ func TestSubtractYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 	}
 }
 
-func TestSeparatedChangeArrayaFromYearlyLineChangeMap(t *testing.T) {
+func TestSeparatedChangeArrayFromYearlyLineChangeMap(t *testing.T) {
 	lineChangeA, lineChangeB := generateRandomLineChanges()
 	ylcm := YearlyLineChangeMap{
 		2001: *lineChangeA,
@@ -234,7 +234,7 @@ func TestSeparatedChangeArrayaFromYearlyLineChangeMap(t *testing.T) {
 	expectedInsertionsArray := []int{lineChangeA.NumInsertions, lineChangeB.NumInsertions}
 	expectedDeletionsArray := []int{lineChangeA.NumDeletions, lineChangeB.NumDeletions}
 
-	insertionsArray, deletionsArray := ylcm.SeparatedChangeArrays()
+	insertionsArray, deletionsArray := ylcm.SeparatedChangeArrays(nil)
 
 	if !reflect.DeepEqual(insertionsArray, expectedInsertionsArray) {
 		t.Fatalf(`Insertions array from yearly change map does not match expected insertions array:
