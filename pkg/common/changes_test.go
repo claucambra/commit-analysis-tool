@@ -134,6 +134,34 @@ func TestAddLineChangesInYearlyLineChangeMap(t *testing.T) {
 	}
 }
 
+func TestSubtractLineChangesInYearlyLineChangeMap(t *testing.T) {
+	lineChangeA, lineChangeB := generateRandomLineChanges()
+	testYearA := 2023
+	testYearB := 2003
+	ylcm := YearlyLineChangeMap{testYearA: *lineChangeA}
+
+	ylcm.SubtractLineChanges(lineChangeB, testYearB)
+	if _, ok := ylcm[testYearB]; ok {
+		t.Fatalf("Subtracting line changes from a year not present in YLCM should not add this year to YLCM.")
+	}
+
+	ylcm = YearlyLineChangeMap{testYearA: *lineChangeA}
+	ylcm.SubtractLineChanges(lineChangeB, testYearA)
+
+	expectedSubLineChanges := LineChanges{
+		NumInsertions: lineChangeA.NumInsertions - lineChangeB.NumInsertions,
+		NumDeletions:  lineChangeA.NumDeletions - lineChangeB.NumDeletions,
+	}
+
+	fmt.Println(lineChangeA.NumInsertions, lineChangeB.NumInsertions, lineChangeA.NumInsertions-lineChangeB.NumInsertions, ylcm[testYearA].NumInsertions)
+
+	if subLineChanges := ylcm[testYearA]; !reflect.DeepEqual(subLineChanges, expectedSubLineChanges) {
+		t.Fatalf(`Subtracted line changes from yearly line change map does not match expected changes:
+			Expected %+v
+			Received %+v`, expectedSubLineChanges, subLineChanges)
+	}
+}
+
 func TestAddYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 	ylcmA := make(YearlyLineChangeMap, 0)
 	ylcmB := make(YearlyLineChangeMap, 0)
