@@ -1,9 +1,5 @@
 package common
 
-import (
-	"sort"
-)
-
 type LineChanges struct {
 	NumInsertions int
 	NumDeletions  int
@@ -73,19 +69,7 @@ func (ylcm *YearlyLineChangeMap) SeparatedChangeArrays(years []int) ([]int, []in
 	yearsToReturn := years
 
 	if yearsToReturn == nil {
-		sortedYears := make([]int, len(*ylcm))
-
-		i := 0
-		for year := range *ylcm {
-			sortedYears[i] = year
-			i++
-		}
-
-		sort.Slice(sortedYears, func(i, j int) bool {
-			return sortedYears[i] < sortedYears[j]
-		})
-
-		yearsToReturn = sortedYears
+		yearsToReturn = SortedMapKeys(*ylcm)
 	}
 
 	insertionsArray := make([]int, len(yearsToReturn))
