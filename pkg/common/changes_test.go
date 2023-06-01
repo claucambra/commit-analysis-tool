@@ -243,3 +243,31 @@ func TestAddChangesToYearlyChangeMap(t *testing.T) {
 			Received %+v`, summedChanges, ycmASummedChange)
 	}
 }
+
+func TestSubtractChangesFromYearlyChangeMap(t *testing.T) {
+	changeA, changeB := generateRandomChanges()
+	testYearA := 2023
+	testYearB := 2003
+	ycm := YearlyChangeMap{testYearA: *changeA}
+
+	ycm.SubtractChanges(changeB, testYearB)
+	if _, ok := ycm[testYearB]; ok {
+		t.Fatalf("Subtracting changes from a year not present in YCM should not add this year to YCM.")
+	}
+
+	ycm.SubtractChanges(changeB, testYearA)
+
+	expectedSubChanges := Changes{
+		LineChanges: LineChanges{
+			NumInsertions: changeA.NumInsertions - changeB.NumInsertions,
+			NumDeletions:  changeA.NumDeletions - changeB.NumDeletions,
+		},
+		NumFilesChanged: changeA.NumFilesChanged - changeB.NumFilesChanged,
+	}
+
+	if subChanges := ycm[testYearA]; !reflect.DeepEqual(subChanges, expectedSubChanges) {
+		t.Fatalf(`Subtracted line changes from yearly line change map does not match expected changes:
+			Expected %+v
+			Received %+v`, expectedSubChanges, subChanges)
+	}
+}
