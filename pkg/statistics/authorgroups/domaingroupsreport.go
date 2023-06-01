@@ -38,38 +38,36 @@ func NewDomainGroupsReport(domainGroups map[string][]string) *DomainGroupsReport
 	return report
 }
 
-func (report *DomainGroupsReport) updateDomainChanges(authorDomain string, sqlb *db.SQLiteBackend) {
-	if authorDomain == "" {
-		return
-	}
+func (report *DomainGroupsReport) updateDomainChanges(sqlb *db.SQLiteBackend) {
+	for authorDomain := range report.DomainTotalNumAuthors {
+		changes, err := domainChanges(sqlb, authorDomain)
+		if err != nil {
+			return
+		}
 
-	changes, err := domainChanges(sqlb, authorDomain)
-	if err != nil {
-		return
-	}
+		report.TotalChanges = common.AddLineChanges(report.TotalChanges, &changes.LineChanges)
 
-	report.TotalChanges = common.AddLineChanges(report.TotalChanges, &changes.LineChanges)
+		if existingDomainLineChanges, ok := report.DomainTotalLineChanges[authorDomain]; ok {
+			summedDomainLineChanges := common.AddLineChanges(existingDomainLineChanges, &changes.LineChanges)
+			report.DomainTotalLineChanges[authorDomain] = summedDomainLineChanges
+		} else {
+			report.DomainTotalLineChanges[authorDomain] = &changes.LineChanges
+		}
 
-	if existingDomainLineChanges, ok := report.DomainTotalLineChanges[authorDomain]; ok {
-		summedDomainLineChanges := common.AddLineChanges(existingDomainLineChanges, &changes.LineChanges)
-		report.DomainTotalLineChanges[authorDomain] = summedDomainLineChanges
-	} else {
-		report.DomainTotalLineChanges[authorDomain] = &changes.LineChanges
-	}
+		yearlyChanges, err := domainYearlyChanges(sqlb, authorDomain)
+		if err != nil {
+			return
+		}
 
-	yearlyChanges, err := domainYearlyChanges(sqlb, authorDomain)
-	if err != nil {
-		return
-	}
+		yearlyLineChanges := yearlyChanges.LineChanges()
+		report.TotalYearlyLineChanges.AddYearlyLineChangeMap(yearlyLineChanges)
 
-	yearlyLineChanges := yearlyChanges.LineChanges()
-	report.TotalYearlyLineChanges.AddYearlyLineChangeMap(yearlyLineChanges)
-
-	if existingDomainYearLineChanges, ok := report.DomainTotalYearlyLineChanges[authorDomain]; ok {
-		existingDomainYearLineChanges.AddYearlyLineChangeMap(yearlyLineChanges)
-		report.DomainTotalYearlyLineChanges[authorDomain] = existingDomainYearLineChanges
-	} else {
-		report.DomainTotalYearlyLineChanges[authorDomain] = yearlyLineChanges
+		if existingDomainYearLineChanges, ok := report.DomainTotalYearlyLineChanges[authorDomain]; ok {
+			existingDomainYearLineChanges.AddYearlyLineChangeMap(yearlyLineChanges)
+			report.DomainTotalYearlyLineChanges[authorDomain] = existingDomainYearLineChanges
+		} else {
+			report.DomainTotalYearlyLineChanges[authorDomain] = yearlyLineChanges
+		}
 	}
 }
 
@@ -88,8 +86,6 @@ func (report *DomainGroupsReport) updateAuthors(authors []string, db *db.SQLiteB
 
 		report.DomainTotalNumAuthors[authorDomain] += 1
 		report.TotalAuthors += 1
-
-		report.updateDomainChanges(authorDomain, db)
 	}
 }
 
@@ -100,6 +96,7 @@ func (report *DomainGroupsReport) Generate(db *db.SQLiteBackend) {
 	}
 
 	report.updateAuthors(authors, db)
+	report.updateDomainChanges(db)
 }
 
 // Returns authors, insertions, deletions
