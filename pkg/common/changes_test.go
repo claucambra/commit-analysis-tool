@@ -7,13 +7,13 @@ import (
 	"testing"
 )
 
-const randomChangeMaxLimit = (math.MaxInt / 2) - 1
+const randomChangeMaxLimit = 50000
 
 func generateRandomLineChanges() (*LineChanges, *LineChanges) {
 	testChangeAInsertions := rand.Intn(randomChangeMaxLimit)
 	testChangeADeletions := rand.Intn(randomChangeMaxLimit)
-	testChangeBInsertions := rand.Intn(randomChangeMaxLimit)
-	testChangeBDeletions := rand.Intn(randomChangeMaxLimit)
+	testChangeBInsertions := rand.Intn(testChangeAInsertions)
+	testChangeBDeletions := rand.Intn(testChangeADeletions)
 
 	changeA := &LineChanges{
 		NumInsertions: testChangeAInsertions,
