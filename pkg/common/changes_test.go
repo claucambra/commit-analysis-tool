@@ -117,17 +117,17 @@ func TestAddLineChangesInYearlyLineChangeMap(t *testing.T) {
 	ylcm := make(YearlyLineChangeMap, 0)
 
 	ylcm.AddLineChanges(lineChangeA, testYear)
-	if ylcmALineChangeA := *(ylcm[testYear]); !reflect.DeepEqual(ylcmALineChangeA, *lineChangeA) {
+	if ylcmALineChangeA := ylcm[testYear]; !reflect.DeepEqual(ylcmALineChangeA, *lineChangeA) {
 		t.Fatalf(`Added changes to yearly line change map when year not already in map does not match expected changes:
 			Expected %+v
-			Received %+v`, *lineChangeA, ylcmALineChangeA)
+			Received %+v`, lineChangeA, ylcmALineChangeA)
 	}
 
 	ylcm.AddLineChanges(lineChangeB, testYear)
 	summedLineChanges := *lineChangeA
 	summedLineChanges.AddLineChanges(lineChangeB)
 
-	if ylcmASummedLineChange := *(ylcm[testYear]); !reflect.DeepEqual(ylcmASummedLineChange, summedLineChanges) {
+	if ylcmASummedLineChange := ylcm[testYear]; !reflect.DeepEqual(ylcmASummedLineChange, summedLineChanges) {
 		t.Fatalf(`Added changes to yearly line change map when year already in map does not match expected changes:
 			Expected %+v
 			Received %+v`, summedLineChanges, ylcmASummedLineChange)
@@ -148,7 +148,7 @@ func TestAddYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 
 	if addedLineChangeB, ok := ylcmA[testYearB]; !ok {
 		t.Fatalf("Adding line changes from a year of YLCM B not present in YLCM A should add this year to YLCM A.")
-	} else if !reflect.DeepEqual(addedLineChangeB, lineChangeB) {
+	} else if !reflect.DeepEqual(addedLineChangeB, *lineChangeB) {
 		t.Fatalf(`Added YLCM B to YLCM A does not match expected line changes:
 			Expected %+v
 			Received %+v`, *lineChangeB, addedLineChangeB)
@@ -157,7 +157,7 @@ func TestAddYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 	ylcmB.AddLineChanges(lineChangeB, testYearA)
 	ylcmA.AddYearlyLineChangeMap(ylcmB)
 
-	expectedAddLineChanges := &LineChanges{
+	expectedAddLineChanges := LineChanges{
 		NumInsertions: lineChangeA.NumInsertions + lineChangeB.NumInsertions,
 		NumDeletions:  lineChangeA.NumDeletions + lineChangeB.NumDeletions,
 	}
@@ -188,7 +188,7 @@ func TestSubtractYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 	ylcmA.AddLineChanges(lineChangeA, testYearB)
 	ylcmA.SubtractYearlyLineChangeMap(ylcmB)
 
-	expectedSubLineChanges := &LineChanges{
+	expectedSubLineChanges := LineChanges{
 		NumInsertions: lineChangeA.NumInsertions - lineChangeB.NumInsertions,
 		NumDeletions:  lineChangeA.NumDeletions - lineChangeB.NumDeletions,
 	}
