@@ -226,13 +226,17 @@ func TestSubtractYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 
 func TestSeparatedChangeArrayFromYearlyLineChangeMap(t *testing.T) {
 	lineChangeA, lineChangeB := generateRandomLineChanges()
+	testYearA := 2001
+	testYearB := 2023
+	testYearC := 2195
 	ylcm := YearlyLineChangeMap{
-		2001: *lineChangeA,
-		2023: *lineChangeB,
+		testYearA: *lineChangeA,
+		testYearB: *lineChangeB,
+		testYearC: *lineChangeA,
 	}
 
-	expectedInsertionsArray := []int{lineChangeA.NumInsertions, lineChangeB.NumInsertions}
-	expectedDeletionsArray := []int{lineChangeA.NumDeletions, lineChangeB.NumDeletions}
+	expectedInsertionsArray := []int{lineChangeA.NumInsertions, lineChangeB.NumInsertions, lineChangeA.NumInsertions}
+	expectedDeletionsArray := []int{lineChangeA.NumDeletions, lineChangeB.NumDeletions, lineChangeA.NumDeletions}
 
 	insertionsArray, deletionsArray := ylcm.SeparatedChangeArrays(nil)
 
@@ -246,6 +250,23 @@ func TestSeparatedChangeArrayFromYearlyLineChangeMap(t *testing.T) {
 		t.Fatalf(`Deletions array from yearly change map does not match expected deletions array:
 			Expected %+v
 			Received %+v`, expectedDeletionsArray, deletionsArray)
+	}
+
+	testRetrievalYears := []int{testYearA, testYearC}
+	specificInsertionsArray, specificDeletionsArray := ylcm.SeparatedChangeArrays(testRetrievalYears)
+	expectedSpecificInsertionsArray := []int{lineChangeA.NumInsertions, lineChangeA.NumInsertions}
+	expectedSpecificDeletionsArray := []int{lineChangeA.NumDeletions, lineChangeA.NumDeletions}
+
+	if !reflect.DeepEqual(specificInsertionsArray, expectedSpecificInsertionsArray) {
+		t.Fatalf(`Insertions array from specific years in yearly change map does not match expected insertions array:
+			Expected %+v
+			Received %+v`, expectedSpecificInsertionsArray, specificInsertionsArray)
+	}
+
+	if !reflect.DeepEqual(specificDeletionsArray, expectedSpecificDeletionsArray) {
+		t.Fatalf(`Deletions array from specific yearly change map does not match expected deletions array:
+			Expected %+v
+			Received %+v`, expectedSpecificDeletionsArray, specificDeletionsArray)
 	}
 }
 
