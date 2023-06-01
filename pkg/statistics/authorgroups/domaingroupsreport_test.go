@@ -23,6 +23,13 @@ var testEmailGroups = map[string][]string{
 	testGroupName: {testGroupDomain},
 }
 
+var testGroupYearlyLineChanges = map[int]common.LineChanges{
+	2023: {
+		NumInsertions: 660,
+		NumDeletions:  685,
+	},
+}
+
 func TestNewDomainGroupsReport(t *testing.T) {
 	dbtesting.TestLogFilePath = testCommitsFile
 	sqlb := dbtesting.InitTestDB(t)
@@ -47,6 +54,7 @@ func TestNewDomainGroupsReport(t *testing.T) {
 			NumInsertions: testGroupInsertions,
 			NumDeletions:  testGroupDeletions,
 		},
+		YearlyLineChanges: testGroupYearlyLineChanges,
 		AuthorsPercent:    (float32(testNumGroupAuthors) / float32(testNumAuthors)) * 100,
 		InsertionsPercent: (float32(testGroupInsertions) / float32(testNumInsertions)) * 100,
 		DeletionsPercent:  (float32(testGroupDeletions) / float32(testNumDeletions)) * 100,

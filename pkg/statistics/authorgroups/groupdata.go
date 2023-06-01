@@ -19,6 +19,7 @@ func NewGroupData(report *DomainGroupsReport, groupName string, groupAuthors int
 	groupData.GroupName = groupName
 	groupData.NumAuthors = groupAuthors
 	groupData.NumLineChanges = groupLineChanges
+	groupData.YearlyLineChanges = groupYearlyLineChanges
 	groupData.AuthorsPercent = (float32(groupAuthors) / float32(report.TotalAuthors)) * 100
 	groupData.InsertionsPercent = (float32(groupLineChanges.NumInsertions) / float32(report.TotalChanges.NumInsertions)) * 100
 	groupData.DeletionsPercent = (float32(groupLineChanges.NumDeletions) / float32(report.TotalChanges.NumDeletions)) * 100
