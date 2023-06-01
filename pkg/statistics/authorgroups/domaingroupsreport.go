@@ -48,11 +48,11 @@ func (report *DomainGroupsReport) updateDomainChanges(authorDomain string, sqlb 
 		return
 	}
 
-	report.TotalChanges.AddLineChanges(&changes.LineChanges)
+	report.TotalChanges = common.AddLineChanges(report.TotalChanges, &changes.LineChanges)
 
 	if existingDomainLineChanges, ok := report.DomainTotalLineChanges[authorDomain]; ok {
-		existingDomainLineChanges.AddLineChanges(&changes.LineChanges)
-		report.DomainTotalLineChanges[authorDomain] = existingDomainLineChanges
+		summedDomainLineChanges := common.AddLineChanges(existingDomainLineChanges, &changes.LineChanges)
+		report.DomainTotalLineChanges[authorDomain] = summedDomainLineChanges
 	} else {
 		report.DomainTotalLineChanges[authorDomain] = &changes.LineChanges
 	}
@@ -105,7 +105,7 @@ func (report *DomainGroupsReport) Generate(db *db.SQLiteBackend) {
 // Returns authors, insertions, deletions
 func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (int, *common.LineChanges, common.YearlyLineChangeMap) {
 	totalGroupAuthors := 0
-	totalGroupLineChanges := common.LineChanges{
+	totalGroupLineChanges := &common.LineChanges{
 		NumInsertions: 0,
 		NumDeletions:  0,
 	}
@@ -117,14 +117,14 @@ func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (int, 
 			continue
 		}
 
-		totalGroupLineChanges.AddLineChanges(reportChanges)
+		totalGroupLineChanges = common.AddLineChanges(totalGroupLineChanges, reportChanges)
 		totalGroupAuthors += report.DomainTotalNumAuthors[domain]
 
 		reportYearlyChanges := report.DomainTotalYearlyLineChanges[domain]
 		totalGroupYearlyLineChanges.AddYearlyLineChangeMap(reportYearlyChanges)
 	}
 
-	return totalGroupAuthors, &totalGroupLineChanges, totalGroupYearlyLineChanges
+	return totalGroupAuthors, totalGroupLineChanges, totalGroupYearlyLineChanges
 }
 
 func (report *DomainGroupsReport) UnknownGroupData() *GroupData {
@@ -138,17 +138,16 @@ func (report *DomainGroupsReport) UnknownGroupData() *GroupData {
 	for groupName := range report.GroupsOfDomains {
 		groupAuthors, groupLineChanges, yearlyGroupLineChanges := report.accumulateGroupCounts(groupName)
 		totalGroupAuthors += groupAuthors
-		totalGroupChanges.AddLineChanges(groupLineChanges)
+		totalGroupChanges = common.AddLineChanges(totalGroupChanges, groupLineChanges)
 		totalGroupYearlyLineChanges.AddYearlyLineChangeMap(yearlyGroupLineChanges)
 	}
 
 	unknownGroupTotalAuthors := report.TotalAuthors - totalGroupAuthors
-	unknownGroupTotalLineChanges := *report.TotalChanges // copy
-	unknownGroupTotalLineChanges.SubtractLineChanges(totalGroupChanges)
+	unknownGroupTotalLineChanges := common.SubtractLineChanges(report.TotalChanges, totalGroupChanges)
 	unknownGroupTotalYearlyLineChanges := report.TotalYearlyLineChanges
 	unknownGroupTotalYearlyLineChanges.SubtractYearlyLineChangeMap(totalGroupYearlyLineChanges)
 
-	return NewGroupData(report, fallbackGroupName, unknownGroupTotalAuthors, &unknownGroupTotalLineChanges, unknownGroupTotalYearlyLineChanges)
+	return NewGroupData(report, fallbackGroupName, unknownGroupTotalAuthors, unknownGroupTotalLineChanges, unknownGroupTotalYearlyLineChanges)
 }
 
 func (report *DomainGroupsReport) GroupData(groupName string) *GroupData {

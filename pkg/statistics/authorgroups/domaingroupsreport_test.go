@@ -23,7 +23,7 @@ var testEmailGroups = map[string][]string{
 	testGroupName: {testGroupDomain},
 }
 
-var testGroupYearlyLineChanges = map[int]common.LineChanges{
+var testGroupYearlyLineChanges = map[int]*common.LineChanges{
 	2023: {
 		NumInsertions: 660,
 		NumDeletions:  685,
