@@ -3,14 +3,12 @@ package common
 type Commit struct {
 	Changes
 
-	Id             string
-	RepoName       string
-	AuthorName     string
-	AuthorEmail    string
-	AuthorTime     int64
-	CommitterName  string
-	CommitterEmail string
-	CommitterTime  int64
+	Id            string
+	RepoName      string
+	Author        Person
+	AuthorTime    int64
+	Committer     Person
+	CommitterTime int64
 }
 
 // Similar to RFC1123Z but without trailing zero on day

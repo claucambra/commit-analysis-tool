@@ -45,7 +45,7 @@ func TestDomainChanges(t *testing.T) {
 	}
 
 	for _, commit := range parsedCommitLog {
-		if !emailHasDomain(commit.AuthorEmail, testDomain) {
+		if !emailHasDomain(commit.Author.Email, testDomain) {
 			continue
 		}
 
@@ -77,7 +77,7 @@ func TestDomainYearlyChanges(t *testing.T) {
 	testDomainYearlyChanges := make(common.YearlyChangeMap, 0)
 
 	for _, commit := range parsedCommitLog {
-		if !emailHasDomain(commit.AuthorEmail, testDomain) {
+		if !emailHasDomain(commit.Author.Email, testDomain) {
 			continue
 		}
 

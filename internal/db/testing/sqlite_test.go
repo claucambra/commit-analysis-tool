@@ -81,7 +81,7 @@ func TestSqliteAuthorCommits(t *testing.T) {
 
 	testAuthorCommits := make([]*common.Commit, 0)
 	for _, testCommit := range testCommits {
-		if testCommit.AuthorEmail == testAuthorEmail {
+		if testCommit.Author.Email == testAuthorEmail {
 			testAuthorCommits = append(testAuthorCommits, testCommit)
 		}
 	}
