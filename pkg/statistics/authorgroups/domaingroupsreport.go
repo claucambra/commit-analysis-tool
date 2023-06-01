@@ -127,7 +127,7 @@ func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (int, 
 	return totalGroupAuthors, &totalGroupLineChanges, totalGroupYearlyLineChanges
 }
 
-func (report *DomainGroupsReport) unknownGroupData() *GroupData {
+func (report *DomainGroupsReport) UnknownGroupData() *GroupData {
 	totalGroupAuthors := 0
 	totalGroupChanges := &common.LineChanges{
 		NumInsertions: 0,
@@ -153,7 +153,7 @@ func (report *DomainGroupsReport) unknownGroupData() *GroupData {
 
 func (report *DomainGroupsReport) GroupData(groupName string) *GroupData {
 	if groupName == "" || groupName == fallbackGroupName {
-		return report.unknownGroupData()
+		return report.UnknownGroupData()
 	}
 
 	totalGroupAuthors, totalGroupLineChanges, totalGroupYearlyLineChanges := report.accumulateGroupCounts(groupName)
