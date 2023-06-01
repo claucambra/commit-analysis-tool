@@ -41,10 +41,8 @@ func (ylcm *YearlyLineChangeMap) AddLineChanges(lineChangesToAdd *LineChanges, c
 		changes.AddLineChanges(lineChangesToAdd)
 		(*ylcm)[commitYear] = changes
 	} else {
-		(*ylcm)[commitYear] = &LineChanges{
-			NumInsertions: lineChangesToAdd.NumInsertions,
-			NumDeletions:  lineChangesToAdd.NumDeletions,
-		}
+		lineChangesCopy := *lineChangesToAdd
+		(*ylcm)[commitYear] = &lineChangesCopy
 	}
 }
 
@@ -73,7 +71,8 @@ func (ycm *YearlyChangeMap) AddChanges(changesToAdd *Changes, commitYear int) {
 		changes.AddChanges(changesToAdd)
 		(*ycm)[commitYear] = changes
 	} else {
-		(*ycm)[commitYear] = changesToAdd
+		changesCopy := *changesToAdd
+		(*ycm)[commitYear] = &changesCopy
 	}
 }
 
