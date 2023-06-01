@@ -1,7 +1,6 @@
 package common
 
 import (
-	"math"
 	"math/rand"
 	"reflect"
 	"testing"
@@ -152,8 +151,6 @@ func TestSubtractLineChangesInYearlyLineChangeMap(t *testing.T) {
 		NumInsertions: lineChangeA.NumInsertions - lineChangeB.NumInsertions,
 		NumDeletions:  lineChangeA.NumDeletions - lineChangeB.NumDeletions,
 	}
-
-	fmt.Println(lineChangeA.NumInsertions, lineChangeB.NumInsertions, lineChangeA.NumInsertions-lineChangeB.NumInsertions, ylcm[testYearA].NumInsertions)
 
 	if subLineChanges := ylcm[testYearA]; !reflect.DeepEqual(subLineChanges, expectedSubLineChanges) {
 		t.Fatalf(`Subtracted line changes from yearly line change map does not match expected changes:
