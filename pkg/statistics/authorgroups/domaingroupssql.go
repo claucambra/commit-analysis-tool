@@ -69,7 +69,7 @@ func domainYearlyChanges(sqlb *db.SQLiteBackend, domain string) (common.YearlyCh
 		return nil, err
 	}
 
-	yearBuckets := make(common.YearlyChangeMap)
+	yearBuckets := common.YearlyChangeMap{}
 
 	for rows.Next() {
 		commit := new(common.Commit)

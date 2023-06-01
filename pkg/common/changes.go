@@ -73,13 +73,7 @@ func (ycm *YearlyChangeMap) AddChanges(changesToAdd *Changes, commitYear int) {
 		changes.AddChanges(changesToAdd)
 		(*ycm)[commitYear] = changes
 	} else {
-		(*ycm)[commitYear] = &Changes{
-			LineChanges: LineChanges{
-				NumInsertions: changes.NumInsertions,
-				NumDeletions:  changes.NumDeletions,
-			},
-			NumFilesChanged: changes.NumFilesChanged,
-		}
+		(*ycm)[commitYear] = changesToAdd
 	}
 }
 
