@@ -1,5 +1,9 @@
 package common
 
+import (
+	"sort"
+)
+
 type LineChanges struct {
 	NumInsertions int
 	NumDeletions  int

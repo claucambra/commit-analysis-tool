@@ -44,6 +44,7 @@ func generateRandomChanges() (*Changes, *Changes) {
 	return changeA, changeB
 }
 
+// LineChanges
 func TestAddLineChanges(t *testing.T) {
 	changeA, changeB := generateRandomLineChanges()
 	testChange := &LineChanges{
@@ -74,6 +75,7 @@ func TestSubtractLineChanges(t *testing.T) {
 	}
 }
 
+// Changes
 func TestAddChanges(t *testing.T) {
 	changeA, changeB := generateRandomChanges()
 	testChange := &Changes{
@@ -110,6 +112,7 @@ func TestSubtractChanges(t *testing.T) {
 	}
 }
 
+// YearlyLineChangeMap
 func TestAddLineChangesInYearlyLineChangeMap(t *testing.T) {
 	lineChangeA, lineChangeB := generateRandomLineChanges()
 	testYear := 2023
@@ -221,6 +224,24 @@ func TestSubtractYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 	}
 }
 
+func TestInsertionsArrayFromYearlyLineChangeMap(t *testing.T) {
+	lineChangeA, lineChangeB := generateRandomLineChanges()
+	ylcm := YearlyLineChangeMap{
+		2001: *lineChangeA,
+		2023: *lineChangeB,
+	}
+
+	expectedInsertionsArray := []int{lineChangeA.NumInsertions, lineChangeB.NumInsertions}
+	insertionsArray := ylcm.InsertionsArray()
+
+	if !reflect.DeepEqual(insertionsArray, expectedInsertionsArray) {
+		t.Fatalf(`Insertions array from yearly change map does not match expected insertions array:
+			Expected %+v
+			Received %+v`, expectedInsertionsArray, insertionsArray)
+	}
+}
+
+// YearlyChangeMap
 func TestAddChangesToYearlyChangeMap(t *testing.T) {
 	changeA, changeB := generateRandomChanges()
 	testYear := 2023
