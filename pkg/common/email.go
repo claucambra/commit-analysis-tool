@@ -4,7 +4,7 @@ type EmailSet map[string]bool
 type YearlyEmailMap map[int]EmailSet
 
 func AddEmailSet(a EmailSet, b EmailSet) EmailSet {
-	newSet := a
+	newSet := CopyMap(a)
 
 	for email := range b {
 		newSet[email] = true
@@ -14,7 +14,7 @@ func AddEmailSet(a EmailSet, b EmailSet) EmailSet {
 }
 
 func SubtractEmailSet(a EmailSet, b EmailSet) (EmailSet, bool) {
-	newSet := a
+	newSet := CopyMap(a)
 
 	for email := range b {
 		delete(newSet, email)
