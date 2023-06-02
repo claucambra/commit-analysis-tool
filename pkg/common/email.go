@@ -49,19 +49,12 @@ func (yem *YearlyEmailMap) SubtractEmailSet(emailSetToAdd EmailSet, year int) {
 
 func (yem *YearlyEmailMap) AddYearlyPeopleMap(yemToAdd YearlyEmailMap) {
 	for year, emailsToAdd := range yemToAdd {
-		if existingEmails, ok := (*yem)[year]; ok {
-			(*yem)[year] = AddEmailSet(existingEmails, emailsToAdd)
-		} else {
-			(*yem)[year] = emailsToAdd
-		}
+		yem.AddEmailSet(emailsToAdd, year)
 	}
 }
 
 func (yem *YearlyEmailMap) SubtractYearlyPeopleMap(yemToSubtract YearlyEmailMap) {
 	for year, emailsToSubtract := range yemToSubtract {
-		if existingEmails, ok := (*yem)[year]; ok {
-			subtractedEmails := SubtractEmailSet(existingEmails, emailsToSubtract)
-			(*yem)[year] = subtractedEmails
-		}
+		yem.SubtractEmailSet(emailsToSubtract, year)
 	}
 }
