@@ -94,3 +94,49 @@ func domainYearlyChanges(sqlb *db.SQLiteBackend, domain string) (common.YearlyCh
 
 	return yearBuckets, nil
 }
+
+func domainYearlyAuthors(sqlb *db.SQLiteBackend, domain string) (common.YearlyPeopleMap, error) {
+	rows, err := domainChangeRows(sqlb, domain)
+	if err != nil {
+		log.Fatalf("Error retrieving rows: %s", err)
+		return nil, err
+	}
+
+	insertedPeople := make(map[int]map[string]bool, 0)
+	yearBuckets := common.YearlyPeopleMap{}
+
+	for rows.Next() {
+		commit := new(common.Commit)
+
+		rows.Scan(
+			&commit.Id,
+			&commit.RepoName,
+			&commit.Author.Name,
+			&commit.Author.Email,
+			&commit.AuthorTime,
+			&commit.Committer.Name,
+			&commit.Committer.Email,
+			&commit.CommitterTime,
+			&commit.NumInsertions,
+			&commit.NumDeletions,
+			&commit.NumFilesChanged,
+		)
+
+		authorEmail := commit.Author.Email
+		commitYear := time.Unix(commit.AuthorTime, 0).Year()
+		insertedPeopleInYear := insertedPeople[commitYear]
+		personNotAlreadyAddedInYear := insertedPeopleInYear == nil || !insertedPeopleInYear[authorEmail]
+
+		if insertedPeopleInYear == nil {
+			insertedPeople[commitYear] = map[string]bool{authorEmail: true}
+		} else if !insertedPeopleInYear[authorEmail] {
+			insertedPeople[commitYear][authorEmail] = true
+		}
+
+		if personNotAlreadyAddedInYear {
+			yearBuckets[commitYear] = append(yearBuckets[commitYear], &(commit.Author))
+		}
+	}
+
+	return yearBuckets, nil
+}
