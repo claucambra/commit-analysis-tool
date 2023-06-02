@@ -30,8 +30,9 @@ func generateRandomEmails(amount int) []string {
 }
 
 func generateRandomEmailSets() (EmailSet, EmailSet) {
-	setAEmails := generateRandomEmails(generateTestEmailCount)
-	setBEmails := generateRandomEmails(generateTestEmailCount)
+	commonEmail := "developer@claudiocambra.com"
+	setAEmails := append(generateRandomEmails(generateTestEmailCount), commonEmail)
+	setBEmails := append(generateRandomEmails(generateTestEmailCount), commonEmail)
 
 	emailSetA := EmailSet{}
 	emailSetB := EmailSet{}
@@ -100,5 +101,28 @@ func TestAddEmailSetToYearlyEmailMap(t *testing.T) {
 		t.Fatalf(`Added email set to yearly emails map when year already in map does not match expected changes:
 			Expected %+v
 			Received %+v`, summedEmailSets, yemASummedEmailSets)
+	}
+}
+
+func TestSubtractEmailSetInYearlyEmailsMap(t *testing.T) {
+	emailSetA, emailSetB := generateRandomEmailSets()
+	testYearA := 2023
+	testYearB := 2003
+	yem := YearlyEmailMap{testYearA: emailSetA}
+
+	yem.SubtractEmailSet(emailSetB, testYearB)
+	if _, ok := yem[testYearB]; ok {
+		t.Fatalf("Subtracting email set from a year not present in YEM should not add this year to YEM.")
+	}
+
+	yem = YearlyEmailMap{testYearA: emailSetA}
+	yem.SubtractEmailSet(emailSetB, testYearA)
+
+	expectedSubEmailSet, _ := SubtractEmailSet(emailSetA, emailSetB)
+
+	if subEmailSet := yem[testYearA]; !reflect.DeepEqual(subEmailSet, expectedSubEmailSet) {
+		t.Fatalf(`Subtracted email set from yearly email map does not match expected changes:
+			Expected %+v
+			Received %+v`, expectedSubEmailSet, subEmailSet)
 	}
 }
