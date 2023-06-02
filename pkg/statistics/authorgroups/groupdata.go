@@ -33,13 +33,7 @@ func NewGroupData(report *DomainGroupsReport, groupName string, groupAuthors int
 }
 
 func (group *GroupData) changesCorrelation(groupToCorrelate *GroupData) (float64, float64) {
-	changeYearsInBothGroups := []int{}
-	for year := range group.YearlyLineChanges {
-		_, ok := groupToCorrelate.YearlyLineChanges[year]
-		if ok {
-			changeYearsInBothGroups = append(changeYearsInBothGroups, year)
-		}
-	}
+	changeYearsInBothGroups := common.KeysInCommon(group.YearlyLineChanges, groupToCorrelate.YearlyLineChanges)
 
 	thisYearlyInsertionsArr, thisYearlyDeletionsArr := group.YearlyLineChanges.SeparatedChangeArrays(changeYearsInBothGroups)
 	thatYearlyInsertionsArr, thatYearlyDeletionsArr := groupToCorrelate.YearlyLineChanges.SeparatedChangeArrays(changeYearsInBothGroups)
@@ -63,13 +57,7 @@ func (group *GroupData) changesCorrelation(groupToCorrelate *GroupData) (float64
 }
 
 func (group *GroupData) authorsCorrelation(groupToCorrelate *GroupData) float64 {
-	authorYearsInBothGroups := []int{}
-	for year := range group.YearlyAuthors {
-		_, ok := groupToCorrelate.YearlyAuthors[year]
-		if ok {
-			authorYearsInBothGroups = append(authorYearsInBothGroups, year)
-		}
-	}
+	authorYearsInBothGroups := common.KeysInCommon(group.YearlyAuthors, groupToCorrelate.YearlyAuthors)
 
 	thisYearlyAuthorsArr := group.YearlyAuthors.CountArray(authorYearsInBothGroups)
 	thatYearlyAuthorsArr := groupToCorrelate.YearlyAuthors.CountArray(authorYearsInBothGroups)
