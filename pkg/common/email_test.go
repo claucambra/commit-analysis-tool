@@ -63,3 +63,19 @@ func TestAddEmailSet(t *testing.T) {
 			Received %+v`, testEmailSet, summedEmailSets)
 	}
 }
+
+func TestSubtractEmailSets(t *testing.T) {
+	emailSetA, emailSetB := generateRandomEmailSets()
+	subbedEmailSets := SubtractEmailSet(emailSetA, emailSetB)
+	testEmailSet := emailSetA
+
+	for email := range emailSetB {
+		delete(testEmailSet, email)
+	}
+
+	if !reflect.DeepEqual(testEmailSet, subbedEmailSets) {
+		t.Fatalf(`Subtracted email sets do not match expected email set: 
+			Expected %+v
+			Received %+v`, testEmailSet, subbedEmailSets)
+	}
+}
