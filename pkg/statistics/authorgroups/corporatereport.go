@@ -6,8 +6,10 @@ type CorporateReport struct {
 	CorporateGroup *GroupData
 	CommunityGroup *GroupData
 
+	// Correlations based upon year-by-year aggregated figures for both groups
 	InsertionsCorrel float64
 	DeletionsCorrel  float64
+	AuthorsCorrel    float64
 
 	domainGroupsReport *DomainGroupsReport
 }
@@ -23,7 +25,7 @@ func NewCorporateReport(groupsOfDomains map[string][]string, sqlb *db.SQLiteBack
 	corpGroup := domainGroupsReport.GroupData(corporateGroupName)
 	commGroup := domainGroupsReport.UnknownGroupData()
 
-	insertionsCorrel, deletionsCorrel := corpGroup.Correlation(commGroup)
+	insertionsCorrel, deletionsCorrel, authorsCorrel := corpGroup.Correlation(commGroup)
 
 	return &CorporateReport{
 		CorporateGroup: corpGroup,
@@ -31,6 +33,7 @@ func NewCorporateReport(groupsOfDomains map[string][]string, sqlb *db.SQLiteBack
 
 		InsertionsCorrel: insertionsCorrel,
 		DeletionsCorrel:  deletionsCorrel,
+		AuthorsCorrel:    authorsCorrel,
 
 		domainGroupsReport: domainGroupsReport,
 	}

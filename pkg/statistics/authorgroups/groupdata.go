@@ -32,35 +32,51 @@ func NewGroupData(report *DomainGroupsReport, groupName string, groupAuthors int
 	return groupData
 }
 
-// Returns correlations between insertions and deletions of two groups
-func (group *GroupData) Correlation(groupToCorrelate *GroupData) (float64, float64) {
-	yearsInBothGroups := []int{}
+// Returns correlations between insertions and deletions and authors of two groups over years
+func (group *GroupData) Correlation(groupToCorrelate *GroupData) (float64, float64, float64) {
+	changeYearsInBothGroups := []int{}
 	for year := range group.YearlyLineChanges {
 		_, ok := groupToCorrelate.YearlyLineChanges[year]
 		if ok {
-			yearsInBothGroups = append(yearsInBothGroups, year)
+			changeYearsInBothGroups = append(changeYearsInBothGroups, year)
 		}
 	}
 
-	thisYearlyInsertionsArr, thisYearlyDeletionsArr := group.YearlyLineChanges.SeparatedChangeArrays(yearsInBothGroups)
-	thatYearlyInsertionsArr, thatYearlyDeletionsArr := groupToCorrelate.YearlyLineChanges.SeparatedChangeArrays(yearsInBothGroups)
+	authorYearsInBothGroups := []int{}
+	for year := range group.YearlyAuthors {
+		_, ok := groupToCorrelate.YearlyAuthors[year]
+		if ok {
+			authorYearsInBothGroups = append(authorYearsInBothGroups, year)
+		}
+	}
 
-	floatThisInserts := make([]float64, len(yearsInBothGroups))
-	floatThisDeletes := make([]float64, len(yearsInBothGroups))
-	floatThatInserts := make([]float64, len(yearsInBothGroups))
-	floatThatDeletes := make([]float64, len(yearsInBothGroups))
+	thisYearlyInsertionsArr, thisYearlyDeletionsArr := group.YearlyLineChanges.SeparatedChangeArrays(changeYearsInBothGroups)
+	thisYearlyAuthorsArr := group.YearlyAuthors.CountArray(authorYearsInBothGroups)
+	thatYearlyInsertionsArr, thatYearlyDeletionsArr := groupToCorrelate.YearlyLineChanges.SeparatedChangeArrays(changeYearsInBothGroups)
+	thatYearlyAuthorsArr := groupToCorrelate.YearlyAuthors.CountArray(authorYearsInBothGroups)
 
-	for i := 0; i < len(group.YearlyLineChanges); i++ {
+	floatThisInserts := make([]float64, len(changeYearsInBothGroups))
+	floatThisDeletes := make([]float64, len(changeYearsInBothGroups))
+	floatThisAuthors := make([]float64, len(authorYearsInBothGroups))
+	floatThatInserts := make([]float64, len(changeYearsInBothGroups))
+	floatThatDeletes := make([]float64, len(changeYearsInBothGroups))
+	floatThatAuthors := make([]float64, len(authorYearsInBothGroups))
+
+	for i := 0; i < len(changeYearsInBothGroups); i++ {
 		floatThisInserts[i] = float64(thisYearlyInsertionsArr[i])
 		floatThisDeletes[i] = float64(thisYearlyDeletionsArr[i])
-	}
-	for i := 0; i < len(groupToCorrelate.YearlyLineChanges); i++ {
 		floatThatInserts[i] = float64(thatYearlyInsertionsArr[i])
 		floatThatDeletes[i] = float64(thatYearlyDeletionsArr[i])
 	}
 
+	for i := 0; i < len(authorYearsInBothGroups); i++ {
+		floatThisAuthors[i] = float64(thisYearlyAuthorsArr[i])
+		floatThatAuthors[i] = float64(thatYearlyAuthorsArr[i])
+	}
+
 	insertionsCorrel := stat.Correlation(floatThisInserts, floatThatInserts, nil)
 	deletionsCorrel := stat.Correlation(floatThisDeletes, floatThatDeletes, nil)
+	authorsCorrel := stat.Correlation(floatThisAuthors, floatThatAuthors, nil)
 
-	return insertionsCorrel, deletionsCorrel
+	return insertionsCorrel, deletionsCorrel, authorsCorrel
 }
