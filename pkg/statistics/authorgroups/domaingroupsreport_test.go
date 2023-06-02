@@ -9,13 +9,13 @@ import (
 )
 
 const testNumAuthors = 31
-const testNumInsertions = 78388
-const testNumDeletions = 42629
+const testNumInsertions = 25205
+const testNumDeletions = 17147
 const testNumGroupAuthors = 5
 const testGroupName = "VideoLAN"
 const testGroupDomain = "videolan.org"
-const testGroupInsertions = 660
-const testGroupDeletions = 685
+const testGroupInsertions = 132
+const testGroupDeletions = 137
 
 var testCommitsFile = "../../../test/data/log.txt"
 
@@ -25,8 +25,8 @@ var testEmailGroups = map[string][]string{
 
 var testGroupYearlyLineChanges = map[int]*common.LineChanges{
 	2023: {
-		NumInsertions: 660,
-		NumDeletions:  685,
+		NumInsertions: testGroupInsertions,
+		NumDeletions:  testGroupDeletions,
 	},
 }
 
