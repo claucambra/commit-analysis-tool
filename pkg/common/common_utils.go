@@ -22,6 +22,7 @@ func SortedMapKeys[K constraints.Ordered, V any, M ~map[K]V](inMap M) []K {
 	return sortedKeys
 }
 
+// Insert operation that adds to an existing value in the map using a specified additive function
 func AdditiveValueMapInsert[K comparable, V any, M ~map[K]V](inMap map[K]V, key K, additiveFunc func(V, V) V, valueToAdd V) {
 	completeValue := valueToAdd
 	if existingValue, ok := inMap[key]; ok {
@@ -29,4 +30,17 @@ func AdditiveValueMapInsert[K comparable, V any, M ~map[K]V](inMap map[K]V, key 
 	}
 
 	inMap[key] = completeValue
+}
+
+// Operation that subtracts from an existing value in the map using a specified subtractive function
+func SubtractiveValueMapRemove[K comparable, V any, M ~map[K]V](inMap map[K]V, key K, subtractiveFunc func(V, V) (V, bool), valueToSubtract V) {
+	if existingValue, ok := inMap[key]; ok {
+		subtractedValue, removeCondition := subtractiveFunc(existingValue, valueToSubtract)
+
+		if removeCondition {
+			delete(inMap, key)
+		} else {
+			inMap[key] = subtractedValue
+		}
+	}
 }
