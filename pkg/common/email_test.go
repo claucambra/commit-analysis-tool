@@ -79,3 +79,26 @@ func TestSubtractEmailSets(t *testing.T) {
 			Received %+v`, testEmailSet, subbedEmailSets)
 	}
 }
+
+// YearlyEmailMap
+func TestAddEmailSetToYearlyEmailMap(t *testing.T) {
+	emailSetA, emailSetB := generateRandomEmailSets()
+	testYear := 2023
+	yem := make(YearlyEmailMap, 0)
+
+	yem.AddEmailSet(emailSetA, testYear)
+	if yemAEmailSetA := yem[testYear]; !reflect.DeepEqual(yemAEmailSetA, emailSetA) {
+		t.Fatalf(`Added email set to yearly emails map when year not already in map does not match expected changes:
+			Expected %+v
+			Received %+v`, emailSetA, yemAEmailSetA)
+	}
+
+	yem.AddEmailSet(emailSetB, testYear)
+	summedEmailSets := AddEmailSet(emailSetA, emailSetB)
+
+	if yemASummedEmailSets := yem[testYear]; !reflect.DeepEqual(yemASummedEmailSets, summedEmailSets) {
+		t.Fatalf(`Added email set to yearly emails map when year already in map does not match expected changes:
+			Expected %+v
+			Received %+v`, summedEmailSets, yemASummedEmailSets)
+	}
+}
