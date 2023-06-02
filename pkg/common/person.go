@@ -22,3 +22,13 @@ func (ypm *YearlyPeopleMap) CountArray(years []int) []int {
 
 	return countArray
 }
+
+func (ypm *YearlyPeopleMap) AddYearlyPeopleMap(ypmToAdd YearlyPeopleMap) {
+	for year, peopleToAdd := range ypmToAdd {
+		if existingPeople, ok := (*ypm)[year]; ok {
+			(*ypm)[year] = append(existingPeople, peopleToAdd...)
+		} else {
+			(*ypm)[year] = peopleToAdd
+		}
+	}
+}
