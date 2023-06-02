@@ -26,7 +26,7 @@ type DomainGroupsReport struct {
 }
 
 func NewDomainGroupsReport(domainGroups map[string][]string) *DomainGroupsReport {
-	report := &DomainGroupsReport{
+	return &DomainGroupsReport{
 		TotalChanges:                 &common.LineChanges{},
 		TotalYearlyLineChanges:       common.YearlyLineChangeMap{},
 		GroupsOfDomains:              domainGroups,
@@ -34,8 +34,14 @@ func NewDomainGroupsReport(domainGroups map[string][]string) *DomainGroupsReport
 		DomainTotalLineChanges:       map[string]*common.LineChanges{},
 		DomainTotalYearlyLineChanges: map[string]common.YearlyLineChangeMap{},
 	}
+}
 
-	return report
+func (report *DomainGroupsReport) resetStats() {
+	report.TotalChanges = &common.LineChanges{}
+	report.TotalYearlyLineChanges = common.YearlyLineChangeMap{}
+	report.DomainTotalNumAuthors = map[string]int{}
+	report.DomainTotalLineChanges = map[string]*common.LineChanges{}
+	report.DomainTotalYearlyLineChanges = map[string]common.YearlyLineChangeMap{}
 }
 
 func (report *DomainGroupsReport) updateDomainChanges(sqlb *db.SQLiteBackend) {
@@ -95,6 +101,7 @@ func (report *DomainGroupsReport) Generate(db *db.SQLiteBackend) {
 		return
 	}
 
+	report.resetStats()
 	report.updateAuthors(authors, db)
 	report.updateDomainChanges(db)
 }
