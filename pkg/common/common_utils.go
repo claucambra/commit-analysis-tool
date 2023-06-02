@@ -7,7 +7,7 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
-func CopyMap[K constraints.Ordered, V any, M ~map[K]V](inMap M) map[K]V {
+func CopyMap[K comparable, V any, M ~map[K]V](inMap M) map[K]V {
 	copyMap := make(map[K]V, len(inMap))
 
 	for key, value := range inMap {
@@ -31,6 +31,19 @@ func SortedMapKeys[K constraints.Ordered, V any, M ~map[K]V](inMap M) []K {
 	})
 
 	return sortedKeys
+}
+
+func KeysInCommon[K comparable, V any, M ~map[K]V](inMapA M, inMapB M) []K {
+	commonKeys := []K{}
+
+	for key := range inMapA {
+		_, ok := inMapB[key]
+		if ok {
+			commonKeys = append(commonKeys, key)
+		}
+	}
+
+	return commonKeys
 }
 
 // Insert operation that adds to an existing value in the map using a specified additive function
