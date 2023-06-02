@@ -20,11 +20,17 @@ func AddLineChanges(a *LineChanges, b *LineChanges) *LineChanges {
 	}
 }
 
-func SubtractLineChanges(a *LineChanges, b *LineChanges) *LineChanges {
-	return &LineChanges{
-		NumInsertions: a.NumInsertions - b.NumInsertions,
-		NumDeletions:  a.NumDeletions - b.NumDeletions,
+func SubtractLineChanges(a *LineChanges, b *LineChanges) (*LineChanges, bool) {
+	subtractedInsertions := MaxInt(a.NumInsertions-b.NumInsertions, 0)
+	subtractedDeletions := MaxInt(a.NumDeletions-b.NumDeletions, 0)
+
+	lineChanges := &LineChanges{
+		NumInsertions: subtractedInsertions,
+		NumDeletions:  subtractedDeletions,
 	}
+
+	emptyOrInvalid := subtractedInsertions <= 0 && subtractedDeletions <= 0
+	return lineChanges, emptyOrInvalid
 }
 
 func AddChanges(a *Changes, b *Changes) *Changes {
@@ -34,11 +40,16 @@ func AddChanges(a *Changes, b *Changes) *Changes {
 	}
 }
 
-func SubtractChanges(a *Changes, b *Changes) *Changes {
-	return &Changes{
-		LineChanges:     *SubtractLineChanges(&a.LineChanges, &b.LineChanges),
-		NumFilesChanged: a.NumFilesChanged - b.NumFilesChanged,
+func SubtractChanges(a *Changes, b *Changes) (*Changes, bool) {
+	subtractedLineChanges, lcEmptyOrInvalid := SubtractLineChanges(&a.LineChanges, &b.LineChanges)
+	subtractedFilesChanged := MaxInt(a.NumFilesChanged-b.NumFilesChanged, 0)
+	changes := &Changes{
+		LineChanges:     *subtractedLineChanges,
+		NumFilesChanged: subtractedFilesChanged,
 	}
+
+	emptyOrInvalid := lcEmptyOrInvalid || subtractedFilesChanged <= 0
+	return changes, emptyOrInvalid
 }
 
 // YearlyLineChangeMap

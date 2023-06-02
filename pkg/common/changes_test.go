@@ -67,7 +67,7 @@ func TestSubtractLineChanges(t *testing.T) {
 		NumDeletions:  changeA.NumDeletions - changeB.NumDeletions,
 	}
 
-	subbedChanges := SubtractLineChanges(changeA, changeB)
+	subbedChanges, _ := SubtractLineChanges(changeA, changeB)
 	if !reflect.DeepEqual(subbedChanges, testChange) {
 		t.Fatalf(`Subtracted line changes do not match expected changes:
 			Expected %+v
@@ -104,7 +104,7 @@ func TestSubtractChanges(t *testing.T) {
 		NumFilesChanged: changeA.NumFilesChanged - changeB.NumFilesChanged,
 	}
 
-	subbedChanges := SubtractChanges(changeA, changeB)
+	subbedChanges, _ := SubtractChanges(changeA, changeB)
 	if !reflect.DeepEqual(subbedChanges, testChange) {
 		t.Fatalf(`Subtracted changes do not match expected changes:
 			Expected %+v

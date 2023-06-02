@@ -170,7 +170,7 @@ func (report *DomainGroupsReport) UnknownGroupData() *GroupData {
 	}
 
 	unknownGroupTotalAuthors := report.TotalAuthors - totalGroupAuthors
-	unknownGroupTotalLineChanges := common.SubtractLineChanges(report.TotalChanges, totalGroupChanges)
+	unknownGroupTotalLineChanges, _ := common.SubtractLineChanges(report.TotalChanges, totalGroupChanges)
 	unknownGroupTotalYearlyLineChanges := report.TotalYearlyLineChanges
 	unknownGroupTotalYearlyLineChanges.SubtractYearlyLineChangeMap(totalGroupYearlyLineChanges)
 	unknownGroupTotalYearlyAuthors := report.TotalYearlyAuthors
