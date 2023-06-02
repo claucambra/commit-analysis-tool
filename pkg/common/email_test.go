@@ -66,7 +66,7 @@ func TestAddEmailSet(t *testing.T) {
 
 func TestSubtractEmailSets(t *testing.T) {
 	emailSetA, emailSetB := generateRandomEmailSets()
-	subbedEmailSets := SubtractEmailSet(emailSetA, emailSetB)
+	subbedEmailSets, _ := SubtractEmailSet(emailSetA, emailSetB)
 	testEmailSet := emailSetA
 
 	for email := range emailSetB {

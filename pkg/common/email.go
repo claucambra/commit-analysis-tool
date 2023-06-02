@@ -13,14 +13,15 @@ func AddEmailSet(a EmailSet, b EmailSet) EmailSet {
 	return newSet
 }
 
-func SubtractEmailSet(a EmailSet, b EmailSet) EmailSet {
+func SubtractEmailSet(a EmailSet, b EmailSet) (EmailSet, bool) {
 	newSet := a
 
 	for email := range b {
 		delete(newSet, email)
 	}
 
-	return newSet
+	empty := len(newSet) == 0
+	return newSet, empty
 }
 
 func (yem *YearlyEmailMap) CountArray(years []int) []int {
@@ -43,8 +44,8 @@ func (yem *YearlyEmailMap) AddEmailSet(emailSetToAdd EmailSet, year int) {
 	AdditiveValueMapInsert[int, EmailSet, YearlyEmailMap](*yem, year, AddEmailSet, emailSetToAdd)
 }
 
-func (yem *YearlyEmailMap) SubtractEmailSet(emailSetToAdd EmailSet, year int) {
-	AdditiveValueMapInsert[int, EmailSet, YearlyEmailMap](*yem, year, AddEmailSet, emailSetToAdd)
+func (yem *YearlyEmailMap) SubtractEmailSet(emailSetToSubtract EmailSet, year int) {
+	SubtractiveValueMapRemove[int, EmailSet, YearlyEmailMap](*yem, year, SubtractEmailSet, emailSetToSubtract)
 }
 
 func (yem *YearlyEmailMap) AddYearlyPeopleMap(yemToAdd YearlyEmailMap) {
