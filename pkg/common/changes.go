@@ -58,10 +58,7 @@ func (ylcm *YearlyLineChangeMap) AddLineChanges(lineChangesToAdd *LineChanges, c
 }
 
 func (ylcm *YearlyLineChangeMap) SubtractLineChanges(lineChangesToSubtract *LineChanges, commitYear int) {
-	if changes, ok := (*ylcm)[commitYear]; ok {
-		subtractedChanges := SubtractLineChanges(changes, lineChangesToSubtract)
-		(*ylcm)[commitYear] = subtractedChanges
-	}
+	SubtractiveValueMapRemove[int, *LineChanges, YearlyLineChangeMap](*ylcm, commitYear, SubtractLineChanges, lineChangesToSubtract)
 }
 
 func (ylcm *YearlyLineChangeMap) AddYearlyLineChangeMap(ylcmToAdd YearlyLineChangeMap) {
@@ -101,10 +98,7 @@ func (ycm *YearlyChangeMap) AddChanges(changesToAdd *Changes, commitYear int) {
 }
 
 func (ycm *YearlyChangeMap) SubtractChanges(changesToSubtract *Changes, commitYear int) {
-	if changes, ok := (*ycm)[commitYear]; ok {
-		subtractedChanges := SubtractChanges(changes, changesToSubtract)
-		(*ycm)[commitYear] = subtractedChanges
-	}
+	SubtractiveValueMapRemove[int, *Changes, YearlyChangeMap](*ycm, commitYear, SubtractChanges, changesToSubtract)
 }
 
 func (ycm *YearlyChangeMap) LineChanges() YearlyLineChangeMap {
