@@ -1,6 +1,7 @@
 package common
 
 import (
+	"math"
 	"sort"
 
 	"golang.org/x/exp/constraints"
@@ -43,4 +44,9 @@ func SubtractiveValueMapRemove[K comparable, V any, M ~map[K]V](inMap map[K]V, k
 			inMap[key] = subtractedValue
 		}
 	}
+}
+
+func MaxInt(numA int, numB int) int {
+	maxNum := math.Max(float64(numA), float64(numB))
+	return int(maxNum)
 }
