@@ -63,8 +63,8 @@ func TestAddLineChanges(t *testing.T) {
 func TestSubtractLineChanges(t *testing.T) {
 	changeA, changeB := generateRandomLineChanges()
 	testChange := &LineChanges{
-		NumInsertions: changeA.NumInsertions - changeB.NumInsertions,
-		NumDeletions:  changeA.NumDeletions - changeB.NumDeletions,
+		NumInsertions: MaxInt(changeA.NumInsertions-changeB.NumInsertions, 0),
+		NumDeletions:  MaxInt(changeA.NumDeletions-changeB.NumDeletions, 0),
 	}
 
 	subbedChanges, _ := SubtractLineChanges(changeA, changeB)
@@ -98,10 +98,10 @@ func TestSubtractChanges(t *testing.T) {
 	changeA, changeB := generateRandomChanges()
 	testChange := &Changes{
 		LineChanges: LineChanges{
-			NumInsertions: changeA.NumInsertions - changeB.NumInsertions,
-			NumDeletions:  changeA.NumDeletions - changeB.NumDeletions,
+			NumInsertions: MaxInt(changeA.NumInsertions-changeB.NumInsertions, 0),
+			NumDeletions:  MaxInt(changeA.NumDeletions-changeB.NumDeletions, 0),
 		},
-		NumFilesChanged: changeA.NumFilesChanged - changeB.NumFilesChanged,
+		NumFilesChanged: MaxInt(changeA.NumFilesChanged-changeB.NumFilesChanged, 0),
 	}
 
 	subbedChanges, _ := SubtractChanges(changeA, changeB)
@@ -150,8 +150,8 @@ func TestSubtractLineChangesInYearlyLineChangeMap(t *testing.T) {
 	ylcm.SubtractLineChanges(lineChangeB, testYearA)
 
 	expectedSubLineChanges := &LineChanges{
-		NumInsertions: lineChangeA.NumInsertions - lineChangeB.NumInsertions,
-		NumDeletions:  lineChangeA.NumDeletions - lineChangeB.NumDeletions,
+		NumInsertions: MaxInt(lineChangeA.NumInsertions-lineChangeB.NumInsertions, 0),
+		NumDeletions:  MaxInt(lineChangeA.NumDeletions-lineChangeB.NumDeletions, 0),
 	}
 
 	if subLineChanges := ylcm[testYearA]; !reflect.DeepEqual(subLineChanges, expectedSubLineChanges) {
@@ -210,8 +210,8 @@ func TestSubtractYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 	ylcmA.SubtractYearlyLineChangeMap(ylcmB)
 
 	expectedSubLineChanges := &LineChanges{
-		NumInsertions: lineChangeA.NumInsertions - lineChangeB.NumInsertions,
-		NumDeletions:  lineChangeA.NumDeletions - lineChangeB.NumDeletions,
+		NumInsertions: MaxInt(lineChangeA.NumInsertions-lineChangeB.NumInsertions, 0),
+		NumDeletions:  MaxInt(lineChangeA.NumDeletions-lineChangeB.NumDeletions, 0),
 	}
 
 	if testYearBSubLineChanges, ok := ylcmA[testYearB]; !ok {
@@ -307,10 +307,10 @@ func TestSubtractChangesFromYearlyChangeMap(t *testing.T) {
 
 	expectedSubChanges := &Changes{
 		LineChanges: LineChanges{
-			NumInsertions: changeA.NumInsertions - changeB.NumInsertions,
-			NumDeletions:  changeA.NumDeletions - changeB.NumDeletions,
+			NumInsertions: MaxInt(changeA.NumInsertions-changeB.NumInsertions, 0),
+			NumDeletions:  MaxInt(changeA.NumDeletions-changeB.NumDeletions, 0),
 		},
-		NumFilesChanged: changeA.NumFilesChanged - changeB.NumFilesChanged,
+		NumFilesChanged: MaxInt(changeA.NumFilesChanged-changeB.NumFilesChanged, 0),
 	}
 
 	if subChanges := ycm[testYearA]; !reflect.DeepEqual(subChanges, expectedSubChanges) {
