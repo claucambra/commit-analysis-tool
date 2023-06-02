@@ -150,8 +150,35 @@ func TestAddYearlyEmailMapToYearlyEmailMap(t *testing.T) {
 	expectedSummedEmailSets := AddEmailSet(emailSetA, emailSetB)
 
 	if addedEmailSets := yemA[testYearA]; !reflect.DeepEqual(addedEmailSets, expectedSummedEmailSets) {
-		t.Fatalf(`Added YLCM B line changes to YLCM A does not match expected line changes:
+		t.Fatalf(`Added YLCM B email set to YLCM A does not match expected email set:
 			Expected %+v
 			Received %+v`, addedEmailSets, expectedSummedEmailSets)
+	}
+}
+
+func TestSubtractYearlyEmailMapToYearlyEmailMap(t *testing.T) {
+	emailSetA, emailSetB := generateRandomEmailSets()
+	testYearA := 2023
+	testYearB := 2003
+	yemA := YearlyEmailMap{testYearA: emailSetA}
+	yemB := YearlyEmailMap{testYearB: emailSetB}
+
+	yemA.SubtractYearlyEmailMap(yemB)
+
+	if _, ok := yemA[testYearB]; ok {
+		t.Fatalf("Subtracting YEM B email set from a year not present in YEM A should not add this year to YEM A.")
+	}
+
+	yemA.AddEmailSet(emailSetA, testYearB)
+	yemA.SubtractYearlyEmailMap(yemB)
+
+	expectedSubbedEmailSets, _ := SubtractEmailSet(emailSetA, emailSetB)
+
+	if testYearBSubEmailSet, ok := yemA[testYearB]; !ok {
+		t.Fatalf("Test year B should now be present in YLCM A")
+	} else if !reflect.DeepEqual(testYearBSubEmailSet, expectedSubbedEmailSets) {
+		t.Fatalf(`Subtracted YLCM B email set to yearly email set map does not match expected changes:
+			Expected %+v
+			Received %+v`, expectedSubbedEmailSets, testYearBSubEmailSet)
 	}
 }
