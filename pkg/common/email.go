@@ -48,13 +48,13 @@ func (yem *YearlyEmailMap) SubtractEmailSet(emailSetToSubtract EmailSet, year in
 	SubtractiveValueMapRemove[int, EmailSet, YearlyEmailMap](*yem, year, SubtractEmailSet, emailSetToSubtract)
 }
 
-func (yem *YearlyEmailMap) AddYearlyPeopleMap(yemToAdd YearlyEmailMap) {
+func (yem *YearlyEmailMap) AddYearlyEmailMap(yemToAdd YearlyEmailMap) {
 	for year, emailsToAdd := range yemToAdd {
 		yem.AddEmailSet(emailsToAdd, year)
 	}
 }
 
-func (yem *YearlyEmailMap) SubtractYearlyPeopleMap(yemToSubtract YearlyEmailMap) {
+func (yem *YearlyEmailMap) SubtractYearlyEmailMap(yemToSubtract YearlyEmailMap) {
 	for year, emailsToSubtract := range yemToSubtract {
 		yem.SubtractEmailSet(emailsToSubtract, year)
 	}

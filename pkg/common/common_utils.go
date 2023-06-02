@@ -7,6 +7,16 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+func CopyMap[K constraints.Ordered, V any, M ~map[K]V](inMap M) map[K]V {
+	copyMap := make(map[K]V, len(inMap))
+
+	for key, value := range inMap {
+		copyMap[key] = value
+	}
+
+	return copyMap
+}
+
 func SortedMapKeys[K constraints.Ordered, V any, M ~map[K]V](inMap M) []K {
 	sortedKeys := make([]K, len(inMap))
 

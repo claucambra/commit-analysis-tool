@@ -83,10 +83,10 @@ func (report *DomainGroupsReport) updateDomainChanges(sqlb *db.SQLiteBackend) {
 			return
 		}
 
-		report.TotalYearlyAuthors.AddYearlyPeopleMap(yearlyAuthors)
+		report.TotalYearlyAuthors.AddYearlyEmailMap(yearlyAuthors)
 
 		if existingDomainYearAuthors, ok := report.DomainTotalYearlyAuthors[authorDomain]; ok {
-			existingDomainYearAuthors.AddYearlyPeopleMap(yearlyAuthors)
+			existingDomainYearAuthors.AddYearlyEmailMap(yearlyAuthors)
 			report.DomainTotalYearlyAuthors[authorDomain] = existingDomainYearAuthors
 		} else {
 			report.DomainTotalYearlyAuthors[authorDomain] = yearlyAuthors
@@ -146,7 +146,7 @@ func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (int, 
 		totalGroupYearlyLineChanges.AddYearlyLineChangeMap(reportYearlyChanges)
 
 		reportYearlyAuthors := report.DomainTotalYearlyAuthors[domain]
-		totalGroupYearlyAuthors.AddYearlyPeopleMap(reportYearlyAuthors)
+		totalGroupYearlyAuthors.AddYearlyEmailMap(reportYearlyAuthors)
 	}
 
 	return totalGroupAuthors, totalGroupLineChanges, totalGroupYearlyAuthors, totalGroupYearlyLineChanges
@@ -166,7 +166,7 @@ func (report *DomainGroupsReport) UnknownGroupData() *GroupData {
 		totalGroupAuthors += groupAuthors
 		totalGroupChanges = common.AddLineChanges(totalGroupChanges, groupLineChanges)
 		totalGroupYearlyLineChanges.AddYearlyLineChangeMap(yearlyGroupLineChanges)
-		totalGroupYearlyAuthors.AddYearlyPeopleMap(yearlyGroupAuthors)
+		totalGroupYearlyAuthors.AddYearlyEmailMap(yearlyGroupAuthors)
 	}
 
 	unknownGroupTotalAuthors := report.TotalAuthors - totalGroupAuthors
@@ -174,7 +174,7 @@ func (report *DomainGroupsReport) UnknownGroupData() *GroupData {
 	unknownGroupTotalYearlyLineChanges := report.TotalYearlyLineChanges
 	unknownGroupTotalYearlyLineChanges.SubtractYearlyLineChangeMap(totalGroupYearlyLineChanges)
 	unknownGroupTotalYearlyAuthors := report.TotalYearlyAuthors
-	unknownGroupTotalYearlyAuthors.SubtractYearlyPeopleMap(totalGroupYearlyAuthors)
+	unknownGroupTotalYearlyAuthors.SubtractYearlyEmailMap(totalGroupYearlyAuthors)
 
 	return NewGroupData(report, fallbackGroupName, unknownGroupTotalAuthors, unknownGroupTotalLineChanges, unknownGroupTotalYearlyLineChanges, unknownGroupTotalYearlyAuthors)
 }
