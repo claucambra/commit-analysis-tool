@@ -16,6 +16,7 @@ const testGroupName = "VideoLAN"
 const testGroupDomain = "videolan.org"
 const testGroupInsertions = 132
 const testGroupDeletions = 137
+const testCommitsYear = 2023
 
 var testCommitsFile = "../../../test/data/log.txt"
 
@@ -24,9 +25,34 @@ var testEmailGroups = map[string][]string{
 }
 
 var testGroupYearlyLineChanges = map[int]*common.LineChanges{
-	2023: {
+	testCommitsYear: {
 		NumInsertions: testGroupInsertions,
 		NumDeletions:  testGroupDeletions,
+	},
+}
+
+var testGroupYearlyAuthors = map[int][]*common.Person{
+	testCommitsYear: {
+		{
+			Name:  "Tristan Matthews",
+			Email: "tmatth@videolan.org",
+		},
+		{
+			Name:  "Simon Latapie",
+			Email: "garf@videolan.org",
+		},
+		{
+			Name:  "Jean-Baptiste Kempf",
+			Email: "jb@videolan.org",
+		},
+		{
+			Name:  "Ilkka Ollakka",
+			Email: "ileoo@videolan.org",
+		},
+		{
+			Name:  "David Fuhrmann",
+			Email: "dfuhrmann@videolan.org",
+		},
 	},
 }
 
@@ -55,6 +81,7 @@ func TestNewDomainGroupsReport(t *testing.T) {
 			NumDeletions:  testGroupDeletions,
 		},
 		YearlyLineChanges: testGroupYearlyLineChanges,
+		YearlyAuthors:     testGroupYearlyAuthors,
 		AuthorsPercent:    (float32(testNumGroupAuthors) / float32(testNumAuthors)) * 100,
 		InsertionsPercent: (float32(testGroupInsertions) / float32(testNumInsertions)) * 100,
 		DeletionsPercent:  (float32(testGroupDeletions) / float32(testNumDeletions)) * 100,
