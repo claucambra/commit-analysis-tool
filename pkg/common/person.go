@@ -1,59 +1,72 @@
 package common
 
-import (
-	"sort"
-)
-
 type Person struct {
 	Name  string
 	Email string
 }
 
-type YearlyPeopleMap map[int][]*Person
+type EmailSet map[string]bool
+type YearlyEmailMap map[int]EmailSet
 
-func (ypm *YearlyPeopleMap) CountArray(years []int) []int {
+func AddEmailSet(a EmailSet, b EmailSet) EmailSet {
+	newSet := a
+
+	for email := range b {
+		newSet[email] = true
+	}
+
+	return newSet
+}
+
+func SubtractEmailSet(a EmailSet, b EmailSet) EmailSet {
+	newSet := a
+
+	for email := range b {
+		delete(newSet, email)
+	}
+
+	return newSet
+}
+
+func (yem *YearlyEmailMap) CountArray(years []int) []int {
 	yearsToReturn := years
 
 	if yearsToReturn == nil {
-		yearsToReturn = SortedMapKeys(*ypm)
+		yearsToReturn = SortedMapKeys(*yem)
 	}
 
 	countArray := make([]int, len(yearsToReturn))
 
 	for i, year := range yearsToReturn {
-		countArray[i] = len((*ypm)[year])
+		countArray[i] = len((*yem)[year])
 	}
 
 	return countArray
 }
 
-func (ypm *YearlyPeopleMap) AddYearlyPeopleMap(ypmToAdd YearlyPeopleMap) {
-	for year, peopleToAdd := range ypmToAdd {
-		if existingPeople, ok := (*ypm)[year]; ok {
-			(*ypm)[year] = append(existingPeople, peopleToAdd...)
+func (yem *YearlyEmailMap) AddEmailSet(emailSetToAdd EmailSet, year int) {
+	AdditiveValueMapInsert[int, EmailSet, YearlyEmailMap](*yem, year, AddEmailSet, emailSetToAdd)
+}
+
+func (yem *YearlyEmailMap) SubtractEmailSet(emailSetToAdd EmailSet, year int) {
+	AdditiveValueMapInsert[int, EmailSet, YearlyEmailMap](*yem, year, AddEmailSet, emailSetToAdd)
+}
+
+func (yem *YearlyEmailMap) AddYearlyPeopleMap(yemToAdd YearlyEmailMap) {
+	for year, emailsToAdd := range yemToAdd {
+		if existingEmails, ok := (*yem)[year]; ok {
+			(*yem)[year] = AddEmailSet(existingEmails, emailsToAdd)
 		} else {
-			(*ypm)[year] = peopleToAdd
+			(*yem)[year] = emailsToAdd
 		}
 	}
 }
 
-func (ypm *YearlyPeopleMap) SubtractYearlyPeopleMap(ypmToSubtract YearlyPeopleMap) {
-	for year, peopleToSubtract := range ypmToSubtract {
-		if existingPeople, ok := (*ypm)[year]; ok {
-			subtractedPeople := existingPeople
-
-			for _, personToSubtract := range peopleToSubtract {
-				personIdx := sort.Search(len(subtractedPeople), func(i int) bool {
-					return subtractedPeople[i].Email == personToSubtract.Email
-				})
-
-				if personIdx < len(subtractedPeople) && subtractedPeople[personIdx].Email == personToSubtract.Email {
-					subtractedPeople[personIdx] = subtractedPeople[len(subtractedPeople)-1]
-					subtractedPeople = subtractedPeople[:len(subtractedPeople)-1]
-				}
-			}
-
-			(*ypm)[year] = subtractedPeople
+func (yem *YearlyEmailMap) SubtractYearlyPeopleMap(yemToSubtract YearlyEmailMap) {
+	for year, emailsToSubtract := range yemToSubtract {
+		if existingEmails, ok := (*yem)[year]; ok {
+			subtractedEmails := SubtractEmailSet(existingEmails, emailsToSubtract)
+			(*yem)[year] = subtractedEmails
 		}
 	}
 }

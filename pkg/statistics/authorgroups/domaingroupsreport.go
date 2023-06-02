@@ -14,7 +14,7 @@ type DomainGroupsReport struct {
 	TotalAuthors           int
 	TotalCommits           int
 	TotalChanges           *common.LineChanges
-	TotalYearlyAuthors     common.YearlyPeopleMap
+	TotalYearlyAuthors     common.YearlyEmailMap
 	TotalYearlyLineChanges common.YearlyLineChangeMap
 
 	GroupsOfDomains map[string][]string
@@ -23,19 +23,19 @@ type DomainGroupsReport struct {
 	DomainTotalLineChanges  map[string]*common.LineChanges
 	DomainTotalNumDeletions map[string]int
 
-	DomainTotalYearlyAuthors     map[string]common.YearlyPeopleMap
+	DomainTotalYearlyAuthors     map[string]common.YearlyEmailMap
 	DomainTotalYearlyLineChanges map[string]common.YearlyLineChangeMap
 }
 
 func NewDomainGroupsReport(domainGroups map[string][]string) *DomainGroupsReport {
 	return &DomainGroupsReport{
 		TotalChanges:                 &common.LineChanges{},
-		TotalYearlyAuthors:           common.YearlyPeopleMap{},
+		TotalYearlyAuthors:           common.YearlyEmailMap{},
 		TotalYearlyLineChanges:       common.YearlyLineChangeMap{},
 		GroupsOfDomains:              domainGroups,
 		DomainTotalNumAuthors:        map[string]int{},
 		DomainTotalLineChanges:       map[string]*common.LineChanges{},
-		DomainTotalYearlyAuthors:     map[string]common.YearlyPeopleMap{},
+		DomainTotalYearlyAuthors:     map[string]common.YearlyEmailMap{},
 		DomainTotalYearlyLineChanges: map[string]common.YearlyLineChangeMap{},
 	}
 }
@@ -124,14 +124,14 @@ func (report *DomainGroupsReport) Generate(db *db.SQLiteBackend) {
 }
 
 // Returns authors, insertions, deletions
-func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (int, *common.LineChanges, common.YearlyPeopleMap, common.YearlyLineChangeMap) {
+func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (int, *common.LineChanges, common.YearlyEmailMap, common.YearlyLineChangeMap) {
 	totalGroupAuthors := 0
 	totalGroupLineChanges := &common.LineChanges{
 		NumInsertions: 0,
 		NumDeletions:  0,
 	}
 	totalGroupYearlyLineChanges := make(common.YearlyLineChangeMap, 0)
-	totalGroupYearlyAuthors := make(common.YearlyPeopleMap, 0)
+	totalGroupYearlyAuthors := make(common.YearlyEmailMap, 0)
 
 	for _, domain := range report.GroupsOfDomains[groupName] {
 		reportChanges, ok := report.DomainTotalLineChanges[domain]
@@ -159,7 +159,7 @@ func (report *DomainGroupsReport) UnknownGroupData() *GroupData {
 		NumDeletions:  0,
 	}
 	totalGroupYearlyLineChanges := make(common.YearlyLineChangeMap, 0)
-	totalGroupYearlyAuthors := make(common.YearlyPeopleMap, 0)
+	totalGroupYearlyAuthors := make(common.YearlyEmailMap, 0)
 
 	for groupName := range report.GroupsOfDomains {
 		groupAuthors, groupLineChanges, yearlyGroupAuthors, yearlyGroupLineChanges := report.accumulateGroupCounts(groupName)

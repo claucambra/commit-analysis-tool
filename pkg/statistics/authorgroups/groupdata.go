@@ -11,14 +11,14 @@ type GroupData struct {
 	NumAuthors        int
 	NumLineChanges    *common.LineChanges
 	YearlyLineChanges common.YearlyLineChangeMap
-	YearlyAuthors     common.YearlyPeopleMap
+	YearlyAuthors     common.YearlyEmailMap
 
 	AuthorsPercent    float32
 	InsertionsPercent float32
 	DeletionsPercent  float32
 }
 
-func NewGroupData(report *DomainGroupsReport, groupName string, groupAuthors int, groupLineChanges *common.LineChanges, groupYearlyLineChanges common.YearlyLineChangeMap, groupYearlyAuthors common.YearlyPeopleMap) *GroupData {
+func NewGroupData(report *DomainGroupsReport, groupName string, groupAuthors int, groupLineChanges *common.LineChanges, groupYearlyLineChanges common.YearlyLineChangeMap, groupYearlyAuthors common.YearlyEmailMap) *GroupData {
 	groupData := new(GroupData)
 	groupData.GroupName = groupName
 	groupData.NumAuthors = groupAuthors

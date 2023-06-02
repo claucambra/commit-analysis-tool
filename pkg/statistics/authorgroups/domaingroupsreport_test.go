@@ -24,35 +24,20 @@ var testEmailGroups = map[string][]string{
 	testGroupName: {testGroupDomain},
 }
 
-var testGroupYearlyLineChanges = map[int]*common.LineChanges{
+var testGroupYearlyLineChanges = common.YearlyLineChangeMap{
 	testCommitsYear: {
 		NumInsertions: testGroupInsertions,
 		NumDeletions:  testGroupDeletions,
 	},
 }
 
-var testGroupYearlyAuthors = map[int][]*common.Person{
+var testGroupYearlyAuthors = common.YearlyEmailMap{
 	testCommitsYear: {
-		{
-			Name:  "Tristan Matthews",
-			Email: "tmatth@videolan.org",
-		},
-		{
-			Name:  "Simon Latapie",
-			Email: "garf@videolan.org",
-		},
-		{
-			Name:  "Jean-Baptiste Kempf",
-			Email: "jb@videolan.org",
-		},
-		{
-			Name:  "Ilkka Ollakka",
-			Email: "ileoo@videolan.org",
-		},
-		{
-			Name:  "David Fuhrmann",
-			Email: "dfuhrmann@videolan.org",
-		},
+		"tmatth@videolan.org":    true,
+		"garf@videolan.org":      true,
+		"jb@videolan.org":        true,
+		"ileoo@videolan.org":     true,
+		"dfuhrmann@videolan.org": true,
 	},
 }
 

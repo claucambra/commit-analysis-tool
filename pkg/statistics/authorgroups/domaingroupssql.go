@@ -92,15 +92,14 @@ func domainYearlyLineChanges(sqlb *db.SQLiteBackend, domain string) (common.Year
 	return yearBuckets, nil
 }
 
-func domainYearlyAuthors(sqlb *db.SQLiteBackend, domain string) (common.YearlyPeopleMap, error) {
+func domainYearlyAuthors(sqlb *db.SQLiteBackend, domain string) (common.YearlyEmailMap, error) {
 	rows, err := domainChangeRows(sqlb, domain)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
 		return nil, err
 	}
 
-	insertedPeople := make(map[int]map[string]bool, 0)
-	yearBuckets := common.YearlyPeopleMap{}
+	yearBuckets := common.YearlyEmailMap{}
 
 	for rows.Next() {
 		commit := new(common.Commit)
@@ -121,18 +120,8 @@ func domainYearlyAuthors(sqlb *db.SQLiteBackend, domain string) (common.YearlyPe
 
 		authorEmail := commit.Author.Email
 		commitYear := time.Unix(commit.AuthorTime, 0).Year()
-		insertedPeopleInYear := insertedPeople[commitYear]
-		personNotAlreadyAddedInYear := insertedPeopleInYear == nil || !insertedPeopleInYear[authorEmail]
 
-		if insertedPeopleInYear == nil {
-			insertedPeople[commitYear] = map[string]bool{authorEmail: true}
-		} else if !insertedPeopleInYear[authorEmail] {
-			insertedPeople[commitYear][authorEmail] = true
-		}
-
-		if personNotAlreadyAddedInYear {
-			yearBuckets[commitYear] = append(yearBuckets[commitYear], &(commit.Author))
-		}
+		common.AdditiveValueMapInsert[int, common.EmailSet, common.YearlyEmailMap](yearBuckets, commitYear, common.AddEmailSet, common.EmailSet{authorEmail: true})
 	}
 
 	return yearBuckets, nil
