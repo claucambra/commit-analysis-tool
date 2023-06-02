@@ -2,6 +2,8 @@ package common
 
 import (
 	"math/rand"
+	"reflect"
+	"testing"
 )
 
 const generateTestEmailCount = 10
@@ -43,4 +45,21 @@ func generateRandomEmailSets() (EmailSet, EmailSet) {
 	}
 
 	return emailSetA, emailSetB
+}
+
+// EmailSet
+func TestAddEmailSet(t *testing.T) {
+	emailSetA, emailSetB := generateRandomEmailSets()
+	summedEmailSets := AddEmailSet(emailSetA, emailSetB)
+	testEmailSet := emailSetA
+
+	for email := range emailSetB {
+		testEmailSet[email] = true
+	}
+
+	if !reflect.DeepEqual(testEmailSet, summedEmailSets) {
+		t.Fatalf(`Added email sets do not match expected email set: 
+			Expected %+v
+			Received %+v`, testEmailSet, summedEmailSets)
+	}
 }
