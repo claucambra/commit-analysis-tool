@@ -30,18 +30,15 @@ func TestDomainChanges(t *testing.T) {
 
 	dbtesting.IngestTestCommits(sqlb, t)
 
-	retrievedDomainChanges, err := domainChanges(sqlb, testDomain)
+	retrievedDomainChanges, err := domainLineChanges(sqlb, testDomain)
 	if err != nil {
 		t.Fatalf("Error retrieving domain's changes from database")
 	}
 
 	parsedCommitLog := dbtesting.ParsedTestCommitLog(t)
-	testDomainChanges := &common.Changes{
-		LineChanges: common.LineChanges{
-			NumInsertions: 0,
-			NumDeletions:  0,
-		},
-		NumFilesChanged: 0,
+	testDomainLineChanges := &common.LineChanges{
+		NumInsertions: 0,
+		NumDeletions:  0,
 	}
 
 	for _, commit := range parsedCommitLog {
@@ -49,15 +46,14 @@ func TestDomainChanges(t *testing.T) {
 			continue
 		}
 
-		testDomainChanges.NumInsertions += commit.NumInsertions
-		testDomainChanges.NumDeletions += commit.NumDeletions
-		testDomainChanges.NumFilesChanged += commit.NumFilesChanged
+		testDomainLineChanges.NumInsertions += commit.NumInsertions
+		testDomainLineChanges.NumDeletions += commit.NumDeletions
 	}
 
-	if !reflect.DeepEqual(retrievedDomainChanges, testDomainChanges) {
+	if !reflect.DeepEqual(retrievedDomainChanges, testDomainLineChanges) {
 		t.Fatalf(`Database domain changes do not equal expected domain changes.
 			Expected: %+v
-			Received: %+v`, testDomainChanges, retrievedDomainChanges)
+			Received: %+v`, testDomainLineChanges, retrievedDomainChanges)
 	}
 }
 
@@ -68,13 +64,13 @@ func TestDomainYearlyChanges(t *testing.T) {
 
 	dbtesting.IngestTestCommits(sqlb, t)
 
-	retrievedDomainYearlyChanges, err := domainYearlyChanges(sqlb, testDomain)
+	retrievedDomainYearlyLineChanges, err := domainYearlyLineChanges(sqlb, testDomain)
 	if err != nil {
 		t.Fatalf("Error retrieving domain's yearly changes from database")
 	}
 
 	parsedCommitLog := dbtesting.ParsedTestCommitLog(t)
-	testDomainYearlyChanges := make(common.YearlyChangeMap, 0)
+	testDomainYearlyLineChanges := make(common.YearlyLineChangeMap, 0)
 
 	for _, commit := range parsedCommitLog {
 		if !emailHasDomain(commit.Author.Email, testDomain) {
@@ -82,11 +78,11 @@ func TestDomainYearlyChanges(t *testing.T) {
 		}
 
 		commitYear := time.Unix(commit.AuthorTime, 0).Year()
-		testDomainYearlyChanges.AddChanges(&(commit.Changes), commitYear)
+		testDomainYearlyLineChanges.AddLineChanges(&(commit.LineChanges), commitYear)
 	}
 
-	numTestYears := len(testDomainYearlyChanges)
-	numRetrievedYears := len(retrievedDomainYearlyChanges)
+	numTestYears := len(testDomainYearlyLineChanges)
+	numRetrievedYears := len(retrievedDomainYearlyLineChanges)
 
 	if numRetrievedYears != numTestYears {
 		t.Fatalf(`Number of retrieved domain change years do not equal expected domain change years.
@@ -94,18 +90,18 @@ func TestDomainYearlyChanges(t *testing.T) {
 			Received: %+v`, numTestYears, numRetrievedYears)
 	}
 
-	for year, testChanges := range testDomainYearlyChanges {
-		retrievedChanges, ok := retrievedDomainYearlyChanges[year]
+	for year, testLineChanges := range testDomainYearlyLineChanges {
+		retrievedChanges, ok := retrievedDomainYearlyLineChanges[year]
 
 		if !ok {
 			t.Fatalf(`Retrieved yearly changes does not contain the year %+v`, year)
 		}
 
-		if !reflect.DeepEqual(retrievedChanges, testChanges) {
+		if !reflect.DeepEqual(retrievedChanges, testLineChanges) {
 			t.Fatalf(`Database domain changes do not equal expected domain changes.
 				Expected: %+v
 				Received: %+v
-				Error occurred when testing results for year %+v`, testChanges, retrievedChanges, year)
+				Error occurred when testing results for year %+v`, testLineChanges, retrievedChanges, year)
 		}
 	}
 }

@@ -21,7 +21,7 @@ func domainChangeRows(sqlb *db.SQLiteBackend, domain string) (*sql.Rows, error) 
 	return accStmt.Query(domain)
 }
 
-func domainChanges(sqlb *db.SQLiteBackend, domain string) (*common.Changes, error) {
+func domainLineChanges(sqlb *db.SQLiteBackend, domain string) (*common.LineChanges, error) {
 	rows, err := domainChangeRows(sqlb, domain)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
@@ -53,23 +53,20 @@ func domainChanges(sqlb *db.SQLiteBackend, domain string) (*common.Changes, erro
 		numFilesChanged += commit.NumFilesChanged
 	}
 
-	return &common.Changes{
-		LineChanges: common.LineChanges{
-			NumInsertions: numInsertions,
-			NumDeletions:  numDeletions,
-		},
-		NumFilesChanged: numFilesChanged,
+	return &common.LineChanges{
+		NumInsertions: numInsertions,
+		NumDeletions:  numDeletions,
 	}, nil
 }
 
-func domainYearlyChanges(sqlb *db.SQLiteBackend, domain string) (common.YearlyChangeMap, error) {
+func domainYearlyLineChanges(sqlb *db.SQLiteBackend, domain string) (common.YearlyLineChangeMap, error) {
 	rows, err := domainChangeRows(sqlb, domain)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
 		return nil, err
 	}
 
-	yearBuckets := common.YearlyChangeMap{}
+	yearBuckets := common.YearlyLineChangeMap{}
 
 	for rows.Next() {
 		commit := new(common.Commit)
@@ -89,7 +86,7 @@ func domainYearlyChanges(sqlb *db.SQLiteBackend, domain string) (common.YearlyCh
 		)
 
 		commitYear := time.Unix(commit.AuthorTime, 0).Year()
-		yearBuckets.AddChanges(&(commit.Changes), commitYear)
+		yearBuckets.AddLineChanges(&(commit.LineChanges), commitYear)
 	}
 
 	return yearBuckets, nil

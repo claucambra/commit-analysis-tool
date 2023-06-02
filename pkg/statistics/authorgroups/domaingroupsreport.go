@@ -50,26 +50,25 @@ func (report *DomainGroupsReport) resetStats() {
 
 func (report *DomainGroupsReport) updateDomainChanges(sqlb *db.SQLiteBackend) {
 	for authorDomain := range report.DomainTotalNumAuthors {
-		changes, err := domainChanges(sqlb, authorDomain)
+		lineChanges, err := domainLineChanges(sqlb, authorDomain)
 		if err != nil {
 			return
 		}
 
-		report.TotalChanges = common.AddLineChanges(report.TotalChanges, &changes.LineChanges)
+		report.TotalChanges = common.AddLineChanges(report.TotalChanges, lineChanges)
 
 		if existingDomainLineChanges, ok := report.DomainTotalLineChanges[authorDomain]; ok {
-			summedDomainLineChanges := common.AddLineChanges(existingDomainLineChanges, &changes.LineChanges)
+			summedDomainLineChanges := common.AddLineChanges(existingDomainLineChanges, lineChanges)
 			report.DomainTotalLineChanges[authorDomain] = summedDomainLineChanges
 		} else {
-			report.DomainTotalLineChanges[authorDomain] = &changes.LineChanges
+			report.DomainTotalLineChanges[authorDomain] = lineChanges
 		}
 
-		yearlyChanges, err := domainYearlyChanges(sqlb, authorDomain)
+		yearlyLineChanges, err := domainYearlyLineChanges(sqlb, authorDomain)
 		if err != nil {
 			return
 		}
 
-		yearlyLineChanges := yearlyChanges.LineChanges()
 		report.TotalYearlyLineChanges.AddYearlyLineChangeMap(yearlyLineChanges)
 
 		if existingDomainYearLineChanges, ok := report.DomainTotalYearlyLineChanges[authorDomain]; ok {
