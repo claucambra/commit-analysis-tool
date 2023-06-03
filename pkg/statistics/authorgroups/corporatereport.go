@@ -1,6 +1,8 @@
 package authorgroups
 
-import "github.com/claucambra/commit-analysis-tool/internal/db"
+import (
+	"github.com/claucambra/commit-analysis-tool/internal/db"
+)
 
 type CorporateReport struct {
 	CorporateGroup *GroupData
@@ -11,7 +13,9 @@ type CorporateReport struct {
 	DeletionsCorrel  float64
 	AuthorsCorrel    float64
 
-	domainGroupsReport *DomainGroupsReport
+	DomainGroupsReport           *DomainGroupsReport
+	CorporateGroupSurvivalReport *GroupSurvivalReport
+	CommunityGroupSurvivalReport *GroupSurvivalReport
 }
 
 func NewCorporateReport(groupsOfDomains map[string][]string, sqlb *db.SQLiteBackend, corporateGroupName string) *CorporateReport {
@@ -27,6 +31,12 @@ func NewCorporateReport(groupsOfDomains map[string][]string, sqlb *db.SQLiteBack
 
 	insertionsCorrel, deletionsCorrel, authorsCorrel := corpGroup.Correlation(commGroup)
 
+	corpGroupSurvival := NewGroupSurvivalReport(sqlb, corpGroup.Authors)
+	corpGroupSurvival.Generate()
+
+	commGroupSurvival := NewGroupSurvivalReport(sqlb, commGroup.Authors)
+	commGroupSurvival.Generate()
+
 	return &CorporateReport{
 		CorporateGroup: corpGroup,
 		CommunityGroup: commGroup,
@@ -35,6 +45,8 @@ func NewCorporateReport(groupsOfDomains map[string][]string, sqlb *db.SQLiteBack
 		DeletionsCorrel:  deletionsCorrel,
 		AuthorsCorrel:    authorsCorrel,
 
-		domainGroupsReport: domainGroupsReport,
+		DomainGroupsReport:           domainGroupsReport,
+		CorporateGroupSurvivalReport: corpGroupSurvival,
+		CommunityGroupSurvivalReport: commGroupSurvival,
 	}
 }
