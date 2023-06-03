@@ -51,8 +51,8 @@ func TestDomainGroupsReportGroupData(t *testing.T) {
 
 	dbtesting.IngestTestCommits(sqlb, t)
 
-	report := NewDomainGroupsReport(testEmailGroups)
-	report.Generate(sqlb)
+	report := NewDomainGroupsReport(testEmailGroups, sqlb)
+	report.Generate()
 
 	testGroupData := &GroupData{
 		GroupName: testGroupName,

@@ -5,6 +5,9 @@ import (
 )
 
 type CorporateReport struct {
+	CorporateGroupName string
+	GroupsOfDomains    map[string][]string
+
 	CorporateGroup *GroupData
 	CommunityGroup *GroupData
 
@@ -16,6 +19,8 @@ type CorporateReport struct {
 	DomainGroupsReport           *DomainGroupsReport
 	CorporateGroupSurvivalReport *GroupSurvivalReport
 	CommunityGroupSurvivalReport *GroupSurvivalReport
+
+	sqlb *db.SQLiteBackend
 }
 
 func NewCorporateReport(groupsOfDomains map[string][]string, sqlb *db.SQLiteBackend, corporateGroupName string) *CorporateReport {
@@ -23,30 +28,33 @@ func NewCorporateReport(groupsOfDomains map[string][]string, sqlb *db.SQLiteBack
 		corporateGroupName = "Corporate"
 	}
 
-	domainGroupsReport := NewDomainGroupsReport(groupsOfDomains)
-	domainGroupsReport.Generate(sqlb)
+	return &CorporateReport{
+		CorporateGroupName: corporateGroupName,
+		GroupsOfDomains:    groupsOfDomains,
+		sqlb:               sqlb,
+	}
+}
 
-	corpGroup := domainGroupsReport.GroupData(corporateGroupName)
+func (corpReport *CorporateReport) Generate() {
+	domainGroupsReport := NewDomainGroupsReport(corpReport.GroupsOfDomains, corpReport.sqlb)
+	domainGroupsReport.Generate()
+
+	corpGroup := domainGroupsReport.GroupData(corpReport.CorporateGroupName)
 	commGroup := domainGroupsReport.UnknownGroupData()
 
 	insertionsCorrel, deletionsCorrel, authorsCorrel := corpGroup.Correlation(commGroup)
 
-	corpGroupSurvival := NewGroupSurvivalReport(sqlb, corpGroup.Authors)
+	corpGroupSurvival := NewGroupSurvivalReport(corpReport.sqlb, corpGroup.Authors)
 	corpGroupSurvival.Generate()
 
-	commGroupSurvival := NewGroupSurvivalReport(sqlb, commGroup.Authors)
+	commGroupSurvival := NewGroupSurvivalReport(corpReport.sqlb, commGroup.Authors)
 	commGroupSurvival.Generate()
 
-	return &CorporateReport{
-		CorporateGroup: corpGroup,
-		CommunityGroup: commGroup,
-
-		InsertionsCorrel: insertionsCorrel,
-		DeletionsCorrel:  deletionsCorrel,
-		AuthorsCorrel:    authorsCorrel,
-
-		DomainGroupsReport:           domainGroupsReport,
-		CorporateGroupSurvivalReport: corpGroupSurvival,
-		CommunityGroupSurvivalReport: commGroupSurvival,
-	}
+	corpReport.CorporateGroup = corpGroup
+	corpReport.CommunityGroup = commGroup
+	corpReport.InsertionsCorrel = insertionsCorrel
+	corpReport.DeletionsCorrel = deletionsCorrel
+	corpReport.AuthorsCorrel = authorsCorrel
+	corpReport.CorporateGroupSurvivalReport = corpGroupSurvival
+	corpReport.CommunityGroupSurvivalReport = commGroupSurvival
 }

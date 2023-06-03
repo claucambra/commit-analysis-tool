@@ -15,7 +15,8 @@ type GroupSurvivalReport struct {
 	Authors         common.EmailSet
 	AuthorsInYear   statistics.TimeStepPopulation
 	AuthorsSurvival statistics.TimeStepSurvival
-	sqlb            *db.SQLiteBackend
+
+	sqlb *db.SQLiteBackend
 }
 
 func NewGroupSurvivalReport(sqlb *db.SQLiteBackend, yearlyAuthors common.EmailSet) *GroupSurvivalReport {

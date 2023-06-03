@@ -92,14 +92,9 @@ func printDomainGroups(readDbPath string, domainGroupsFilePath string) {
 		os.Exit(0)
 	}
 
-	report := authorgroups.NewDomainGroupsReport(groups)
-	report.Generate(sqlb)
-
-	for groupName, _ := range groups {
-		fmt.Printf("%+v\n", report.GroupData(groupName))
-	}
-
-	fmt.Printf("%+v\n", report.GroupData("")) // Print "unknown/other" group
+	corpReport := authorgroups.NewCorporateReport(groups, sqlb, "Corporate")
+	corpReport.Generate()
+	fmt.Printf("%+v", corpReport)
 
 	sqlb.Close()
 	os.Exit(0)

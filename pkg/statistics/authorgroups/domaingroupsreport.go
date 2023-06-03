@@ -26,9 +26,11 @@ type DomainGroupsReport struct {
 
 	DomainTotalYearlyAuthors     map[string]common.YearlyEmailMap
 	DomainTotalYearlyLineChanges map[string]common.YearlyLineChangeMap
+
+	sqlb *db.SQLiteBackend
 }
 
-func NewDomainGroupsReport(domainGroups map[string][]string) *DomainGroupsReport {
+func NewDomainGroupsReport(domainGroups map[string][]string, sqlb *db.SQLiteBackend) *DomainGroupsReport {
 	return &DomainGroupsReport{
 		TotalAuthors:                 common.EmailSet{},
 		TotalChanges:                 &common.LineChanges{},
@@ -39,6 +41,7 @@ func NewDomainGroupsReport(domainGroups map[string][]string) *DomainGroupsReport
 		DomainTotalLineChanges:       map[string]*common.LineChanges{},
 		DomainTotalYearlyAuthors:     map[string]common.YearlyEmailMap{},
 		DomainTotalYearlyLineChanges: map[string]common.YearlyLineChangeMap{},
+		sqlb:                         sqlb,
 	}
 }
 
@@ -51,9 +54,9 @@ func (report *DomainGroupsReport) resetStats() {
 	report.DomainTotalYearlyLineChanges = map[string]common.YearlyLineChangeMap{}
 }
 
-func (report *DomainGroupsReport) updateDomainChanges(sqlb *db.SQLiteBackend) {
+func (report *DomainGroupsReport) updateDomainChanges() {
 	for authorDomain := range report.DomainTotalAuthors {
-		lineChanges, err := domainLineChanges(sqlb, authorDomain)
+		lineChanges, err := domainLineChanges(report.sqlb, authorDomain)
 		if err != nil {
 			return
 		}
@@ -67,7 +70,7 @@ func (report *DomainGroupsReport) updateDomainChanges(sqlb *db.SQLiteBackend) {
 			report.DomainTotalLineChanges[authorDomain] = lineChanges
 		}
 
-		yearlyLineChanges, err := domainYearlyLineChanges(sqlb, authorDomain)
+		yearlyLineChanges, err := domainYearlyLineChanges(report.sqlb, authorDomain)
 		if err != nil {
 			return
 		}
@@ -81,7 +84,7 @@ func (report *DomainGroupsReport) updateDomainChanges(sqlb *db.SQLiteBackend) {
 			report.DomainTotalYearlyLineChanges[authorDomain] = yearlyLineChanges
 		}
 
-		yearlyAuthors, err := domainYearlyAuthors(sqlb, authorDomain)
+		yearlyAuthors, err := domainYearlyAuthors(report.sqlb, authorDomain)
 		if err != nil {
 			return
 		}
@@ -97,7 +100,7 @@ func (report *DomainGroupsReport) updateDomainChanges(sqlb *db.SQLiteBackend) {
 	}
 }
 
-func (report *DomainGroupsReport) updateAuthors(authors []string, db *db.SQLiteBackend) {
+func (report *DomainGroupsReport) updateAuthors(authors []string) {
 	for _, author := range authors {
 		if author == "" {
 			continue
@@ -116,15 +119,15 @@ func (report *DomainGroupsReport) updateAuthors(authors []string, db *db.SQLiteB
 	}
 }
 
-func (report *DomainGroupsReport) Generate(db *db.SQLiteBackend) {
-	authors, err := db.Authors()
+func (report *DomainGroupsReport) Generate() {
+	authors, err := report.sqlb.Authors()
 	if err != nil {
 		return
 	}
 
 	report.resetStats()
-	report.updateAuthors(authors, db)
-	report.updateDomainChanges(db)
+	report.updateAuthors(authors)
+	report.updateDomainChanges()
 }
 
 // Returns authors, insertions, deletions
