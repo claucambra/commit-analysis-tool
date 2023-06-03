@@ -5,11 +5,12 @@ import (
 	"gonum.org/v1/gonum/stat"
 )
 
+// Data for an entire group
 type GroupData struct {
 	GroupName string
 
-	NumAuthors        int
-	NumLineChanges    *common.LineChanges
+	Authors           common.EmailSet
+	LineChanges       *common.LineChanges
 	YearlyLineChanges common.YearlyLineChangeMap
 	YearlyAuthors     common.YearlyEmailMap
 
@@ -18,14 +19,20 @@ type GroupData struct {
 	DeletionsPercent  float32
 }
 
-func NewGroupData(report *DomainGroupsReport, groupName string, groupAuthors int, groupLineChanges *common.LineChanges, groupYearlyLineChanges common.YearlyLineChangeMap, groupYearlyAuthors common.YearlyEmailMap) *GroupData {
+func NewGroupData(report *DomainGroupsReport,
+	groupName string,
+	groupAuthors common.EmailSet,
+	groupLineChanges *common.LineChanges,
+	groupYearlyLineChanges common.YearlyLineChangeMap,
+	groupYearlyAuthors common.YearlyEmailMap) *GroupData {
+
 	groupData := new(GroupData)
 	groupData.GroupName = groupName
-	groupData.NumAuthors = groupAuthors
-	groupData.NumLineChanges = groupLineChanges
+	groupData.Authors = groupAuthors
+	groupData.LineChanges = groupLineChanges
 	groupData.YearlyLineChanges = groupYearlyLineChanges
 	groupData.YearlyAuthors = groupYearlyAuthors
-	groupData.AuthorsPercent = (float32(groupAuthors) / float32(report.TotalAuthors)) * 100
+	groupData.AuthorsPercent = (float32(len(groupAuthors)) / float32(len(report.TotalAuthors))) * 100
 	groupData.InsertionsPercent = (float32(groupLineChanges.NumInsertions) / float32(report.TotalChanges.NumInsertions)) * 100
 	groupData.DeletionsPercent = (float32(groupLineChanges.NumDeletions) / float32(report.TotalChanges.NumDeletions)) * 100
 

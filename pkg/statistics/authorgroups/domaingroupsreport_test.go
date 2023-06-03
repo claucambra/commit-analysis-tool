@@ -24,6 +24,14 @@ var testEmailGroups = map[string][]string{
 	testGroupName: {testGroupDomain},
 }
 
+var testGroupAuthors = common.EmailSet{
+	"tmatth@videolan.org":    true,
+	"garf@videolan.org":      true,
+	"jb@videolan.org":        true,
+	"ileoo@videolan.org":     true,
+	"dfuhrmann@videolan.org": true,
+}
+
 var testGroupYearlyLineChanges = common.YearlyLineChangeMap{
 	testCommitsYear: {
 		NumInsertions: testGroupInsertions,
@@ -32,16 +40,10 @@ var testGroupYearlyLineChanges = common.YearlyLineChangeMap{
 }
 
 var testGroupYearlyAuthors = common.YearlyEmailMap{
-	testCommitsYear: {
-		"tmatth@videolan.org":    true,
-		"garf@videolan.org":      true,
-		"jb@videolan.org":        true,
-		"ileoo@videolan.org":     true,
-		"dfuhrmann@videolan.org": true,
-	},
+	testCommitsYear: testGroupAuthors,
 }
 
-func TestNewDomainGroupsReport(t *testing.T) {
+func TestDomainGroupsReportGroupData(t *testing.T) {
 	dbtesting.TestLogFilePath = testCommitsFile
 	sqlb := dbtesting.InitTestDB(t)
 	cleanup := func() { dbtesting.CleanupTestDB(sqlb) }
@@ -52,16 +54,10 @@ func TestNewDomainGroupsReport(t *testing.T) {
 	report := NewDomainGroupsReport(testEmailGroups)
 	report.Generate(sqlb)
 
-	if authorCount := report.TotalAuthors; authorCount != testNumAuthors {
-		t.Fatalf("Unexpected number of authors: received %d, expected %d", authorCount, testNumAuthors)
-	} else if numGroupAuthors := report.DomainTotalNumAuthors[testGroupDomain]; numGroupAuthors != testNumGroupAuthors {
-		t.Fatalf("Unexpected number of domain authors: received %d, expected %d", numGroupAuthors, testNumGroupAuthors)
-	}
-
 	testGroupData := &GroupData{
-		GroupName:  testGroupName,
-		NumAuthors: testNumGroupAuthors,
-		NumLineChanges: &common.LineChanges{
+		GroupName: testGroupName,
+		Authors:   testGroupAuthors,
+		LineChanges: &common.LineChanges{
 			NumInsertions: testGroupInsertions,
 			NumDeletions:  testGroupDeletions,
 		},
@@ -78,5 +74,4 @@ func TestNewDomainGroupsReport(t *testing.T) {
 			Expected %+v
 			Received %+v`, testGroupData, groupData)
 	}
-
 }
