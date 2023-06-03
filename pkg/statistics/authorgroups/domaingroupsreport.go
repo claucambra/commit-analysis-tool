@@ -1,6 +1,7 @@
 package authorgroups
 
 import (
+	"regexp"
 	"strings"
 
 	"github.com/claucambra/commit-analysis-tool/internal/db"
@@ -136,7 +137,21 @@ func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (commo
 	totalGroupYearlyLineChanges := make(common.YearlyLineChangeMap, 0)
 	totalGroupYearlyAuthors := make(common.YearlyEmailMap, 0)
 
-	for _, domain := range report.GroupsOfDomains[groupName] {
+	// Slice of input group of domains string that matches actual domains extracted from emails
+	matchingDomains := []string{}
+
+	// Find all domains that match domains in group, treat domains in group as potential regexes
+	for _, groupDomainString := range report.GroupsOfDomains[groupName] {
+		groupDomainStringRegex := regexp.MustCompile(groupDomainString)
+
+		for domain := range report.DomainTotalAuthors {
+			if groupDomainStringRegex.MatchString(domain) {
+				matchingDomains = append(matchingDomains, domain)
+			}
+		}
+	}
+
+	for _, domain := range matchingDomains {
 		reportChanges, ok := report.DomainTotalLineChanges[domain]
 		if !ok {
 			continue
