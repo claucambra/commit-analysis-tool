@@ -126,3 +126,20 @@ func domainYearlyAuthors(sqlb *db.SQLiteBackend, domain string) (common.YearlyEm
 
 	return yearBuckets, nil
 }
+
+// The years in which an author has contributed
+func authorYears(sqlb *db.SQLiteBackend, authorEmail string) ([]int, error) {
+	authorCommits, err := sqlb.AuthorCommits(authorEmail)
+	if err != nil {
+		log.Fatalf("Error retrieving rows: %s", err)
+		return nil, err
+	}
+
+	yearsMap := map[int]bool{}
+	for _, commit := range authorCommits {
+		commitYear := time.Unix(commit.AuthorTime, 0).Year()
+		yearsMap[commitYear] = true
+	}
+
+	return common.SortedMapKeys(yearsMap), nil
+}
