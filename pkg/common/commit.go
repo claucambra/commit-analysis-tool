@@ -9,6 +9,8 @@ type Commit struct {
 	AuthorTime    int64
 	Committer     Person
 	CommitterTime int64
+	Subject       string
+	Body          string
 }
 
 // Similar to RFC1123Z but without trailing zero on day

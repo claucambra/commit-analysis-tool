@@ -46,6 +46,8 @@ func domainLineChanges(sqlb *db.SQLiteBackend, domain string) (*common.LineChang
 			&commit.NumInsertions,
 			&commit.NumDeletions,
 			&commit.NumFilesChanged,
+			&commit.Subject,
+			&commit.Body,
 		)
 
 		numInsertions += commit.NumInsertions
@@ -83,6 +85,8 @@ func domainYearlyLineChanges(sqlb *db.SQLiteBackend, domain string) (common.Year
 			&commit.NumInsertions,
 			&commit.NumDeletions,
 			&commit.NumFilesChanged,
+			&commit.Subject,
+			&commit.Body,
 		)
 
 		commitYear := time.Unix(commit.AuthorTime, 0).Year()
@@ -116,6 +120,8 @@ func domainYearlyAuthors(sqlb *db.SQLiteBackend, domain string) (common.YearlyEm
 			&commit.NumInsertions,
 			&commit.NumDeletions,
 			&commit.NumFilesChanged,
+			&commit.Subject,
+			&commit.Body,
 		)
 
 		authorEmail := commit.Author.Email

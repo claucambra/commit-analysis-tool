@@ -49,14 +49,21 @@ func (sqlb *SQLiteBackend) Setup() error {
 			committer_time INT,
 			num_insertions INT,
 			num_deletions INT,
-			num_files_changed INT);
+			num_files_changed INT,
+			subject TEXT,
+			body TEXT);
 		CREATE INDEX IF NOT EXISTS index_repo_name ON commits (repo_name);
 		CREATE INDEX IF NOT EXISTS index_author_name ON commits (author_name);
 		CREATE INDEX IF NOT EXISTS index_author_email ON commits (author_email);
 		CREATE INDEX IF NOT EXISTS index_author_time ON commits (author_time);
 		CREATE INDEX IF NOT EXISTS index_committer_name ON commits (committer_name);
 		CREATE INDEX IF NOT EXISTS index_committer_email ON commits (committer_email);
-		CREATE INDEX IF NOT EXISTS index_committer_time ON commits (committer_time);`
+		CREATE INDEX IF NOT EXISTS index_committer_time ON commits (committer_time);
+		CREATE INDEX IF NOT EXISTS index_num_insertions ON commits (num_insertions);
+		CREATE INDEX IF NOT EXISTS index_num_deletions ON commits (num_deletions);
+		CREATE INDEX IF NOT EXISTS index_num_files_changed ON commits (num_files_changed);
+		CREATE INDEX IF NOT EXISTS index_subject ON commits (subject);
+		CREATE INDEX IF NOT EXISTS index_body ON commits (body);`
 
 	_, err := sqlb.Db.Exec(stmt)
 	if err != nil {
@@ -79,8 +86,10 @@ func (sqlb *SQLiteBackend) AddCommit(commit *common.Commit) error {
 			committer_time,
 			num_insertions,
 			num_deletions,
-			num_files_changed
-		) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)`
+			num_files_changed,
+			subject,
+			body
+		) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)`
 
 	_, err := sqlb.Db.Exec(stmt,
 		commit.Id,
@@ -93,7 +102,9 @@ func (sqlb *SQLiteBackend) AddCommit(commit *common.Commit) error {
 		commit.CommitterTime,
 		commit.NumInsertions,
 		commit.NumDeletions,
-		commit.NumFilesChanged)
+		commit.NumFilesChanged,
+		commit.Subject,
+		commit.Body)
 
 	if err != nil {
 		log.Printf("Encountered error adding commit: %s", err)
@@ -140,6 +151,8 @@ func (sqlb *SQLiteBackend) Commit(commitId string) (*common.Commit, error) {
 		&commit.NumInsertions,
 		&commit.NumDeletions,
 		&commit.NumFilesChanged,
+		&commit.Subject,
+		&commit.Body,
 	)
 
 	return commit, nil
@@ -176,6 +189,8 @@ func (sqlb *SQLiteBackend) Commits() ([]*common.Commit, error) {
 			&commit.NumInsertions,
 			&commit.NumDeletions,
 			&commit.NumFilesChanged,
+			&commit.Subject,
+			&commit.Body,
 		)
 
 		commits = append(commits, commit)
@@ -241,6 +256,8 @@ func (sqlb *SQLiteBackend) AuthorCommits(authorEmail string) ([]*common.Commit, 
 			&commit.NumInsertions,
 			&commit.NumDeletions,
 			&commit.NumFilesChanged,
+			&commit.Subject,
+			&commit.Body,
 		)
 
 		commits = append(commits, commit)

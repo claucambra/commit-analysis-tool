@@ -10,7 +10,7 @@ import (
 )
 
 func TestParseCommit(t *testing.T) {
-	testCommit := `1c915e7dd147d4b060c2c241bb966d6f6c6ecde9__SEPARATOR__Sat, 8 Apr 2023 17:47:43 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com__SEPARATOR__Wed, 12 Apr 2023 23:21:43 +0000__SEPARATOR__Jean-Baptiste Kempf__SEPARATOR__jb@videolan.org
+	testCommit := `1c915e7dd147d4b060c2c241bb966d6f6c6ecde9__SEPARATOR__Sat, 8 Apr 2023 17:47:43 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com__SEPARATOR__Wed, 12 Apr 2023 23:21:43 +0000__SEPARATOR__Jean-Baptiste Kempf__SEPARATOR__jb@videolan.org__SEPARATOR__This is a commit message__SEPARATOR__This is a commit body
 modules/gui/macosx/library/VLCLibraryWindow.h                            |  6 +++---
 modules/gui/macosx/library/VLCLibraryWindowPersistentPreferences.h       | 22 +++++++++-------------
 modules/gui/macosx/library/VLCLibraryWindowPersistentPreferences.m       | 30 +++++++++++++++---------------
@@ -44,6 +44,8 @@ modules/gui/macosx/library/video-library/VLCLibraryVideoViewController.m |  2 +-
 	expectedCommitData.NumInsertions = 32
 	expectedCommitData.NumDeletions = 36
 	expectedCommitData.NumFilesChanged = 6
+	expectedCommitData.Subject = "This is a commit message"
+	expectedCommitData.Body = "This is a commit body"
 
 	commitData, err := ParseCommit(testCommit)
 	if err != nil {
