@@ -16,8 +16,8 @@ func tenDecimalPlaceRound(num float64) float64 {
 }
 
 func TestCorrelation(t *testing.T) {
-	groupData := testGroupData()
-	unknownGroupData := testUnknownGroupData()
+	groupData := testGroupData(t)
+	unknownGroupData := testUnknownGroupData(t)
 
 	insertCorrel, deleteCorrel, authorCorrel := groupData.Correlation(unknownGroupData)
 	roundInsertCorrel := tenDecimalPlaceRound(insertCorrel)

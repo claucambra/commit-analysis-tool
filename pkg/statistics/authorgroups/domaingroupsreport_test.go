@@ -18,17 +18,17 @@ func TestDomainGroupsReportGroupData(t *testing.T) {
 	report := NewDomainGroupsReport(testEmailGroups(), sqlb)
 	report.Generate()
 
-	testGroupData := testGroupData()
 	groupData := report.GroupData(testGroupName)
+	expectedGroupData := testGroupData(t)
 
-	if !cmp.Equal(testGroupData, groupData) {
-		t.Fatalf(`Retrieved group data does not match test group data: %s`, cmp.Diff(testGroupData, groupData))
+	if !cmp.Equal(expectedGroupData, groupData) {
+		t.Fatalf(`Retrieved group data does not match test group data: %s`, cmp.Diff(expectedGroupData, groupData))
 	}
 
-	testUnknownGroupData := testUnknownGroupData()
 	unknownGroupData := report.GroupData("")
+	expectedUnknownGroupData := testUnknownGroupData(t)
 
-	if !cmp.Equal(testUnknownGroupData, unknownGroupData) {
-		t.Fatalf(`Retrieved group data does not match test group data: %s`, cmp.Diff(testUnknownGroupData, unknownGroupData))
+	if !cmp.Equal(expectedUnknownGroupData, unknownGroupData) {
+		t.Fatalf(`Retrieved group data does not match test group data: %s`, cmp.Diff(expectedUnknownGroupData, unknownGroupData))
 	}
 }
