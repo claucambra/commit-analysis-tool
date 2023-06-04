@@ -50,6 +50,7 @@ func (corpReport *CorporateReport) Generate() {
 	commGroupSurvival := NewGroupSurvivalReport(corpReport.sqlb, commGroup.Authors)
 	commGroupSurvival.Generate()
 
+	corpReport.DomainGroupsReport = domainGroupsReport
 	corpReport.CorporateGroup = corpGroup
 	corpReport.CommunityGroup = commGroup
 	corpReport.InsertionsCorrel = insertionsCorrel
