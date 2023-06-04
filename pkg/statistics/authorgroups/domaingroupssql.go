@@ -9,7 +9,7 @@ import (
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
 )
 
-func domainChangeRows(sqlb *db.SQLiteBackend, domain string) (*sql.Rows, error) {
+func domainCommitsRows(sqlb *db.SQLiteBackend, domain string) (*sql.Rows, error) {
 	stmt := "SELECT * FROM commits WHERE instr(author_email, ?) > 0"
 	accStmt, err := sqlb.Db.Prepare(stmt)
 	if err != nil {
@@ -21,8 +21,25 @@ func domainChangeRows(sqlb *db.SQLiteBackend, domain string) (*sql.Rows, error) 
 	return accStmt.Query(domain)
 }
 
+func domainCommits(sqlb *db.SQLiteBackend, domain string) ([]*common.Commit, error) {
+	rows, err := domainCommitsRows(sqlb, domain)
+	if err != nil {
+		log.Fatalf("Error retrieving rows: %s", err)
+		return nil, err
+	}
+
+	commits := []*common.Commit{}
+
+	for rows.Next() {
+		commit := sqlb.ScanRowInRowsToCommits(rows)
+		commits = append(commits, commit)
+	}
+
+	return commits, nil
+}
+
 func domainLineChanges(sqlb *db.SQLiteBackend, domain string) (*common.LineChanges, error) {
-	rows, err := domainChangeRows(sqlb, domain)
+	rows, err := domainCommitsRows(sqlb, domain)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
 		return nil, err
@@ -47,7 +64,7 @@ func domainLineChanges(sqlb *db.SQLiteBackend, domain string) (*common.LineChang
 }
 
 func domainYearlyLineChanges(sqlb *db.SQLiteBackend, domain string) (common.YearlyLineChangeMap, error) {
-	rows, err := domainChangeRows(sqlb, domain)
+	rows, err := domainCommitsRows(sqlb, domain)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
 		return nil, err
@@ -65,7 +82,7 @@ func domainYearlyLineChanges(sqlb *db.SQLiteBackend, domain string) (common.Year
 }
 
 func domainYearlyAuthors(sqlb *db.SQLiteBackend, domain string) (common.YearlyEmailMap, error) {
-	rows, err := domainChangeRows(sqlb, domain)
+	rows, err := domainCommitsRows(sqlb, domain)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
 		return nil, err
