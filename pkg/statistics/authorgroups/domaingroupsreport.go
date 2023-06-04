@@ -1,6 +1,7 @@
 package authorgroups
 
 import (
+	"log"
 	"regexp"
 	"strings"
 
@@ -58,6 +59,7 @@ func (report *DomainGroupsReport) updateDomainChanges() {
 	for authorDomain := range report.DomainTotalAuthors {
 		lineChanges, err := domainLineChanges(report.sqlb, authorDomain)
 		if err != nil {
+			log.Fatalf("Error retrieving line changes for domain %s, received error: %s", authorDomain, err)
 			return
 		}
 
@@ -72,6 +74,7 @@ func (report *DomainGroupsReport) updateDomainChanges() {
 
 		yearlyLineChanges, err := domainYearlyLineChanges(report.sqlb, authorDomain)
 		if err != nil {
+			log.Fatalf("Error retrieving yearly line changes for domain %s, received error: %s", authorDomain, err)
 			return
 		}
 
@@ -86,6 +89,7 @@ func (report *DomainGroupsReport) updateDomainChanges() {
 
 		yearlyAuthors, err := domainYearlyAuthors(report.sqlb, authorDomain)
 		if err != nil {
+			log.Fatalf("Error retrieving yearly authors for domain %s, received error: %s", authorDomain, err)
 			return
 		}
 
