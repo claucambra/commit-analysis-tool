@@ -73,3 +73,8 @@ func MaxInt(numA int, numB int) int {
 	maxNum := math.Max(float64(numA), float64(numB))
 	return int(maxNum)
 }
+
+func MinInt(numA int, numB int) int {
+	minNum := math.Min(float64(numA), float64(numB))
+	return int(minNum)
+}
