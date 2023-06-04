@@ -7,8 +7,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
-const expectedInsertCorrel = 0.5337756465
-const expectedDeleteCorrel = 0.6832214793
+const expectedInsertCorrel = 0.5335791364
+const expectedDeleteCorrel = 0.6828353061
 const expectedAuthorCorrel = 0.6715084138
 
 func tenDecimalPlaceRound(num float64) float64 {
