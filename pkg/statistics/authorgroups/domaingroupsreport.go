@@ -64,6 +64,8 @@ func (report *DomainGroupsReport) resetStats() {
 
 func (report *DomainGroupsReport) updateDomainChanges() {
 	for authorDomain := range report.DomainTotalAuthors {
+		log.Printf("Updating domain groups report data for domain: %s", authorDomain)
+
 		lineChanges, err := domainLineChanges(report.sqlb, authorDomain)
 		if err != nil {
 			log.Fatalf("Error retrieving line changes for domain %s, received error: %s", authorDomain, err)
@@ -120,6 +122,8 @@ func (report *DomainGroupsReport) updateDomainChanges() {
 }
 
 func (report *DomainGroupsReport) updateAuthors(authors []string) {
+	log.Printf("Updating domain groups report authors.")
+
 	for _, author := range authors {
 		if author == "" {
 			continue
@@ -143,6 +147,8 @@ func (report *DomainGroupsReport) Generate() {
 	if err != nil {
 		return
 	}
+
+	log.Println("Generating domain groups report.")
 
 	report.resetStats()
 	report.updateAuthors(authors)
