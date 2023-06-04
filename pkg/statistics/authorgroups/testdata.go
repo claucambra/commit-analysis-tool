@@ -299,11 +299,11 @@ func testOtherYearlyLineChanges() common.YearlyLineChangeMap {
 		2014: {NumInsertions: 491, NumDeletions: 2},
 		2016: {NumInsertions: 4966, NumDeletions: 368},
 		2017: {NumInsertions: 111, NumDeletions: 69},
-		2018: {NumInsertions: 81663, NumDeletions: 32973},
-		2019: {NumInsertions: 133676, NumDeletions: 113042},
-		2020: {NumInsertions: 125638, NumDeletions: 80655},
-		2021: {NumInsertions: 98295, NumDeletions: 64080},
-		2022: {NumInsertions: 98569, NumDeletions: 80283},
+		2018: {NumInsertions: 81696, NumDeletions: 33055},
+		2019: {NumInsertions: 133643, NumDeletions: 112960},
+		2020: {NumInsertions: 125639, NumDeletions: 80658},
+		2021: {NumInsertions: 98422, NumDeletions: 64119},
+		2022: {NumInsertions: 98441, NumDeletions: 80241},
 		2023: {NumInsertions: 39863, NumDeletions: 25300},
 	}
 }

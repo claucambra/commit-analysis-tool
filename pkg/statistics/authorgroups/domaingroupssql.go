@@ -74,7 +74,7 @@ func domainYearlyLineChanges(sqlb *db.SQLiteBackend, domain string) (common.Year
 
 	for rows.Next() {
 		commit := sqlb.ScanRowInRowsToCommits(rows)
-		commitYear := time.Unix(commit.AuthorTime, 0).Year()
+		commitYear := time.Unix(commit.AuthorTime, 0).UTC().Year()
 		yearBuckets.AddLineChanges(&(commit.LineChanges), commitYear)
 	}
 
@@ -93,7 +93,7 @@ func domainYearlyAuthors(sqlb *db.SQLiteBackend, domain string) (common.YearlyEm
 	for rows.Next() {
 		commit := sqlb.ScanRowInRowsToCommits(rows)
 		authorEmail := commit.Author.Email
-		commitYear := time.Unix(commit.AuthorTime, 0).Year()
+		commitYear := time.Unix(commit.AuthorTime, 0).UTC().Year()
 
 		common.AdditiveValueMapInsert[int, common.EmailSet, common.YearlyEmailMap](yearBuckets, commitYear, common.AddEmailSet, common.EmailSet{authorEmail: true})
 	}
@@ -111,7 +111,7 @@ func authorYears(sqlb *db.SQLiteBackend, authorEmail string) ([]int, error) {
 
 	yearsMap := map[int]bool{}
 	for _, commit := range authorCommits {
-		commitYear := time.Unix(commit.AuthorTime, 0).Year()
+		commitYear := time.Unix(commit.AuthorTime, 0).UTC().Year()
 		yearsMap[commitYear] = true
 	}
 
