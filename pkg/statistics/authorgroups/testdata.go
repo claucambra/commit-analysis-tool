@@ -14,39 +14,49 @@ const testGroupInsertions = 132
 const testGroupDeletions = 137
 const testCommitsYear = 2023
 
-var testEmailGroups = map[string][]string{
-	testGroupName: {testGroupDomain},
+func testEmailGroups() map[string][]string {
+	return map[string][]string{
+		testGroupName: {testGroupDomain},
+	}
 }
 
-var testGroupAuthors = common.EmailSet{
-	"tmatth@videolan.org":    true,
-	"garf@videolan.org":      true,
-	"jb@videolan.org":        true,
-	"ileoo@videolan.org":     true,
-	"dfuhrmann@videolan.org": true,
+func testGroupAuthors() common.EmailSet {
+	return common.EmailSet{
+		"tmatth@videolan.org":    true,
+		"garf@videolan.org":      true,
+		"jb@videolan.org":        true,
+		"ileoo@videolan.org":     true,
+		"dfuhrmann@videolan.org": true,
+	}
 }
 
-var testGroupYearlyLineChanges = common.YearlyLineChangeMap{
-	testCommitsYear: {
-		NumInsertions: testGroupInsertions,
-		NumDeletions:  testGroupDeletions,
-	},
+func testGroupYearlyLineChanges() common.YearlyLineChangeMap {
+	return common.YearlyLineChangeMap{
+		testCommitsYear: {
+			NumInsertions: testGroupInsertions,
+			NumDeletions:  testGroupDeletions,
+		},
+	}
 }
 
-var testGroupYearlyAuthors = common.YearlyEmailMap{
-	testCommitsYear: testGroupAuthors,
+func testGroupYearlyAuthors() common.YearlyEmailMap {
+	return common.YearlyEmailMap{
+		testCommitsYear: testGroupAuthors(),
+	}
 }
 
-var testGroupData = &GroupData{
-	GroupName: testGroupName,
-	Authors:   testGroupAuthors,
-	LineChanges: &common.LineChanges{
-		NumInsertions: testGroupInsertions,
-		NumDeletions:  testGroupDeletions,
-	},
-	YearlyLineChanges: testGroupYearlyLineChanges,
-	YearlyAuthors:     testGroupYearlyAuthors,
-	AuthorsPercent:    (float32(testNumGroupAuthors) / float32(testNumAuthors)) * 100,
-	InsertionsPercent: (float32(testGroupInsertions) / float32(testNumInsertions)) * 100,
-	DeletionsPercent:  (float32(testGroupDeletions) / float32(testNumDeletions)) * 100,
+func testGroupData() *GroupData {
+	return &GroupData{
+		GroupName: testGroupName,
+		Authors:   testGroupAuthors(),
+		LineChanges: &common.LineChanges{
+			NumInsertions: testGroupInsertions,
+			NumDeletions:  testGroupDeletions,
+		},
+		YearlyLineChanges: testGroupYearlyLineChanges(),
+		YearlyAuthors:     testGroupYearlyAuthors(),
+		AuthorsPercent:    (float32(testNumGroupAuthors) / float32(testNumAuthors)) * 100,
+		InsertionsPercent: (float32(testGroupInsertions) / float32(testNumInsertions)) * 100,
+		DeletionsPercent:  (float32(testGroupDeletions) / float32(testNumDeletions)) * 100,
+	}
 }
