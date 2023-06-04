@@ -8,41 +8,6 @@ import (
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
 )
 
-const testNumAuthors = 31
-const testNumInsertions = 25205
-const testNumDeletions = 17147
-const testNumGroupAuthors = 5
-const testGroupName = "VideoLAN"
-const testGroupDomain = "videolan.org"
-const testGroupInsertions = 132
-const testGroupDeletions = 137
-const testCommitsYear = 2023
-
-var testCommitsFile = "../../../test/data/log.txt"
-
-var testEmailGroups = map[string][]string{
-	testGroupName: {testGroupDomain},
-}
-
-var testGroupAuthors = common.EmailSet{
-	"tmatth@videolan.org":    true,
-	"garf@videolan.org":      true,
-	"jb@videolan.org":        true,
-	"ileoo@videolan.org":     true,
-	"dfuhrmann@videolan.org": true,
-}
-
-var testGroupYearlyLineChanges = common.YearlyLineChangeMap{
-	testCommitsYear: {
-		NumInsertions: testGroupInsertions,
-		NumDeletions:  testGroupDeletions,
-	},
-}
-
-var testGroupYearlyAuthors = common.YearlyEmailMap{
-	testCommitsYear: testGroupAuthors,
-}
-
 func TestDomainGroupsReportGroupData(t *testing.T) {
 	dbtesting.TestLogFilePath = testCommitsFile
 	sqlb := dbtesting.InitTestDB(t)
