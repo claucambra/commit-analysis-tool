@@ -2,8 +2,9 @@ package common
 
 import (
 	"math/rand"
-	"reflect"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 const randomChangeMaxLimit = 50000
@@ -53,10 +54,8 @@ func TestAddLineChanges(t *testing.T) {
 	}
 
 	summedChanges := AddLineChanges(changeA, changeB)
-	if !reflect.DeepEqual(summedChanges, testChange) {
-		t.Fatalf(`Added line changes do not match expected changes: 
-			Expected %+v
-			Received %+v`, testChange, summedChanges)
+	if !cmp.Equal(summedChanges, testChange) {
+		t.Fatalf(`Added line changes do not match expected changes: %s`, cmp.Diff(testChange, summedChanges))
 	}
 }
 
@@ -68,10 +67,8 @@ func TestSubtractLineChanges(t *testing.T) {
 	}
 
 	subbedChanges, _ := SubtractLineChanges(changeA, changeB)
-	if !reflect.DeepEqual(subbedChanges, testChange) {
-		t.Fatalf(`Subtracted line changes do not match expected changes:
-			Expected %+v
-			Received %+v`, testChange, subbedChanges)
+	if !cmp.Equal(subbedChanges, testChange) {
+		t.Fatalf(`Subtracted line changes do not match expected changes: %s`, cmp.Diff(testChange, subbedChanges))
 	}
 }
 
@@ -87,10 +84,8 @@ func TestAddChanges(t *testing.T) {
 	}
 
 	summedChanges := AddChanges(changeA, changeB)
-	if !reflect.DeepEqual(summedChanges, testChange) {
-		t.Fatalf(`Added changes do not match expected changes:
-			Expected %+v
-			Received %+v`, testChange, summedChanges)
+	if !cmp.Equal(summedChanges, testChange) {
+		t.Fatalf(`Added changes do not match expected changes: %s`, cmp.Diff(testChange, summedChanges))
 	}
 }
 
@@ -105,10 +100,8 @@ func TestSubtractChanges(t *testing.T) {
 	}
 
 	subbedChanges, _ := SubtractChanges(changeA, changeB)
-	if !reflect.DeepEqual(subbedChanges, testChange) {
-		t.Fatalf(`Subtracted changes do not match expected changes:
-			Expected %+v
-			Received %+v`, testChange, subbedChanges)
+	if !cmp.Equal(subbedChanges, testChange) {
+		t.Fatalf(`Subtracted changes do not match expected changes: %s`, cmp.Diff(testChange, subbedChanges))
 	}
 }
 
@@ -119,19 +112,15 @@ func TestAddLineChangesInYearlyLineChangeMap(t *testing.T) {
 	ylcm := make(YearlyLineChangeMap, 0)
 
 	ylcm.AddLineChanges(lineChangeA, testYear)
-	if ylcmALineChangeA := ylcm[testYear]; !reflect.DeepEqual(ylcmALineChangeA, lineChangeA) {
-		t.Fatalf(`Added changes to yearly line change map when year not already in map does not match expected changes:
-			Expected %+v
-			Received %+v`, lineChangeA, ylcmALineChangeA)
+	if ylcmALineChangeA := ylcm[testYear]; !cmp.Equal(ylcmALineChangeA, lineChangeA) {
+		t.Fatalf(`Added changes to yearly line change map when year not already in map does not match expected changes: %s`, cmp.Diff(lineChangeA, ylcmALineChangeA))
 	}
 
 	ylcm.AddLineChanges(lineChangeB, testYear)
 	summedLineChanges := AddLineChanges(lineChangeA, lineChangeB)
 
-	if ylcmASummedLineChange := ylcm[testYear]; !reflect.DeepEqual(ylcmASummedLineChange, summedLineChanges) {
-		t.Fatalf(`Added changes to yearly line change map when year already in map does not match expected changes:
-			Expected %+v
-			Received %+v`, summedLineChanges, ylcmASummedLineChange)
+	if ylcmASummedLineChange := ylcm[testYear]; !cmp.Equal(ylcmASummedLineChange, summedLineChanges) {
+		t.Fatalf(`Added changes to yearly line change map when year already in map does not match expected changes: %s`, cmp.Diff(summedLineChanges, ylcmASummedLineChange))
 	}
 }
 
@@ -154,10 +143,8 @@ func TestSubtractLineChangesInYearlyLineChangeMap(t *testing.T) {
 		NumDeletions:  MaxInt(lineChangeA.NumDeletions-lineChangeB.NumDeletions, 0),
 	}
 
-	if subLineChanges := ylcm[testYearA]; !reflect.DeepEqual(subLineChanges, expectedSubLineChanges) {
-		t.Fatalf(`Subtracted line changes from yearly line change map does not match expected changes:
-			Expected %+v
-			Received %+v`, expectedSubLineChanges, subLineChanges)
+	if subLineChanges := ylcm[testYearA]; !cmp.Equal(subLineChanges, expectedSubLineChanges) {
+		t.Fatalf(`Subtracted line changes from yearly line change map does not match expected changes: %s`, cmp.Diff(expectedSubLineChanges, subLineChanges))
 	}
 }
 
@@ -172,10 +159,8 @@ func TestAddYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 
 	if addedLineChangeB, ok := ylcmA[testYearB]; !ok {
 		t.Fatalf("Adding line changes from a year of YLCM B not present in YLCM A should add this year to YLCM A.")
-	} else if !reflect.DeepEqual(addedLineChangeB, lineChangeB) {
-		t.Fatalf(`Added YLCM B to YLCM A does not match expected line changes:
-			Expected %+v
-			Received %+v`, *lineChangeB, addedLineChangeB)
+	} else if !cmp.Equal(addedLineChangeB, lineChangeB) {
+		t.Fatalf(`Added YLCM B to YLCM A does not match expected line changes: %s`, cmp.Diff(*lineChangeB, addedLineChangeB))
 	}
 
 	ylcmB = YearlyLineChangeMap{testYearA: lineChangeB}
@@ -186,10 +171,8 @@ func TestAddYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 		NumDeletions:  lineChangeA.NumDeletions + lineChangeB.NumDeletions,
 	}
 
-	if addedLineChange := ylcmA[testYearA]; !reflect.DeepEqual(addedLineChange, expectedAddLineChanges) {
-		t.Fatalf(`Added YLCM B line changes to YLCM A does not match expected line changes:
-			Expected %+v
-			Received %+v`, addedLineChange, expectedAddLineChanges)
+	if addedLineChange := ylcmA[testYearA]; !cmp.Equal(addedLineChange, expectedAddLineChanges) {
+		t.Fatalf(`Added YLCM B line changes to YLCM A does not match expected line changes: %s`, cmp.Diff(addedLineChange, expectedAddLineChanges))
 	}
 }
 
@@ -216,10 +199,8 @@ func TestSubtractYearlyLineChangeMapToYearlyLineChangeMap(t *testing.T) {
 
 	if testYearBSubLineChanges, ok := ylcmA[testYearB]; !ok {
 		t.Fatalf("Test year B should now be present in YLCM A")
-	} else if !reflect.DeepEqual(testYearBSubLineChanges, expectedSubLineChanges) {
-		t.Fatalf(`Subtracted YLCM B line changes to yearly line change map does not match expected changes:
-			Expected %+v
-			Received %+v`, expectedSubLineChanges, testYearBSubLineChanges)
+	} else if !cmp.Equal(testYearBSubLineChanges, expectedSubLineChanges) {
+		t.Fatalf(`Subtracted YLCM B line changes to yearly line change map does not match expected changes: %s`, cmp.Diff(expectedSubLineChanges, testYearBSubLineChanges))
 	}
 }
 
@@ -239,16 +220,12 @@ func TestSeparatedChangeArrayFromYearlyLineChangeMap(t *testing.T) {
 
 	insertionsArray, deletionsArray := ylcm.SeparatedChangeArrays(nil)
 
-	if !reflect.DeepEqual(insertionsArray, expectedInsertionsArray) {
-		t.Fatalf(`Insertions array from yearly change map does not match expected insertions array:
-			Expected %+v
-			Received %+v`, expectedInsertionsArray, insertionsArray)
+	if !cmp.Equal(insertionsArray, expectedInsertionsArray) {
+		t.Fatalf(`Insertions array from yearly change map does not match expected insertions array: %s`, cmp.Diff(expectedInsertionsArray, insertionsArray))
 	}
 
-	if !reflect.DeepEqual(deletionsArray, expectedDeletionsArray) {
-		t.Fatalf(`Deletions array from yearly change map does not match expected deletions array:
-			Expected %+v
-			Received %+v`, expectedDeletionsArray, deletionsArray)
+	if !cmp.Equal(deletionsArray, expectedDeletionsArray) {
+		t.Fatalf(`Deletions array from yearly change map does not match expected deletions array: %s`, cmp.Diff(expectedDeletionsArray, deletionsArray))
 	}
 
 	testRetrievalYears := []int{testYearA, testYearC}
@@ -256,16 +233,12 @@ func TestSeparatedChangeArrayFromYearlyLineChangeMap(t *testing.T) {
 	expectedSpecificInsertionsArray := []int{lineChangeA.NumInsertions, lineChangeA.NumInsertions}
 	expectedSpecificDeletionsArray := []int{lineChangeA.NumDeletions, lineChangeA.NumDeletions}
 
-	if !reflect.DeepEqual(specificInsertionsArray, expectedSpecificInsertionsArray) {
-		t.Fatalf(`Insertions array from specific years in yearly change map does not match expected insertions array:
-			Expected %+v
-			Received %+v`, expectedSpecificInsertionsArray, specificInsertionsArray)
+	if !cmp.Equal(specificInsertionsArray, expectedSpecificInsertionsArray) {
+		t.Fatalf(`Insertions array from specific years in yearly change map does not match expected insertions array: %s`, cmp.Diff(expectedSpecificInsertionsArray, specificInsertionsArray))
 	}
 
-	if !reflect.DeepEqual(specificDeletionsArray, expectedSpecificDeletionsArray) {
-		t.Fatalf(`Deletions array from specific yearly change map does not match expected deletions array:
-			Expected %+v
-			Received %+v`, expectedSpecificDeletionsArray, specificDeletionsArray)
+	if !cmp.Equal(specificDeletionsArray, expectedSpecificDeletionsArray) {
+		t.Fatalf(`Deletions array from specific yearly change map does not match expected deletions array: %s`, cmp.Diff(expectedSpecificDeletionsArray, specificDeletionsArray))
 	}
 }
 
@@ -276,19 +249,15 @@ func TestAddChangesToYearlyChangeMap(t *testing.T) {
 	ycm := make(YearlyChangeMap, 0)
 
 	ycm.AddChanges(changeA, testYear)
-	if ycmChangeA := ycm[testYear]; !reflect.DeepEqual(ycmChangeA, changeA) {
-		t.Fatalf(`Added changes to yearly change map when year not already in map does not match expected changes:
-			Expected %+v
-			Received %+v`, changeA, ycmChangeA)
+	if ycmChangeA := ycm[testYear]; !cmp.Equal(ycmChangeA, changeA) {
+		t.Fatalf(`Added changes to yearly change map when year not already in map does not match expected changes: %s`, cmp.Diff(changeA, ycmChangeA))
 	}
 
 	ycm.AddChanges(changeB, testYear)
 	summedChanges := AddChanges(changeA, changeB)
 
-	if ycmASummedChange := ycm[testYear]; !reflect.DeepEqual(ycmASummedChange, summedChanges) {
-		t.Fatalf(`Added changes to yearly change map when year already in map does not match expected changes:
-			Expected %+v
-			Received %+v`, summedChanges, ycmASummedChange)
+	if ycmASummedChange := ycm[testYear]; !cmp.Equal(ycmASummedChange, summedChanges) {
+		t.Fatalf(`Added changes to yearly change map when year already in map does not match expected changes: %s`, cmp.Diff(summedChanges, ycmASummedChange))
 	}
 }
 
@@ -313,9 +282,7 @@ func TestSubtractChangesFromYearlyChangeMap(t *testing.T) {
 		NumFilesChanged: MaxInt(changeA.NumFilesChanged-changeB.NumFilesChanged, 0),
 	}
 
-	if subChanges := ycm[testYearA]; !reflect.DeepEqual(subChanges, expectedSubChanges) {
-		t.Fatalf(`Subtracted line changes from yearly line change map does not match expected changes:
-			Expected %+v
-			Received %+v`, expectedSubChanges, subChanges)
+	if subChanges := ycm[testYearA]; !cmp.Equal(subChanges, expectedSubChanges) {
+		t.Fatalf(`Subtracted line changes from yearly line change map does not match expected changes: %s`, cmp.Diff(expectedSubChanges, subChanges))
 	}
 }

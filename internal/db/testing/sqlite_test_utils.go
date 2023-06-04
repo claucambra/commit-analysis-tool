@@ -4,12 +4,12 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"reflect"
 	"testing"
 
 	"github.com/claucambra/commit-analysis-tool/internal/db"
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
 	"github.com/claucambra/commit-analysis-tool/pkg/logread"
+	"github.com/google/go-cmp/cmp"
 )
 
 const testDbFileName = "test.db"
@@ -99,19 +99,15 @@ func CompareCommitArrays(t *testing.T, expectedCommitArray []*common.Commit, tes
 	numTestingCommits := len(testingCommitArray)
 
 	if numExpectedCommits != numTestingCommits {
-		t.Fatalf(`Expected commit count does not equal tested commit count.
-			Expected: %+v commits
-			Received: %+v commits`, numExpectedCommits, numTestingCommits)
+		t.Fatalf(`Expected commit count does not equal tested commit count. %s`, cmp.Diff(numExpectedCommits, numTestingCommits))
 	}
 
 	for i := 0; i < numExpectedCommits; i++ {
 		expectedCommit := expectedCommitArray[i]
 		testingCommit := testingCommitArray[i]
 
-		if !reflect.DeepEqual(expectedCommit, testingCommit) {
-			t.Fatalf(`Tested commits do not equal expected commits.
-				Expected: %+v
-				Received: %+v`, expectedCommit, testingCommit)
+		if !cmp.Equal(expectedCommit, testingCommit) {
+			t.Fatalf(`Tested commits do not equal expected commits. %s`, cmp.Diff(expectedCommit, testingCommit))
 		}
 	}
 }

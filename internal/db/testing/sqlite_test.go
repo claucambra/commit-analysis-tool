@@ -1,10 +1,10 @@
 package dbtesting
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestSqliteDbAddCommit(t *testing.T) {
@@ -22,10 +22,8 @@ func TestSqliteDbAddCommit(t *testing.T) {
 		t.Fatalf("Error during commit retrieval: %s", err)
 	}
 
-	if !reflect.DeepEqual(commit, retrievedCommit) {
-		t.Fatalf(`Database commit does not equal expected commit.
-			Expected: %+v
-			Received: %+v`, commit, retrievedCommit)
+	if !cmp.Equal(commit, retrievedCommit) {
+		t.Fatalf(`Database commit does not equal expected commit. %s`, cmp.Diff(commit, retrievedCommit))
 	}
 }
 

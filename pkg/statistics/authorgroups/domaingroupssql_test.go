@@ -1,13 +1,13 @@
 package authorgroups
 
 import (
-	"reflect"
 	"strings"
 	"testing"
 	"time"
 
 	dbtesting "github.com/claucambra/commit-analysis-tool/internal/db/testing"
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
+	"github.com/google/go-cmp/cmp"
 )
 
 var testDomain = "claudiocambra.com"
@@ -50,10 +50,8 @@ func TestDomainChanges(t *testing.T) {
 		testDomainLineChanges.NumDeletions += commit.NumDeletions
 	}
 
-	if !reflect.DeepEqual(retrievedDomainChanges, testDomainLineChanges) {
-		t.Fatalf(`Database domain changes do not equal expected domain changes.
-			Expected: %+v
-			Received: %+v`, testDomainLineChanges, retrievedDomainChanges)
+	if !cmp.Equal(retrievedDomainChanges, testDomainLineChanges) {
+		t.Fatalf(`Database domain changes do not equal expected domain changes. %s`, cmp.Diff(testDomainLineChanges, retrievedDomainChanges))
 	}
 }
 
@@ -97,11 +95,10 @@ func TestDomainYearlyChanges(t *testing.T) {
 			t.Fatalf(`Retrieved yearly changes does not contain the year %+v`, year)
 		}
 
-		if !reflect.DeepEqual(retrievedChanges, testLineChanges) {
+		if !cmp.Equal(retrievedChanges, testLineChanges) {
 			t.Fatalf(`Database domain changes do not equal expected domain changes.
-				Expected: %+v
-				Received: %+v
-				Error occurred when testing results for year %+v`, testLineChanges, retrievedChanges, year)
+				%s
+				Error occurred when testing results for year %+v`, cmp.Diff(testLineChanges, retrievedChanges), year)
 		}
 	}
 }

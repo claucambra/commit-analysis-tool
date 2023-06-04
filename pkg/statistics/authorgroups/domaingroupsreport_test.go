@@ -69,9 +69,7 @@ func TestDomainGroupsReportGroupData(t *testing.T) {
 	}
 	groupData := report.GroupData(testGroupName)
 
-	if !reflect.DeepEqual(testGroupData, groupData) {
-		t.Fatalf(`Retrieved group data does not match test group data: 
-			Expected %+v
-			Received %+v`, testGroupData, groupData)
+	if !cmp.Equal(testGroupData, groupData) {
+		t.Fatalf(`Retrieved group data does not match test group data: %s`, cmp.Diff(testGroupData, groupData))
 	}
 }

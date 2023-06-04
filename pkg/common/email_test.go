@@ -4,6 +4,8 @@ import (
 	"math/rand"
 	"reflect"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 const generateTestEmailCount = 10
@@ -58,10 +60,8 @@ func TestAddEmailSet(t *testing.T) {
 		testEmailSet[email] = true
 	}
 
-	if !reflect.DeepEqual(testEmailSet, summedEmailSets) {
-		t.Fatalf(`Added email sets do not match expected email set: 
-			Expected %+v
-			Received %+v`, testEmailSet, summedEmailSets)
+	if !cmp.Equal(testEmailSet, summedEmailSets) {
+		t.Fatalf(`Added email sets do not match expected email set: %s`, cmp.Diff(testEmailSet, summedEmailSets))
 	}
 }
 

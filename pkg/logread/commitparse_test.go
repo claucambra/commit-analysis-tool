@@ -2,11 +2,11 @@ package logread
 
 import (
 	"os"
-	"reflect"
 	"testing"
 	"time"
 
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestParseCommit(t *testing.T) {
@@ -50,10 +50,8 @@ modules/gui/macosx/library/video-library/VLCLibraryVideoViewController.m |  2 +-
 		t.Fatalf("Received an error while parsing commit: %s", err)
 	}
 
-	if !reflect.DeepEqual(commitData, expectedCommitData) {
-		t.Fatalf(`Parsed commit does not equal expected commit.
-			Expected: %+v
-			Received: %+v`, expectedCommitData, commitData)
+	if !cmp.Equal(commitData, expectedCommitData) {
+		t.Fatalf(`Parsed commit does not equal expected commit. %s`, cmp.Diff(expectedCommitData, commitData))
 	}
 }
 
