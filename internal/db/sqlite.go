@@ -127,6 +127,28 @@ func (sqlb *SQLiteBackend) AddCommits(commits []*common.Commit) error {
 	return nil
 }
 
+func (sqlb *SQLiteBackend) ScanRowInRowsToCommits(rows *sql.Rows) *common.Commit {
+	commit := new(common.Commit)
+
+	rows.Scan(
+		&commit.Id,
+		&commit.RepoName,
+		&commit.Author.Name,
+		&commit.Author.Email,
+		&commit.AuthorTime,
+		&commit.Committer.Name,
+		&commit.Committer.Email,
+		&commit.CommitterTime,
+		&commit.NumInsertions,
+		&commit.NumDeletions,
+		&commit.NumFilesChanged,
+		&commit.Subject,
+		&commit.Body,
+	)
+
+	return commit
+}
+
 func (sqlb *SQLiteBackend) Commit(commitId string) (*common.Commit, error) {
 	stmt := "SELECT * FROM commits WHERE id = ?"
 
@@ -176,23 +198,7 @@ func (sqlb *SQLiteBackend) Commits() ([]*common.Commit, error) {
 
 	commits := make([]*common.Commit, 0)
 	for rows.Next() {
-		commit := new(common.Commit)
-		rows.Scan(
-			&commit.Id,
-			&commit.RepoName,
-			&commit.Author.Name,
-			&commit.Author.Email,
-			&commit.AuthorTime,
-			&commit.Committer.Name,
-			&commit.Committer.Email,
-			&commit.CommitterTime,
-			&commit.NumInsertions,
-			&commit.NumDeletions,
-			&commit.NumFilesChanged,
-			&commit.Subject,
-			&commit.Body,
-		)
-
+		commit := sqlb.ScanRowInRowsToCommits(rows)
 		commits = append(commits, commit)
 	}
 
@@ -243,23 +249,7 @@ func (sqlb *SQLiteBackend) AuthorCommits(authorEmail string) ([]*common.Commit, 
 
 	commits := make([]*common.Commit, 0)
 	for rows.Next() {
-		commit := new(common.Commit)
-		rows.Scan(
-			&commit.Id,
-			&commit.RepoName,
-			&commit.Author.Name,
-			&commit.Author.Email,
-			&commit.AuthorTime,
-			&commit.Committer.Name,
-			&commit.Committer.Email,
-			&commit.CommitterTime,
-			&commit.NumInsertions,
-			&commit.NumDeletions,
-			&commit.NumFilesChanged,
-			&commit.Subject,
-			&commit.Body,
-		)
-
+		commit := sqlb.ScanRowInRowsToCommits(rows)
 		commits = append(commits, commit)
 	}
 

@@ -33,22 +33,7 @@ func domainLineChanges(sqlb *db.SQLiteBackend, domain string) (*common.LineChang
 	numFilesChanged := 0
 
 	for rows.Next() {
-		commit := new(common.Commit)
-		rows.Scan(
-			&commit.Id,
-			&commit.RepoName,
-			&commit.Author.Name,
-			&commit.Author.Email,
-			&commit.AuthorTime,
-			&commit.Committer.Name,
-			&commit.Committer.Email,
-			&commit.CommitterTime,
-			&commit.NumInsertions,
-			&commit.NumDeletions,
-			&commit.NumFilesChanged,
-			&commit.Subject,
-			&commit.Body,
-		)
+		commit := sqlb.ScanRowInRowsToCommits(rows)
 
 		numInsertions += commit.NumInsertions
 		numDeletions += commit.NumDeletions
@@ -71,24 +56,7 @@ func domainYearlyLineChanges(sqlb *db.SQLiteBackend, domain string) (common.Year
 	yearBuckets := common.YearlyLineChangeMap{}
 
 	for rows.Next() {
-		commit := new(common.Commit)
-
-		rows.Scan(
-			&commit.Id,
-			&commit.RepoName,
-			&commit.Author.Name,
-			&commit.Author.Email,
-			&commit.AuthorTime,
-			&commit.Committer.Name,
-			&commit.Committer.Email,
-			&commit.CommitterTime,
-			&commit.NumInsertions,
-			&commit.NumDeletions,
-			&commit.NumFilesChanged,
-			&commit.Subject,
-			&commit.Body,
-		)
-
+		commit := sqlb.ScanRowInRowsToCommits(rows)
 		commitYear := time.Unix(commit.AuthorTime, 0).Year()
 		yearBuckets.AddLineChanges(&(commit.LineChanges), commitYear)
 	}
@@ -106,24 +74,7 @@ func domainYearlyAuthors(sqlb *db.SQLiteBackend, domain string) (common.YearlyEm
 	yearBuckets := common.YearlyEmailMap{}
 
 	for rows.Next() {
-		commit := new(common.Commit)
-
-		rows.Scan(
-			&commit.Id,
-			&commit.RepoName,
-			&commit.Author.Name,
-			&commit.Author.Email,
-			&commit.AuthorTime,
-			&commit.Committer.Name,
-			&commit.Committer.Email,
-			&commit.CommitterTime,
-			&commit.NumInsertions,
-			&commit.NumDeletions,
-			&commit.NumFilesChanged,
-			&commit.Subject,
-			&commit.Body,
-		)
-
+		commit := sqlb.ScanRowInRowsToCommits(rows)
 		authorEmail := commit.Author.Email
 		commitYear := time.Unix(commit.AuthorTime, 0).Year()
 
