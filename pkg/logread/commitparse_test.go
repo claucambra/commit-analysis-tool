@@ -10,7 +10,7 @@ import (
 )
 
 func TestParseCommit(t *testing.T) {
-	testCommit := `1c915e7dd147d4b060c2c241bb966d6f6c6ecde9__SEPARATOR__Sat, 8 Apr 2023 17:47:43 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com__SEPARATOR__Wed, 12 Apr 2023 23:21:43 +0000__SEPARATOR__Jean-Baptiste Kempf__SEPARATOR__jb@videolan.org__SEPARATOR__This is a commit message__SEPARATOR__This is a commit body
+	testCommit := `PRETTYFORMATSTART__1c915e7dd147d4b060c2c241bb966d6f6c6ecde9__SEPARATOR__Sat, 8 Apr 2023 17:47:43 +0800__SEPARATOR__Claudio Cambra__SEPARATOR__developer@claudiocambra.com__SEPARATOR__Wed, 12 Apr 2023 23:21:43 +0000__SEPARATOR__Jean-Baptiste Kempf__SEPARATOR__jb@videolan.org__SEPARATOR__This is a commit message__SEPARATOR__This is a commit body__PRETTYFORMATEND
 modules/gui/macosx/library/VLCLibraryWindow.h                            |  6 +++---
 modules/gui/macosx/library/VLCLibraryWindowPersistentPreferences.h       | 22 +++++++++-------------
 modules/gui/macosx/library/VLCLibraryWindowPersistentPreferences.m       | 30 +++++++++++++++---------------
@@ -65,7 +65,7 @@ func TestParseCommitLog(t *testing.T) {
 
 	testCommitLog := string(testCommitLogBytes)
 
-	expectedCommitCount := 1000
+	expectedCommitCount := 20000
 	parsedCommitLog, err := ParseCommitLog(testCommitLog)
 	receivedCommitCount := len(parsedCommitLog)
 

@@ -29,6 +29,6 @@ func TestDomainGroupsReportGroupData(t *testing.T) {
 	unknownGroupData := report.GroupData("")
 
 	if !cmp.Equal(testUnknownGroupData, unknownGroupData) {
-		t.Fatalf(`Retrieved group data does not match test group data: %s`, cmp.Diff(testGroupData, groupData))
+		t.Fatalf(`Retrieved group data does not match test group data: %s`, cmp.Diff(testUnknownGroupData, unknownGroupData))
 	}
 }

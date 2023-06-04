@@ -58,7 +58,7 @@ func ParsedTestCommitLog(t *testing.T) []*common.Commit {
 	testCommitLog := ReadTestLogFile(t)
 	testCommits, err := logread.ParseCommitLog(testCommitLog)
 	if err != nil {
-		t.Fatalf("Could not parse test commit log")
+		t.Fatalf("Could not parse test commit log: %s", err)
 	}
 
 	return testCommits
@@ -77,8 +77,10 @@ func IngestTestCommits(sqlb *db.SQLiteBackend, t *testing.T) {
 		t.Fatalf("Error checking ingested commits: %s", err)
 	}
 
-	if len(parsedCommits) != 1000 {
-		t.Fatalf("Missing commits.")
+	expectedCommitCount := 20000
+	receivedCommitCount := len(parsedCommits)
+	if receivedCommitCount != expectedCommitCount {
+		t.Fatalf("Missing commits. %+v %+v", expectedCommitCount, receivedCommitCount)
 	}
 }
 

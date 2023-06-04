@@ -56,8 +56,11 @@ func TestSqliteAuthors(t *testing.T) {
 		t.Fatalf("Received error when fetching authors: %s", err)
 	}
 
-	if len(authors) != 31 {
-		t.Fatalf("Received unexpected number of authors: expected %d, received %d", 1, len(authors))
+	expectedAuthors := 247
+	receivedAuthors := len(authors)
+
+	if receivedAuthors != expectedAuthors {
+		t.Fatalf("Received unexpected number of authors: expected %d, received %d", expectedAuthors, receivedAuthors)
 	}
 }
 
