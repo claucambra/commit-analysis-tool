@@ -241,12 +241,13 @@ func (report *DomainGroupsReport) UnknownGroupData() *GroupData {
 	unknownGroupTotalAuthors, _ := common.SubtractEmailSet(report.TotalAuthors, totalGroupAuthors)
 	unknownGroupTotalLineChanges, _ := common.SubtractLineChanges(report.TotalChanges, totalGroupChanges)
 
-	unknownGroupTotalYearlyLineChanges := report.TotalYearlyLineChanges
+	var unknownGroupTotalYearlyLineChanges common.YearlyLineChangeMap = common.CopyMap(report.TotalYearlyLineChanges)
 	unknownGroupTotalYearlyLineChanges.SubtractYearlyLineChangeMap(totalGroupYearlyLineChanges)
-	unknownGroupTotalYearlyAuthors := report.TotalYearlyAuthors
+
+	var unknownGroupTotalYearlyAuthors common.YearlyEmailMap = common.CopyMap(report.TotalYearlyAuthors)
 	unknownGroupTotalYearlyAuthors.SubtractYearlyEmailMap(totalGroupYearlyAuthors)
 
-	unknownGroupCommits := report.TotalCommits
+	var unknownGroupCommits common.CommitMap = common.CopyMap(report.TotalCommits)
 	unknownGroupCommits.SubtractCommitMap(totalGroupCommits)
 
 	return NewGroupData(report,
