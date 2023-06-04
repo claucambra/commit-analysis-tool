@@ -11,6 +11,7 @@ type GroupData struct {
 
 	Authors           common.EmailSet
 	LineChanges       *common.LineChanges
+	Commits           common.CommitMap
 	YearlyLineChanges common.YearlyLineChangeMap
 	YearlyAuthors     common.YearlyEmailMap
 
@@ -24,12 +25,14 @@ func NewGroupData(report *DomainGroupsReport,
 	groupAuthors common.EmailSet,
 	groupLineChanges *common.LineChanges,
 	groupYearlyLineChanges common.YearlyLineChangeMap,
-	groupYearlyAuthors common.YearlyEmailMap) *GroupData {
+	groupYearlyAuthors common.YearlyEmailMap,
+	groupCommits common.CommitMap) *GroupData {
 
 	groupData := new(GroupData)
 	groupData.GroupName = groupName
 	groupData.Authors = groupAuthors
 	groupData.LineChanges = groupLineChanges
+	groupData.Commits = groupCommits
 	groupData.YearlyLineChanges = groupYearlyLineChanges
 	groupData.YearlyAuthors = groupYearlyAuthors
 	groupData.AuthorsPercent = (float32(len(groupAuthors)) / float32(len(report.TotalAuthors))) * 100
