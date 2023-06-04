@@ -18,6 +18,7 @@ type DomainGroupsReport struct {
 	TotalChanges           *common.LineChanges
 	TotalYearlyAuthors     common.YearlyEmailMap
 	TotalYearlyLineChanges common.YearlyLineChangeMap
+	TotalCommits           []*common.Commit
 
 	GroupsOfDomains map[string][]string
 
@@ -28,6 +29,8 @@ type DomainGroupsReport struct {
 	DomainTotalYearlyAuthors     map[string]common.YearlyEmailMap
 	DomainTotalYearlyLineChanges map[string]common.YearlyLineChangeMap
 
+	DomainCommits map[string][]*common.Commit
+
 	sqlb *db.SQLiteBackend
 }
 
@@ -37,11 +40,13 @@ func NewDomainGroupsReport(domainGroups map[string][]string, sqlb *db.SQLiteBack
 		TotalChanges:                 &common.LineChanges{},
 		TotalYearlyAuthors:           common.YearlyEmailMap{},
 		TotalYearlyLineChanges:       common.YearlyLineChangeMap{},
+		TotalCommits:                 []*common.Commit{},
 		GroupsOfDomains:              domainGroups,
 		DomainTotalAuthors:           map[string]common.EmailSet{},
 		DomainTotalLineChanges:       map[string]*common.LineChanges{},
 		DomainTotalYearlyAuthors:     map[string]common.YearlyEmailMap{},
 		DomainTotalYearlyLineChanges: map[string]common.YearlyLineChangeMap{},
+		DomainCommits:                map[string][]*common.Commit{},
 		sqlb:                         sqlb,
 	}
 }
@@ -50,9 +55,11 @@ func (report *DomainGroupsReport) resetStats() {
 	report.TotalAuthors = common.EmailSet{}
 	report.TotalChanges = &common.LineChanges{}
 	report.TotalYearlyLineChanges = common.YearlyLineChangeMap{}
+	report.TotalCommits = []*common.Commit{}
 	report.DomainTotalAuthors = map[string]common.EmailSet{}
 	report.DomainTotalLineChanges = map[string]*common.LineChanges{}
 	report.DomainTotalYearlyLineChanges = map[string]common.YearlyLineChangeMap{}
+	report.DomainCommits = map[string][]*common.Commit{}
 }
 
 func (report *DomainGroupsReport) updateDomainChanges() {
@@ -101,6 +108,14 @@ func (report *DomainGroupsReport) updateDomainChanges() {
 		} else {
 			report.DomainTotalYearlyAuthors[authorDomain] = yearlyAuthors
 		}
+
+		domainCommits, err := domainCommits(report.sqlb, authorDomain)
+		if err != nil {
+			log.Fatalf("Error retrieving commits for domain %s, received error: %s", authorDomain, err)
+			return
+		}
+
+		report.DomainCommits[authorDomain] = domainCommits
 	}
 }
 
