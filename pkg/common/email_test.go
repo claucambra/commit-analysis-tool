@@ -2,7 +2,6 @@ package common
 
 import (
 	"math/rand"
-	"reflect"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -74,10 +73,8 @@ func TestSubtractEmailSets(t *testing.T) {
 		delete(testEmailSet, email)
 	}
 
-	if !reflect.DeepEqual(testEmailSet, subbedEmailSets) {
-		t.Fatalf(`Subtracted email sets do not match expected email set: 
-			Expected %+v
-			Received %+v`, testEmailSet, subbedEmailSets)
+	if !cmp.Equal(testEmailSet, subbedEmailSets) {
+		t.Fatalf(`Subtracted email sets do not match expected email set: %s`, cmp.Diff(testEmailSet, subbedEmailSets))
 	}
 }
 
@@ -88,16 +85,14 @@ func TestAddEmailSetToYearlyEmailMap(t *testing.T) {
 	yem := make(YearlyEmailMap, 0)
 
 	yem.AddEmailSet(emailSetA, testYear)
-	if yemAEmailSetA := yem[testYear]; !reflect.DeepEqual(yemAEmailSetA, emailSetA) {
-		t.Fatalf(`Added email set to yearly emails map when year not already in map does not match expected changes:
-			Expected %+v
-			Received %+v`, emailSetA, yemAEmailSetA)
+	if yemAEmailSetA := yem[testYear]; !cmp.Equal(yemAEmailSetA, emailSetA) {
+		t.Fatalf(`Added email set to yearly emails map when year not already in map does not match expected changes: %s`, cmp.Diff(emailSetA, yemAEmailSetA))
 	}
 
 	yem.AddEmailSet(emailSetB, testYear)
 	summedEmailSets := AddEmailSet(emailSetA, emailSetB)
 
-	if yemASummedEmailSets := yem[testYear]; !reflect.DeepEqual(yemASummedEmailSets, summedEmailSets) {
+	if yemASummedEmailSets := yem[testYear]; !cmp.Equal(yemASummedEmailSets, summedEmailSets) {
 		t.Fatalf(`Added email set to yearly emails map when year already in map does not match expected changes:
 			Expected %+v
 			Received %+v`, summedEmailSets, yemASummedEmailSets)
@@ -120,10 +115,8 @@ func TestSubtractEmailSetInYearlyEmailsMap(t *testing.T) {
 
 	expectedSubEmailSet, _ := SubtractEmailSet(emailSetA, emailSetB)
 
-	if subEmailSet := yem[testYearA]; !reflect.DeepEqual(subEmailSet, expectedSubEmailSet) {
-		t.Fatalf(`Subtracted email set from yearly email map does not match expected changes:
-			Expected %+v
-			Received %+v`, expectedSubEmailSet, subEmailSet)
+	if subEmailSet := yem[testYearA]; !cmp.Equal(subEmailSet, expectedSubEmailSet) {
+		t.Fatalf(`Subtracted email set from yearly email map does not match expected changes: %s`, cmp.Diff(expectedSubEmailSet, subEmailSet))
 	}
 }
 
@@ -138,10 +131,8 @@ func TestAddYearlyEmailMapToYearlyEmailMap(t *testing.T) {
 
 	if addedEmailSetB, ok := yemA[testYearB]; !ok {
 		t.Fatalf("Adding email set from a year of YEM B not present in YEM A should add this year to YEM A.")
-	} else if !reflect.DeepEqual(addedEmailSetB, emailSetB) {
-		t.Fatalf(`Added YLCM B to YLCM A does not match expected line changes:
-			Expected %+v
-			Received %+v`, emailSetB, addedEmailSetB)
+	} else if !cmp.Equal(addedEmailSetB, emailSetB) {
+		t.Fatalf(`Added YLCM B to YLCM A does not match expected line changes: %s`, cmp.Diff(emailSetB, addedEmailSetB))
 	}
 
 	yemB = YearlyEmailMap{testYearA: emailSetB}
@@ -149,10 +140,8 @@ func TestAddYearlyEmailMapToYearlyEmailMap(t *testing.T) {
 
 	expectedSummedEmailSets := AddEmailSet(emailSetA, emailSetB)
 
-	if addedEmailSets := yemA[testYearA]; !reflect.DeepEqual(addedEmailSets, expectedSummedEmailSets) {
-		t.Fatalf(`Added YLCM B email set to YLCM A does not match expected email set:
-			Expected %+v
-			Received %+v`, addedEmailSets, expectedSummedEmailSets)
+	if addedEmailSets := yemA[testYearA]; !cmp.Equal(addedEmailSets, expectedSummedEmailSets) {
+		t.Fatalf(`Added YLCM B email set to YLCM A does not match expected email set: %s`, cmp.Diff(addedEmailSets, expectedSummedEmailSets))
 	}
 }
 
@@ -176,9 +165,7 @@ func TestSubtractYearlyEmailMapToYearlyEmailMap(t *testing.T) {
 
 	if testYearBSubEmailSet, ok := yemA[testYearB]; !ok {
 		t.Fatalf("Test year B should now be present in YLCM A")
-	} else if !reflect.DeepEqual(testYearBSubEmailSet, expectedSubbedEmailSets) {
-		t.Fatalf(`Subtracted YLCM B email set to yearly email set map does not match expected changes:
-			Expected %+v
-			Received %+v`, expectedSubbedEmailSets, testYearBSubEmailSet)
+	} else if !cmp.Equal(testYearBSubEmailSet, expectedSubbedEmailSets) {
+		t.Fatalf(`Subtracted YLCM B email set to yearly email set map does not match expected changes: %s`, cmp.Diff(expectedSubbedEmailSets, testYearBSubEmailSet))
 	}
 }
