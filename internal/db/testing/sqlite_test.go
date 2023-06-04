@@ -7,6 +7,8 @@ import (
 	"github.com/google/go-cmp/cmp"
 )
 
+const expectedCommitCount = 20000
+
 func TestSqliteDbAddCommit(t *testing.T) {
 	sqlb := InitTestDB(t)
 	cleanup := func() { CleanupTestDB(sqlb) }
@@ -32,7 +34,11 @@ func TestSqliteCommits(t *testing.T) {
 	cleanup := func() { CleanupTestDB(sqlb) }
 	t.Cleanup(cleanup)
 
-	IngestTestCommits(sqlb, t)
+	parsedCommits := IngestTestCommits(sqlb, t)
+	receivedCommitCount := len(parsedCommits)
+	if receivedCommitCount != expectedCommitCount {
+		t.Fatalf("Missing commits. %+v %+v", expectedCommitCount, receivedCommitCount)
+	}
 
 	testCommits := ParsedTestCommitLog(t)
 
@@ -69,7 +75,11 @@ func TestSqliteAuthorCommits(t *testing.T) {
 	cleanup := func() { CleanupTestDB(sqlb) }
 	t.Cleanup(cleanup)
 
-	IngestTestCommits(sqlb, t)
+	parsedCommits := IngestTestCommits(sqlb, t)
+	receivedCommitCount := len(parsedCommits)
+	if receivedCommitCount != expectedCommitCount {
+		t.Fatalf("Missing commits. %+v %+v", expectedCommitCount, receivedCommitCount)
+	}
 
 	testAuthorEmail := "developer@claudiocambra.com"
 

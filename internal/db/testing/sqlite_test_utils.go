@@ -64,7 +64,7 @@ func ParsedTestCommitLog(t *testing.T) []*common.Commit {
 	return testCommits
 }
 
-func IngestTestCommits(sqlb *db.SQLiteBackend, t *testing.T) {
+func IngestTestCommits(sqlb *db.SQLiteBackend, t *testing.T) []*common.Commit {
 	parsedCommitLog := ParsedTestCommitLog(t)
 
 	err := sqlb.AddCommits(parsedCommitLog)
@@ -77,11 +77,7 @@ func IngestTestCommits(sqlb *db.SQLiteBackend, t *testing.T) {
 		t.Fatalf("Error checking ingested commits: %s", err)
 	}
 
-	expectedCommitCount := 20000
-	receivedCommitCount := len(parsedCommits)
-	if receivedCommitCount != expectedCommitCount {
-		t.Fatalf("Missing commits. %+v %+v", expectedCommitCount, receivedCommitCount)
-	}
+	return parsedCommits
 }
 
 func CleanupTestDB(sqlb *db.SQLiteBackend) {
