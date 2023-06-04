@@ -119,7 +119,12 @@ func (report *DomainGroupsReport) updateDomainChanges() {
 
 		for _, commit := range domainCommits {
 			report.TotalCommits[commit.Id] = commit
-			report.DomainCommits[authorDomain][commit.Id] = commit
+
+			if _, ok := report.DomainCommits[authorDomain]; !ok {
+				report.DomainCommits[authorDomain] = common.CommitMap{commit.Id: commit}
+			} else {
+				report.DomainCommits[authorDomain][commit.Id] = commit
+			}
 		}
 	}
 }

@@ -72,11 +72,7 @@ func ParseCommitLog(commitLog string) ([]*common.Commit, error) {
 
 func ParseCommit(rawCommit string) (*common.Commit, error) {
 	commitLogLines := strings.Split(rawCommit, logformat.PrettyFormatStringEnd)
-
-	//fmt.Println(rawCommit)
-
 	prettyLogLine := commitLogLines[0]
-
 	changesLogLine := commitLogLines[len(commitLogLines)-1]
 
 	insertions, _ := parseChangesLine(changesLogLine, insertionsRegex)
@@ -104,9 +100,7 @@ func parseChangesLine(changesLogLine string, specificChangesRegex *regexp.Regexp
 	}
 
 	specificChangesString := specificChangesRegex.FindString(changesLogLine)
-	//fmt.Println(specificChangesString)
 	specificChangesNumberString := numberRegex.FindString(specificChangesString)
-	//fmt.Println(specificChangesNumberString)
 	convertedChanges, err := strconv.Atoi(specificChangesNumberString)
 
 	if err != nil {
