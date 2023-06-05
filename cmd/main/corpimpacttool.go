@@ -1,4 +1,4 @@
-package corpimpactanalyzer
+package main
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 
 	"github.com/claucambra/commit-analysis-tool/internal/db"
 	"github.com/claucambra/commit-analysis-tool/pkg/logread"
-	"github.com/claucambra/commit-analysis-tool/pkg/statistics/authorgroups"
+	"github.com/claucambra/commit-analysis-tool/pkg/statistics/authorgroups/corpimpact"
 )
 
 func main() {
@@ -22,27 +22,37 @@ func main() {
 
 	flag.Parse()
 
-	if *ingestDbPath == "" && *readDbPath == "" {
-		log.Fatalf("Must provide a database to ingest to or read from. Quitting.")
-		os.Exit(0)
-	}
-
-	if *ingestDbPath != "" && *repoPath == "" {
-		log.Fatalf("Must provide a git repository path to ingest from. Quitting.")
-		os.Exit(0)
-	}
-
 	if *ingestDbPath != "" {
+
+		if *repoPath == "" {
+			log.Fatalf("Cannot ingest git repository commits to a database file without a path for said file.")
+		}
+
+		sqlb := new(db.SQLiteBackend)
+		err := sqlb.Open(*ingestDbPath)
+		if err != nil {
+			log.Fatalf("Error opening sqlite database, received error: %s", err)
+			os.Exit(0)
+		}
+
 		ingestRepoCommits(*ingestDbPath, *repoPath)
-	} else if *readDbPath != "" {
+		sqlb.Close()
+
+	} else if *readDbPath != "" && *domainGroupsFilePath != "" {
+
+		if *domainGroupsFilePath == "" {
+			log.Println("WARNING: No valid domain groupings file has been provided")
+		}
+
 		printDomainGroups(*readDbPath, *domainGroupsFilePath)
 	}
+
+	log.Fatalf("No valid individual repo or batch operation specified. Exiting.")
 }
 
 func ingestRepoCommits(ingestDbPath string, repoPath string) {
 	sqlb := new(db.SQLiteBackend)
 	err := sqlb.Open(ingestDbPath)
-
 	if err != nil {
 		log.Fatalf("Error opening sqlite database, received error: %s", err)
 		os.Exit(0)
@@ -62,16 +72,11 @@ func ingestRepoCommits(ingestDbPath string, repoPath string) {
 	log.Println("Starting commit ingest.")
 	sqlb.AddCommits(commits)
 	log.Println("Finished ingesting commits!")
+
 	sqlb.Close()
-	os.Exit(0)
 }
 
 func printDomainGroups(readDbPath string, domainGroupsFilePath string) {
-	if domainGroupsFilePath == "" {
-		log.Fatalf("Cannot create author domain group report without domain groups. Quitting.")
-		os.Exit(0)
-	}
-
 	sqlb := new(db.SQLiteBackend)
 	err := sqlb.Open(readDbPath)
 	if err != nil {
@@ -82,20 +87,19 @@ func printDomainGroups(readDbPath string, domainGroupsFilePath string) {
 	groupsJsonBytes, err := os.ReadFile(domainGroupsFilePath)
 	if err != nil {
 		log.Fatalf("Error opening domain groups json file: %s", err)
-		os.Exit(0)
+		sqlb.Close()
 	}
 
 	var groups map[string][]string
 	err = json.Unmarshal(groupsJsonBytes, &groups)
 	if err != nil {
 		log.Fatal("Error during Unmarshal(): ", err)
-		os.Exit(0)
+		sqlb.Close()
 	}
 
-	corpReport := authorgroups.NewCorporateReport(groups, sqlb, "Corporate")
+	corpReport := corpimpact.NewCorporateReport(groups, sqlb, "Corporate")
 	corpReport.Generate()
 	fmt.Printf("%+v", corpReport)
 
 	sqlb.Close()
-	os.Exit(0)
 }
