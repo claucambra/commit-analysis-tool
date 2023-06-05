@@ -116,36 +116,20 @@ func generateCorpReport(readDbPath string, domainGroupsFilePath string, sqlb *db
 	return corpReport
 }
 
-func batchCloneAndRead(urlsJsonFile string, clonePath string, domainGroupsFilePath string) {
-	urlsJsonBytes, err := os.ReadFile(urlsJsonFile)
-	if err != nil {
-		log.Fatalf("Error opening batch fetch urls JSON file: %s", err)
-	}
+func cloneRepos(urls []string, clonePath string) ([]string, []string) {
+	fullClonedPaths := make([]string, len(urls))
+	repoNames := make([]string, len(urls))
 
-	var urls []string
-	err = json.Unmarshal(urlsJsonBytes, &urls)
-	if err != nil {
-		log.Fatal("Error during Unmarshal(): ", err)
-	}
-
-	fullCsvPath := filepath.Join(clonePath, "corpreport.csv")
-	fullCsvFile, err := os.Create(fullCsvPath)
-	if err != nil {
-		log.Fatalf("Could not create report file: %s", err)
-	}
-
-	csvWriter := csv.NewWriter(fullCsvFile)
-	firstLineWritten := false
-
-	for _, url := range urls {
+	for i, url := range urls {
 		log.Printf("About to clone git repository: %s", url)
 
 		splitUrl := strings.Split(url, "/")
 		repoNameDotGit := splitUrl[len(splitUrl)-1]
 		repoName := strings.TrimSuffix(repoNameDotGit, ".git")
+		repoNames[i] = repoName
 
 		fullClonePath := filepath.Join(clonePath, repoName)
-		ingestDbPath := filepath.Join(clonePath, repoName+".db")
+		fullClonedPaths[i] = fullClonePath
 
 		var cmd *exec.Cmd
 		if _, err := os.Stat(fullClonePath); os.IsNotExist(err) {
@@ -174,11 +158,42 @@ func batchCloneAndRead(urlsJsonFile string, clonePath string, domainGroupsFilePa
 		}
 
 		log.Printf("Clone of %s now complete.", repoName)
+	}
+
+	return fullClonedPaths, repoNames
+}
+
+func batchCloneAndRead(urlsJsonFile string, clonePath string, domainGroupsFilePath string) {
+	urlsJsonBytes, err := os.ReadFile(urlsJsonFile)
+	if err != nil {
+		log.Fatalf("Error opening batch fetch urls JSON file: %s", err)
+	}
+
+	var urls []string
+	err = json.Unmarshal(urlsJsonBytes, &urls)
+	if err != nil {
+		log.Fatal("Error during Unmarshal(): ", err)
+	}
+
+	fullCsvPath := filepath.Join(clonePath, "corpreport.csv")
+	fullCsvFile, err := os.Create(fullCsvPath)
+	if err != nil {
+		log.Fatalf("Could not create report file: %s", err)
+	}
+
+	csvWriter := csv.NewWriter(fullCsvFile)
+	firstLineWritten := false
+
+	clonedPaths, repoNames := cloneRepos(urls, clonePath)
+
+	for i, clonedRepoPath := range clonedPaths {
+		repoName := repoNames[i]
+		ingestDbPath := filepath.Join(clonePath, repoName+".db")
 
 		sqlb := newSql(ingestDbPath)
 
 		log.Printf("Beginning commit ingest at %s", ingestDbPath)
-		ingestRepoCommits(ingestDbPath, fullClonePath, sqlb)
+		ingestRepoCommits(ingestDbPath, clonedRepoPath, sqlb)
 		log.Printf("Commit ingest for %s now complete.", repoName)
 
 		log.Printf("Beginning corporate impact analysis.")
