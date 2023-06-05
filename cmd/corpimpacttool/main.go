@@ -1,4 +1,4 @@
-package main
+package corpimpactanalyzer
 
 import (
 	"encoding/json"
