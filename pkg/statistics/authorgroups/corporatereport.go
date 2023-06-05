@@ -2,6 +2,7 @@ package authorgroups
 
 import (
 	"github.com/claucambra/commit-analysis-tool/internal/db"
+	"github.com/claucambra/commit-analysis-tool/pkg/statistics/commitimpact"
 )
 
 type CorporateReport struct {
@@ -19,6 +20,9 @@ type CorporateReport struct {
 	DomainGroupsReport           *DomainGroupsReport
 	CorporateGroupSurvivalReport *GroupSurvivalReport
 	CommunityGroupSurvivalReport *GroupSurvivalReport
+
+	CorporateCommitImpactReport *commitimpact.CommitImpactReport
+	CommunityCommitImpactReport *commitimpact.CommitImpactReport
 
 	sqlb *db.SQLiteBackend
 }
@@ -38,24 +42,32 @@ func NewCorporateReport(groupsOfDomains map[string][]string, sqlb *db.SQLiteBack
 func (corpReport *CorporateReport) Generate() {
 	domainGroupsReport := NewDomainGroupsReport(corpReport.GroupsOfDomains, corpReport.sqlb)
 	domainGroupsReport.Generate()
+	corpReport.DomainGroupsReport = domainGroupsReport
 
 	corpGroup := domainGroupsReport.GroupData(corpReport.CorporateGroupName)
+	corpReport.CorporateGroup = corpGroup
+
 	commGroup := domainGroupsReport.UnknownGroupData()
+	corpReport.CommunityGroup = commGroup
 
 	insertionsCorrel, deletionsCorrel, authorsCorrel := corpGroup.Correlation(commGroup)
-
-	corpGroupSurvival := NewGroupSurvivalReport(corpReport.sqlb, corpGroup.Authors)
-	corpGroupSurvival.Generate()
-
-	commGroupSurvival := NewGroupSurvivalReport(corpReport.sqlb, commGroup.Authors)
-	commGroupSurvival.Generate()
-
-	corpReport.DomainGroupsReport = domainGroupsReport
-	corpReport.CorporateGroup = corpGroup
-	corpReport.CommunityGroup = commGroup
 	corpReport.InsertionsCorrel = insertionsCorrel
 	corpReport.DeletionsCorrel = deletionsCorrel
 	corpReport.AuthorsCorrel = authorsCorrel
+
+	corpGroupSurvival := NewGroupSurvivalReport(corpReport.sqlb, corpGroup.Authors)
+	corpGroupSurvival.Generate()
 	corpReport.CorporateGroupSurvivalReport = corpGroupSurvival
+
+	commGroupSurvival := NewGroupSurvivalReport(corpReport.sqlb, commGroup.Authors)
+	commGroupSurvival.Generate()
 	corpReport.CommunityGroupSurvivalReport = commGroupSurvival
+
+	corpGroupImpact := commitimpact.NewCommitImpactReport(corpGroup.Commits)
+	corpGroupImpact.Generate()
+	corpReport.CorporateCommitImpactReport = corpGroupImpact
+
+	commGroupImpact := commitimpact.NewCommitImpactReport(commGroup.Commits)
+	commGroupImpact.Generate()
+	corpReport.CommunityCommitImpactReport = commGroupImpact
 }
