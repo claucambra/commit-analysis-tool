@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -56,8 +57,10 @@ func main() {
 		}
 
 		sqlb := newSql(*readDbPath)
-		printDomainGroups(*readDbPath, *domainGroupsFilePath, sqlb)
+		report := generateCorpReport(*readDbPath, *domainGroupsFilePath, sqlb)
 		sqlb.Close()
+
+		fmt.Printf("%+v", report)
 
 	} else {
 
@@ -93,7 +96,7 @@ func ingestRepoCommits(ingestDbPath string, repoPath string, sqlb *db.SQLiteBack
 	log.Println("Finished ingesting commits!")
 }
 
-func printDomainGroups(readDbPath string, domainGroupsFilePath string, sqlb *db.SQLiteBackend) {
+func generateCorpReport(readDbPath string, domainGroupsFilePath string, sqlb *db.SQLiteBackend) *corpimpact.CorporateReport {
 	groupsJsonBytes, err := os.ReadFile(domainGroupsFilePath)
 	if err != nil {
 		log.Fatalf("Error opening domain groups json file: %s", err)
@@ -109,7 +112,8 @@ func printDomainGroups(readDbPath string, domainGroupsFilePath string, sqlb *db.
 
 	corpReport := corpimpact.NewCorporateReport(groups, sqlb, "Corporate")
 	corpReport.Generate()
-	fmt.Printf("%+v", corpReport)
+
+	return corpReport
 }
 
 func batchCloneAndRead(urlsJsonFile string, clonePath string, domainGroupsFilePath string) {
@@ -169,7 +173,7 @@ func batchCloneAndRead(urlsJsonFile string, clonePath string, domainGroupsFilePa
 		log.Printf("Commit ingest for %s now complete.", repoName)
 
 		log.Printf("Beginning corporate impact analysis.")
-		printDomainGroups(ingestDbPath, domainGroupsFilePath, sqlb)
+		report := generateCorpReport(ingestDbPath, domainGroupsFilePath, sqlb)
 
 		sqlb.Close()
 	}
