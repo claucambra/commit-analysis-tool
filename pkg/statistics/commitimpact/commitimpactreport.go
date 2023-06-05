@@ -78,7 +78,7 @@ func (cir *CommitImpactReport) generateImpacts(codeMatchCommits map[string][]*co
 		impactScore := (insertScore + deleteScore) * weight
 
 		if impactScore > suspiciouslyHighImpactThreshold {
-			log.Printf("Found a commit (%s) with a suspiciously impact score, ignoring.", commitId)
+			log.Printf("Found a commit (%s) with a suspiciously high impact score, ignoring.", commitId)
 			continue
 		}
 
