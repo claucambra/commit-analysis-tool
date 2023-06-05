@@ -138,9 +138,7 @@ func batchCloneAndRead(urlsJsonFile string, clonePath string, domainGroupsFilePa
 		if _, err := os.Stat(fullClonePath); os.IsNotExist(err) {
 			cmd = exec.Command("git",
 				"clone",
-				"--verbose",
 				"--progress",
-				"--filter=blob:none",
 				url,
 				fullClonePath)
 		} else {
