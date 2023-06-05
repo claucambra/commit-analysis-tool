@@ -1,7 +1,8 @@
-package authorgroups
+package corpimpact
 
 import (
 	"github.com/claucambra/commit-analysis-tool/internal/db"
+	"github.com/claucambra/commit-analysis-tool/pkg/statistics/authorgroups"
 	"github.com/claucambra/commit-analysis-tool/pkg/statistics/commitimpact"
 )
 
@@ -9,17 +10,17 @@ type CorporateReport struct {
 	CorporateGroupName string
 	GroupsOfDomains    map[string][]string
 
-	CorporateGroup *GroupData
-	CommunityGroup *GroupData
+	CorporateGroup *authorgroups.GroupData
+	CommunityGroup *authorgroups.GroupData
 
 	// Correlations based upon year-by-year aggregated figures for both groups
 	InsertionsCorrel float64
 	DeletionsCorrel  float64
 	AuthorsCorrel    float64
 
-	DomainGroupsReport           *DomainGroupsReport
-	CorporateGroupSurvivalReport *GroupSurvivalReport
-	CommunityGroupSurvivalReport *GroupSurvivalReport
+	DomainGroupsReport           *authorgroups.DomainGroupsReport
+	CorporateGroupSurvivalReport *authorgroups.GroupSurvivalReport
+	CommunityGroupSurvivalReport *authorgroups.GroupSurvivalReport
 
 	CorporateCommitImpactReport *commitimpact.CommitImpactReport
 	CommunityCommitImpactReport *commitimpact.CommitImpactReport
@@ -40,7 +41,7 @@ func NewCorporateReport(groupsOfDomains map[string][]string, sqlb *db.SQLiteBack
 }
 
 func (corpReport *CorporateReport) Generate() {
-	domainGroupsReport := NewDomainGroupsReport(corpReport.GroupsOfDomains, corpReport.sqlb)
+	domainGroupsReport := authorgroups.NewDomainGroupsReport(corpReport.GroupsOfDomains, corpReport.sqlb)
 	domainGroupsReport.Generate()
 	corpReport.DomainGroupsReport = domainGroupsReport
 
@@ -55,11 +56,11 @@ func (corpReport *CorporateReport) Generate() {
 	corpReport.DeletionsCorrel = deletionsCorrel
 	corpReport.AuthorsCorrel = authorsCorrel
 
-	corpGroupSurvival := NewGroupSurvivalReport(corpReport.sqlb, corpGroup.Authors)
+	corpGroupSurvival := authorgroups.NewGroupSurvivalReport(corpReport.sqlb, corpGroup.Authors)
 	corpGroupSurvival.Generate()
 	corpReport.CorporateGroupSurvivalReport = corpGroupSurvival
 
-	commGroupSurvival := NewGroupSurvivalReport(corpReport.sqlb, commGroup.Authors)
+	commGroupSurvival := authorgroups.NewGroupSurvivalReport(corpReport.sqlb, commGroup.Authors)
 	commGroupSurvival.Generate()
 	corpReport.CommunityGroupSurvivalReport = commGroupSurvival
 
