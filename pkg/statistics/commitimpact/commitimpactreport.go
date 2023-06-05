@@ -17,6 +17,8 @@ const testDataKey = "testdata"
 const insertionWeight = 0.9
 const deletionWeight = 0.7
 
+const suspiciouslyHighImpactThreshold = 5000
+
 type CommitImpactReport struct {
 	Commits    common.CommitMap
 	Impact     map[string]float64
@@ -74,6 +76,11 @@ func (cir *CommitImpactReport) generateImpacts(codeMatchCommits map[string][]*co
 		deleteScore := float64(commit.NumDeletions) * deletionWeight
 
 		impactScore := (insertScore + deleteScore) * weight
+
+		if impactScore > suspiciouslyHighImpactThreshold {
+			log.Printf("Found a commit (%s) with a suspiciously impact score, ignoring.", commitId)
+			continue
+		}
 
 		commitImpacts = append(commitImpacts, impactScore)
 		cir.Impact[commitId] = impactScore
