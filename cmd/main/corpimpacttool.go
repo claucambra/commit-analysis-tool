@@ -28,14 +28,8 @@ func main() {
 			log.Fatalf("Cannot ingest git repository commits to a database file without a path for said file.")
 		}
 
-		sqlb := new(db.SQLiteBackend)
-		err := sqlb.Open(*ingestDbPath)
-		if err != nil {
-			log.Fatalf("Error opening sqlite database, received error: %s", err)
-			os.Exit(0)
-		}
-
-		ingestRepoCommits(*ingestDbPath, *repoPath)
+		sqlb := newSql(*ingestDbPath)
+		ingestRepoCommits(*ingestDbPath, *repoPath, sqlb)
 		sqlb.Close()
 
 	} else if *readDbPath != "" && *domainGroupsFilePath != "" {
@@ -44,21 +38,29 @@ func main() {
 			log.Println("WARNING: No valid domain groupings file has been provided")
 		}
 
-		printDomainGroups(*readDbPath, *domainGroupsFilePath)
-	}
+		sqlb := newSql(*readDbPath)
+		printDomainGroups(*readDbPath, *domainGroupsFilePath, sqlb)
+		sqlb.Close()
 
-	log.Fatalf("No valid individual repo or batch operation specified. Exiting.")
+	} else {
+
+		log.Fatalf("No valid individual repo or batch operation specified. Exiting.")
+
+	}
 }
 
-func ingestRepoCommits(ingestDbPath string, repoPath string) {
+func newSql(dbpath string) *db.SQLiteBackend {
 	sqlb := new(db.SQLiteBackend)
-	err := sqlb.Open(ingestDbPath)
+	err := sqlb.Open(dbpath)
 	if err != nil {
 		log.Fatalf("Error opening sqlite database, received error: %s", err)
-		os.Exit(0)
 	}
 
-	err = sqlb.Setup()
+	return sqlb
+}
+
+func ingestRepoCommits(ingestDbPath string, repoPath string, sqlb *db.SQLiteBackend) {
+	err := sqlb.Setup()
 	if err != nil {
 		log.Fatalf("Error setting up sqlite database, received error: %s", err)
 		os.Exit(0)
@@ -72,18 +74,9 @@ func ingestRepoCommits(ingestDbPath string, repoPath string) {
 	log.Println("Starting commit ingest.")
 	sqlb.AddCommits(commits)
 	log.Println("Finished ingesting commits!")
-
-	sqlb.Close()
 }
 
-func printDomainGroups(readDbPath string, domainGroupsFilePath string) {
-	sqlb := new(db.SQLiteBackend)
-	err := sqlb.Open(readDbPath)
-	if err != nil {
-		log.Fatalf("Error opening sqlite database, received error: %s", err)
-		os.Exit(0)
-	}
-
+func printDomainGroups(readDbPath string, domainGroupsFilePath string, sqlb *db.SQLiteBackend) {
 	groupsJsonBytes, err := os.ReadFile(domainGroupsFilePath)
 	if err != nil {
 		log.Fatalf("Error opening domain groups json file: %s", err)
@@ -100,6 +93,4 @@ func printDomainGroups(readDbPath string, domainGroupsFilePath string) {
 	corpReport := corpimpact.NewCorporateReport(groups, sqlb, "Corporate")
 	corpReport.Generate()
 	fmt.Printf("%+v", corpReport)
-
-	sqlb.Close()
 }
