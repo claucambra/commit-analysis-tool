@@ -134,19 +134,30 @@ func batchCloneAndRead(urlsJsonFile string, clonePath string, domainGroupsFilePa
 		fullClonePath := filepath.Join(clonePath, repoName)
 		ingestDbPath := filepath.Join(clonePath, repoName+".db")
 
-		cmd := exec.Command("git",
-			"clone",
-			"--no-tags",
-			"--filter=blob:none",
-			"--filter=tree:0",
-			url,
-			fullClonePath)
+		var cmd *exec.Cmd
+		if _, err := os.Stat(fullClonePath); os.IsNotExist(err) {
+			cmd = exec.Command("git",
+				"clone",
+				"--no-tags",
+				"--filter=tree:0",
+				"--verbose",
+				"--progress",
+				url,
+				fullClonePath)
+		} else {
+			cmd = exec.Command("git",
+				"-C",
+				fullClonePath,
+				"pull")
+		}
 
 		var stdBuffer bytes.Buffer
 		mw := io.MultiWriter(os.Stdout, &stdBuffer)
 
 		cmd.Stdout = mw
 		cmd.Stderr = mw
+
+		log.Printf("About to run: %s", cmd.String())
 
 		if err := cmd.Run(); err != nil {
 			log.Panic(err)
