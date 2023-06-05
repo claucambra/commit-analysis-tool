@@ -23,6 +23,16 @@ func NewCommitImpactReport(commits common.CommitMap) *CommitImpactReport {
 	}
 }
 
+func codeMap() map[string][]string {
+	return map[string][]string{
+		featureKey:       {`\bintroduc(e|tion)+\b`, `add(ed|ition)*\b\s+(\ba\b)*\s*\b(support|new|option|way|function)(s)*\b`},
+		bugfixKey:        {`\bfix(ed|es)*\b`, `\bsanitise\b`, `\bbroken\b`, `\bbreak(s|ing)+\b`, `\brevert(s|ing)*\b`, `add(ed|ition)*\b\s+(\ba\b)*\s*\b(missing)*\b`},
+		documentationKey: {`\bdocument\b`, `\bexplain\b`, `\bcomment\b`},
+		testingKey:       {`\btest(ing)*\b`},
+		testDataKey:      {`\btest data\b`},
+	}
+}
+
 func codingWeightMap() map[string]float64 {
 	return map[string]float64{
 		featureKey:       1.0,
