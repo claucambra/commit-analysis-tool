@@ -17,7 +17,7 @@ func testEmailGroups() map[string][]string {
 	}
 }
 func testGroupData(t *testing.T) *GroupData {
-	marshalledTestGroupDataBytes, err := os.ReadFile("testdata/domaingroupsreport_test_corpgroupdata.json")
+	marshalledTestGroupDataBytes, err := os.ReadFile("testdata/domaingroupsreport_test_orggroupdata.json")
 	if err != nil {
 		t.Fatalf("Could not read test marshalled group data file: %s", err)
 	}
