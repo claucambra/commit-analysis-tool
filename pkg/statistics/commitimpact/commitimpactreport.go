@@ -1,7 +1,11 @@
 package commitimpact
 
 import (
+	"log"
+
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
+	"github.com/claucambra/commit-analysis-tool/pkg/statistics/commitcoding"
+	"gonum.org/v1/gonum/stat"
 )
 
 const featureKey = "feature"
@@ -9,6 +13,9 @@ const bugfixKey = "bugfix"
 const documentationKey = "documentation"
 const testingKey = "testing"
 const testDataKey = "testdata"
+
+const insertionWeight = 0.9
+const deletionWeight = 0.7
 
 type CommitImpactReport struct {
 	Commits    common.CommitMap
@@ -41,4 +48,46 @@ func codingWeightMap() map[string]float64 {
 		testingKey:       0.3,
 		testDataKey:      0.0,
 	}
+}
+
+func (cir *CommitImpactReport) generateImpacts(codeMatchCommits map[string][]*common.Commit) {
+	log.Printf("Generating commit impact scores.")
+
+	codeWeightMap := codingWeightMap()
+	commitWeights := map[string]float64{}
+	commitImpacts := []float64{}
+
+	for codeCategory, commits := range codeMatchCommits {
+		for _, commit := range commits {
+			commitWeights[commit.Id] = codeWeightMap[codeCategory]
+		}
+	}
+
+	for commitId, weight := range commitWeights {
+		commit, ok := cir.Commits[commitId]
+		if !ok {
+			log.Fatalf("Could not find commit with id %s in commit impact report commits.", commitId)
+			continue
+		}
+
+		insertScore := float64(commit.NumInsertions) * insertionWeight
+		deleteScore := float64(commit.NumDeletions) * deletionWeight
+
+		impactScore := (insertScore + deleteScore) * weight
+
+		commitImpacts = append(commitImpacts, impactScore)
+		cir.Impact[commitId] = impactScore
+	}
+
+	cir.MeanImpact = stat.Mean(commitImpacts, nil)
+
+	log.Printf("Analysed %v commits, produced a mean impact score of %f", len(commitImpacts), cir.MeanImpact)
+}
+
+// Not all commits we have will get impact scores, this depends on the CommitCodingReport
+func (cir *CommitImpactReport) Generate() {
+	codingReport := commitcoding.NewCommitCodingReport(cir.Commits, codeMap())
+	codingReport.Generate()
+
+	cir.generateImpacts(codingReport.CodeMatchCommits)
 }
