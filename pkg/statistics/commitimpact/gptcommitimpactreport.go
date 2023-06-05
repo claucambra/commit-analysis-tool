@@ -30,8 +30,8 @@ func NewGPTCommitImpactReport(commits common.CommitMap, gptClient *openai.Client
 	}
 }
 
-func (cir *GPTCommitImpactReport) randomCommits() []*common.Commit {
-	numCommits := len(cir.Commits)
+func (gcir *GPTCommitImpactReport) randomCommits() []*common.Commit {
+	numCommits := len(gcir.Commits)
 	numRandomCommits := common.MinInt(commitLimit, numCommits)
 
 	log.Printf("Choosing %v commits to send to openai for analysis.", numRandomCommits)
@@ -40,7 +40,7 @@ func (cir *GPTCommitImpactReport) randomCommits() []*common.Commit {
 	randomCommitSlice := make([]*common.Commit, numRandomCommits)
 
 	i := 0
-	for _, commit := range cir.Commits {
+	for _, commit := range gcir.Commits {
 		commitSlice[i] = commit
 		i++
 	}
@@ -53,7 +53,7 @@ func (cir *GPTCommitImpactReport) randomCommits() []*common.Commit {
 	return randomCommitSlice
 }
 
-func (cir *GPTCommitImpactReport) buildPromptString(commits []*common.Commit) string {
+func (gcir *GPTCommitImpactReport) buildPromptString(commits []*common.Commit) string {
 	promptString := "The following commit data is formatted as an array of JSON objects. "
 
 	promptString += "Commits containing bodies or subjects which describe new features are highly impactful. "
@@ -86,17 +86,17 @@ func (cir *GPTCommitImpactReport) buildPromptString(commits []*common.Commit) st
 	return promptString
 }
 
-func (cir *GPTCommitImpactReport) generatePrompt() string {
+func (gcir *GPTCommitImpactReport) generatePrompt() string {
 	log.Printf("Generating prompt for openai request.")
 
-	promptCommits := cir.randomCommits()
-	promptString := cir.buildPromptString(promptCommits)
+	promptCommits := gcir.randomCommits()
+	promptString := gcir.buildPromptString(promptCommits)
 
 	return promptString
 }
 
-func (cir *GPTCommitImpactReport) Generate() {
-	response, err := cir.gptClient.CreateChatCompletion(
+func (gcir *GPTCommitImpactReport) Generate() {
+	response, err := gcir.gptClient.CreateChatCompletion(
 		context.Background(),
 		openai.ChatCompletionRequest{
 			Model:     gptModel,
@@ -104,7 +104,7 @@ func (cir *GPTCommitImpactReport) Generate() {
 			Messages: []openai.ChatCompletionMessage{
 				{
 					Role:    openai.ChatMessageRoleUser,
-					Content: cir.generatePrompt(),
+					Content: gcir.generatePrompt(),
 				},
 			},
 		},
