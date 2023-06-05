@@ -138,10 +138,9 @@ func batchCloneAndRead(urlsJsonFile string, clonePath string, domainGroupsFilePa
 		if _, err := os.Stat(fullClonePath); os.IsNotExist(err) {
 			cmd = exec.Command("git",
 				"clone",
-				"--no-tags",
-				"--filter=tree:0",
 				"--verbose",
 				"--progress",
+				"--filter=blob:none",
 				url,
 				fullClonePath)
 		} else {
@@ -163,14 +162,15 @@ func batchCloneAndRead(urlsJsonFile string, clonePath string, domainGroupsFilePa
 			log.Panic(err)
 		}
 
-		log.Println(stdBuffer.String())
+		log.Printf("Clone of %s now complete.", repoName)
 
 		sqlb := newSql(ingestDbPath)
 
-		log.Printf("Clone of %s now complete. Beginning commit ingest at %s", repoName, ingestDbPath)
+		log.Printf("Beginning commit ingest at %s", ingestDbPath)
 		ingestRepoCommits(ingestDbPath, fullClonePath, sqlb)
+		log.Printf("Commit ingest for %s now complete.", repoName)
 
-		log.Printf("Commit ingest for %s now complete. Beginning corporate impact analysis.", repoName)
+		log.Printf("Beginning corporate impact analysis.")
 		printDomainGroups(ingestDbPath, domainGroupsFilePath, sqlb)
 
 		sqlb.Close()
