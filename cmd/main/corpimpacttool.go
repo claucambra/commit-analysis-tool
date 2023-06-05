@@ -128,6 +128,15 @@ func batchCloneAndRead(urlsJsonFile string, clonePath string, domainGroupsFilePa
 		log.Fatal("Error during Unmarshal(): ", err)
 	}
 
+	fullCsvPath := filepath.Join(clonePath, "corpreport.csv")
+	fullCsvFile, err := os.Create(fullCsvPath)
+	if err != nil {
+		log.Fatalf("Could not create report file: %s", err)
+	}
+
+	csvWriter := csv.NewWriter(fullCsvFile)
+	firstLineWritten := false
+
 	for _, url := range urls {
 		log.Printf("About to clone git repository: %s", url)
 
@@ -176,5 +185,11 @@ func batchCloneAndRead(urlsJsonFile string, clonePath string, domainGroupsFilePa
 		report := generateCorpReport(ingestDbPath, domainGroupsFilePath, sqlb)
 
 		sqlb.Close()
+
+		fmt.Printf("\n%+v\n", report)
+
+		csvline := report.CSVString(repoName, !firstLineWritten)
+		firstLineWritten = true
+		csvWriter.WriteAll(csvline)
 	}
 }
