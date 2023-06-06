@@ -15,9 +15,9 @@ type GroupData struct {
 	YearlyLineChanges common.YearlyLineChangeMap
 	YearlyAuthors     common.YearlyEmailMap
 
-	AuthorsPercent    float32
-	InsertionsPercent float32
-	DeletionsPercent  float32
+	AuthorsPercent    float64
+	InsertionsPercent float64
+	DeletionsPercent  float64
 }
 
 func NewGroupData(report *DomainGroupsReport,
@@ -35,9 +35,9 @@ func NewGroupData(report *DomainGroupsReport,
 	groupData.Commits = groupCommits
 	groupData.YearlyLineChanges = groupYearlyLineChanges
 	groupData.YearlyAuthors = groupYearlyAuthors
-	groupData.AuthorsPercent = (float32(len(groupAuthors)) / float32(len(report.TotalAuthors))) * 100
-	groupData.InsertionsPercent = (float32(groupLineChanges.NumInsertions) / float32(report.TotalChanges.NumInsertions)) * 100
-	groupData.DeletionsPercent = (float32(groupLineChanges.NumDeletions) / float32(report.TotalChanges.NumDeletions)) * 100
+	groupData.AuthorsPercent = (float64(len(groupAuthors)) / float64(len(report.TotalAuthors))) * 100
+	groupData.InsertionsPercent = (float64(groupLineChanges.NumInsertions) / float64(report.TotalChanges.NumInsertions)) * 100
+	groupData.DeletionsPercent = (float64(groupLineChanges.NumDeletions) / float64(report.TotalChanges.NumDeletions)) * 100
 
 	return groupData
 }
