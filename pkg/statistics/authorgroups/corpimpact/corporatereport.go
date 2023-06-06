@@ -76,7 +76,7 @@ func (corpReport *CorporateReport) Generate() {
 }
 
 func (cr *CorporateReport) CSVString(name string, includeHeader bool) [][]string {
-	numSurvValuesToWrite := 8
+	numSurvValuesToWrite := 10
 	safeCorpSurvivalValues := make([]float64, numSurvValuesToWrite)
 	safeCommSurvivalValues := make([]float64, numSurvValuesToWrite)
 	actualCorpSurvivalValuesLen := len(cr.CorporateGroupSurvivalReport.AuthorsSurvival)
@@ -86,11 +86,11 @@ func (cr *CorporateReport) CSVString(name string, includeHeader bool) [][]string
 		corpSurvivalVal := 0.
 		commSurvivalVal := 0.
 
-		if i > actualCorpSurvivalValuesLen-1 {
+		if i < actualCorpSurvivalValuesLen {
 			corpSurvivalVal = cr.CorporateGroupSurvivalReport.AuthorsSurvival[i]
 		}
 
-		if i > actualCommSurvivalValuesLen-1 {
+		if i < actualCommSurvivalValuesLen {
 			commSurvivalVal = cr.CommunityGroupSurvivalReport.AuthorsSurvival[i]
 		}
 
@@ -106,26 +106,13 @@ func (cr *CorporateReport) CSVString(name string, includeHeader bool) [][]string
 		strconv.FormatFloat(cr.AuthorsCorrel, 'E', -1, 64),
 		strconv.FormatFloat(cr.CorporateCommitImpactReport.MeanImpact, 'E', -1, 64),
 		strconv.FormatFloat(cr.CommunityCommitImpactReport.MeanImpact, 'E', -1, 64),
-		strconv.FormatFloat(safeCorpSurvivalValues[0], 'E', -1, 64),
-		strconv.FormatFloat(safeCorpSurvivalValues[1], 'E', -1, 64),
-		strconv.FormatFloat(safeCorpSurvivalValues[2], 'E', -1, 64),
-		strconv.FormatFloat(safeCorpSurvivalValues[3], 'E', -1, 64),
-		strconv.FormatFloat(safeCorpSurvivalValues[4], 'E', -1, 64),
-		strconv.FormatFloat(safeCorpSurvivalValues[5], 'E', -1, 64),
-		strconv.FormatFloat(safeCorpSurvivalValues[6], 'E', -1, 64),
-		strconv.FormatFloat(safeCorpSurvivalValues[7], 'E', -1, 64),
-		strconv.FormatFloat(safeCorpSurvivalValues[8], 'E', -1, 64),
-		strconv.FormatFloat(safeCorpSurvivalValues[9], 'E', -1, 64),
-		strconv.FormatFloat(safeCommSurvivalValues[0], 'E', -1, 64),
-		strconv.FormatFloat(safeCommSurvivalValues[1], 'E', -1, 64),
-		strconv.FormatFloat(safeCommSurvivalValues[2], 'E', -1, 64),
-		strconv.FormatFloat(safeCommSurvivalValues[3], 'E', -1, 64),
-		strconv.FormatFloat(safeCommSurvivalValues[4], 'E', -1, 64),
-		strconv.FormatFloat(safeCommSurvivalValues[5], 'E', -1, 64),
-		strconv.FormatFloat(safeCommSurvivalValues[6], 'E', -1, 64),
-		strconv.FormatFloat(safeCommSurvivalValues[7], 'E', -1, 64),
-		strconv.FormatFloat(safeCommSurvivalValues[8], 'E', -1, 64),
-		strconv.FormatFloat(safeCommSurvivalValues[9], 'E', -1, 64),
+	}
+
+	for i := 0; i < numSurvValuesToWrite; i++ {
+		csvfiedReport = append(csvfiedReport, strconv.FormatFloat(safeCorpSurvivalValues[i], 'E', -1, 64))
+	}
+	for i := 0; i < numSurvValuesToWrite; i++ {
+		csvfiedReport = append(csvfiedReport, strconv.FormatFloat(safeCommSurvivalValues[i], 'E', -1, 64))
 	}
 
 	var finalReport [][]string
