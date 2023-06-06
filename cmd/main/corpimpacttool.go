@@ -188,6 +188,9 @@ func batchCloneAndRead(urlsJsonFile string, clonePath string, domainGroupsFilePa
 
 	for i, clonedRepoPath := range clonedPaths {
 		repoName := repoNames[i]
+
+		log.Printf("\n\nBeginning analysis of: %s\n\n", repoName)
+
 		ingestDbPath := filepath.Join(clonePath, repoName+".db")
 
 		sqlb := newSql(ingestDbPath)
