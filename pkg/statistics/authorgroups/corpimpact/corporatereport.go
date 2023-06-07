@@ -110,24 +110,24 @@ func (cr *CorporateReport) CSVString(name string, includeHeader bool) [][]string
 		strconv.FormatInt(int64(cr.CommunityGroup.LineChanges.NumInsertions), 10),
 		strconv.FormatInt(int64(cr.CommunityGroup.LineChanges.NumDeletions), 10),
 		strconv.FormatInt(int64(len(cr.CommunityGroup.Authors)), 10),
-		strconv.FormatFloat(cr.CorporateGroup.InsertionsPercent, 'E', -1, 64),
-		strconv.FormatFloat(cr.CorporateGroup.DeletionsPercent, 'E', -1, 64),
-		strconv.FormatFloat(cr.CorporateGroup.AuthorsPercent, 'E', -1, 64),
-		strconv.FormatFloat(cr.CommunityGroup.InsertionsPercent, 'E', -1, 64),
-		strconv.FormatFloat(cr.CommunityGroup.DeletionsPercent, 'E', -1, 64),
-		strconv.FormatFloat(cr.CommunityGroup.AuthorsPercent, 'E', -1, 64),
-		strconv.FormatFloat(cr.InsertionsCorrel, 'E', -1, 64),
-		strconv.FormatFloat(cr.DeletionsCorrel, 'E', -1, 64),
-		strconv.FormatFloat(cr.AuthorsCorrel, 'E', -1, 64),
-		strconv.FormatFloat(cr.CorporateCommitImpactReport.MeanImpact, 'E', -1, 64),
-		strconv.FormatFloat(cr.CommunityCommitImpactReport.MeanImpact, 'E', -1, 64),
+		strconv.FormatFloat(cr.CorporateGroup.InsertionsPercent, 'f', -1, 64),
+		strconv.FormatFloat(cr.CorporateGroup.DeletionsPercent, 'f', -1, 64),
+		strconv.FormatFloat(cr.CorporateGroup.AuthorsPercent, 'f', -1, 64),
+		strconv.FormatFloat(cr.CommunityGroup.InsertionsPercent, 'f', -1, 64),
+		strconv.FormatFloat(cr.CommunityGroup.DeletionsPercent, 'f', -1, 64),
+		strconv.FormatFloat(cr.CommunityGroup.AuthorsPercent, 'f', -1, 64),
+		strconv.FormatFloat(cr.InsertionsCorrel, 'f', -1, 64),
+		strconv.FormatFloat(cr.DeletionsCorrel, 'f', -1, 64),
+		strconv.FormatFloat(cr.AuthorsCorrel, 'f', -1, 64),
+		strconv.FormatFloat(cr.CorporateCommitImpactReport.MeanImpact, 'f', -1, 64),
+		strconv.FormatFloat(cr.CommunityCommitImpactReport.MeanImpact, 'f', -1, 64),
 	}
 
 	for i := 0; i < numSurvValuesToWrite; i++ {
-		csvfiedReport = append(csvfiedReport, strconv.FormatFloat(safeCorpSurvivalValues[i], 'E', -1, 64))
+		csvfiedReport = append(csvfiedReport, strconv.FormatFloat(safeCorpSurvivalValues[i], 'f', -1, 64))
 	}
 	for i := 0; i < numSurvValuesToWrite; i++ {
-		csvfiedReport = append(csvfiedReport, strconv.FormatFloat(safeCommSurvivalValues[i], 'E', -1, 64))
+		csvfiedReport = append(csvfiedReport, strconv.FormatFloat(safeCommSurvivalValues[i], 'f', -1, 64))
 	}
 
 	var finalReport [][]string
