@@ -208,6 +208,9 @@ func batchCloneAndRead(urlsJsonFile string, clonePath string, domainGroupsFilePa
 
 		csvline := report.CSVString(repoName, !firstLineWritten)
 		firstLineWritten = true
-		csvWriter.WriteAll(csvline)
+		err = csvWriter.WriteAll(csvline)
+		if err != nil {
+			log.Fatalf("Error writing to csv: %s", err)
+		}
 	}
 }
