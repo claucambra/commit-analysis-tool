@@ -82,6 +82,7 @@ func (cir *CommitImpactReport) generateImpacts(codeMatchCommits map[string][]*co
 			continue
 		}
 
+		// Bias towards lower impact
 		commitImpacts = append(commitImpacts, impactScore)
 		cir.Impact[commitId] = impactScore
 	}

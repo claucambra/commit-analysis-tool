@@ -10,8 +10,6 @@ import (
 	"github.com/claucambra/commit-analysis-tool/pkg/statistics/commitimpact"
 )
 
-type YearMonthCount map[int]map[int]int
-
 type CorporateReport struct {
 	CorporateGroupName string
 	GroupsOfDomains    map[string][]string
@@ -46,38 +44,39 @@ func NewCorporateReport(groupsOfDomains map[string][]string, sqlb *db.SQLiteBack
 	}
 }
 
-func (corpReport *CorporateReport) Generate() {
-	domainGroupsReport := authorgroups.NewDomainGroupsReport(corpReport.GroupsOfDomains, corpReport.sqlb)
+func (cr *CorporateReport) Generate() {
+	domainGroupsReport := authorgroups.NewDomainGroupsReport(cr.GroupsOfDomains, cr.sqlb)
 	domainGroupsReport.Generate()
-	corpReport.DomainGroupsReport = domainGroupsReport
+	cr.DomainGroupsReport = domainGroupsReport
 
-	corpGroup := domainGroupsReport.GroupData(corpReport.CorporateGroupName)
-	corpReport.CorporateGroup = corpGroup
+	corpGroup := domainGroupsReport.GroupData(cr.CorporateGroupName)
+	cr.CorporateGroup = corpGroup
 
 	commGroup := domainGroupsReport.UnknownGroupData()
-	corpReport.CommunityGroup = commGroup
+	cr.CommunityGroup = commGroup
 
-	// TODO: Maybe use year-month count flattened maps here too? More data
-	insertionsCorrel, deletionsCorrel, authorsCorrel := corpGroup.Correlation(commGroup)
-	corpReport.InsertionsCorrel = insertionsCorrel
-	corpReport.DeletionsCorrel = deletionsCorrel
-	corpReport.AuthorsCorrel = authorsCorrel
+	corpYearMonthInsertsMap, corpYearMonthDeletesMap, corpYearMonthAuthorsMap := cr.CorporateGroup.Commits.YearMonthCounts()
+	commYearMonthInsertsMap, commYearMonthDeletesMap, commYearMonthAuthorsMap := cr.CommunityGroup.Commits.YearMonthCounts()
 
-	corpGroupSurvival := authorgroups.NewGroupSurvivalReport(corpReport.sqlb, corpGroup.Authors)
+	cr.InsertionsCorrel = common.CorrelateYearMonthCounts(corpYearMonthInsertsMap, commYearMonthInsertsMap)
+	cr.DeletionsCorrel = common.CorrelateYearMonthCounts(corpYearMonthDeletesMap, commYearMonthDeletesMap)
+	cr.AuthorsCorrel = common.CorrelateYearMonthCounts(corpYearMonthAuthorsMap, commYearMonthAuthorsMap)
+
+	corpGroupSurvival := authorgroups.NewGroupSurvivalReport(cr.sqlb, corpGroup.Authors)
 	corpGroupSurvival.Generate()
-	corpReport.CorporateGroupSurvivalReport = corpGroupSurvival
+	cr.CorporateGroupSurvivalReport = corpGroupSurvival
 
-	commGroupSurvival := authorgroups.NewGroupSurvivalReport(corpReport.sqlb, commGroup.Authors)
+	commGroupSurvival := authorgroups.NewGroupSurvivalReport(cr.sqlb, commGroup.Authors)
 	commGroupSurvival.Generate()
-	corpReport.CommunityGroupSurvivalReport = commGroupSurvival
+	cr.CommunityGroupSurvivalReport = commGroupSurvival
 
 	corpGroupImpact := commitimpact.NewCommitImpactReport(corpGroup.Commits)
 	corpGroupImpact.Generate()
-	corpReport.CorporateCommitImpactReport = corpGroupImpact
+	cr.CorporateCommitImpactReport = corpGroupImpact
 
 	commGroupImpact := commitimpact.NewCommitImpactReport(commGroup.Commits)
 	commGroupImpact.Generate()
-	corpReport.CommunityCommitImpactReport = commGroupImpact
+	cr.CommunityCommitImpactReport = commGroupImpact
 }
 
 func (cr *CorporateReport) CSVString(name string, includeHeader bool) [][]string {
@@ -191,55 +190,6 @@ func (cr *CorporateReport) CSVString(name string, includeHeader bool) [][]string
 	return finalReport
 }
 
-// FIXME: Just create an additive func for this
-func addValInYearMonthCountMap(inMap YearMonthCount, year int, month int, value int) {
-	if _, ok := inMap[year]; ok {
-		common.AdditiveValueMapInsert[int, int, map[int]int](inMap[year], month, func(a int, b int) int {
-			return a + b // FIXME: And here too
-		}, value)
-	} else {
-		inMap[year] = map[int]int{month: value}
-	}
-}
-
-func yearMonthlyDataMap(group *authorgroups.GroupData) (YearMonthCount, YearMonthCount, YearMonthCount) {
-	yearMonthInsertsMap := YearMonthCount{}
-	yearMonthDeletesMap := YearMonthCount{}
-	yearMonthAuthorsMap := YearMonthCount{}
-
-	checkAuthorInYearMonthMap := map[int]map[int]map[string]bool{}
-
-	for _, commit := range group.Commits {
-		commitTime := time.Unix(commit.AuthorTime, 0).UTC()
-		commitYear := commitTime.Year()
-		commitMonth := int(commitTime.Month())
-		commitAuthor := commit.Author.Email
-
-		addValInYearMonthCountMap(yearMonthInsertsMap, commitYear, commitMonth, commit.LineChanges.NumInsertions)
-		addValInYearMonthCountMap(yearMonthDeletesMap, commitYear, commitMonth, commit.LineChanges.NumDeletions)
-
-		// Make sure to only add author if not added already
-		addAuthor := false
-
-		if monthMap, ok := checkAuthorInYearMonthMap[commitYear]; !ok {
-			checkAuthorInYearMonthMap[commitYear] = map[int]map[string]bool{commitMonth: {commitAuthor: true}}
-			addAuthor = true
-		} else if monthAuthors, ok := monthMap[commitMonth]; !ok {
-			checkAuthorInYearMonthMap[commitYear][commitMonth] = map[string]bool{commitAuthor: true}
-			addAuthor = true
-		} else if !monthAuthors[commitAuthor] {
-			checkAuthorInYearMonthMap[commitYear][commitMonth][commitAuthor] = true
-			addAuthor = true
-		}
-
-		if addAuthor {
-			addValInYearMonthCountMap(yearMonthAuthorsMap, commitYear, commitMonth, 1)
-		}
-	}
-
-	return yearMonthInsertsMap, yearMonthDeletesMap, yearMonthAuthorsMap
-}
-
 func setNumIfChildMap(childMap map[int]int, childMapIsInMap bool, childIndex int) int {
 	if !childMapIsInMap {
 		return 0
@@ -253,23 +203,11 @@ func setNumIfChildMap(childMap map[int]int, childMapIsInMap bool, childIndex int
 // TODO: Move processing to DomainGroupsReport and base on SQL
 func (cr *CorporateReport) CSVChangesString(repoName string) [][]string {
 	// map[Year]map[Month]NumberOfChanges
-	commYearMonthInsertsMap, commYearMonthDeletesMap, commYearMonthAuthorsMap := yearMonthlyDataMap(cr.CommunityGroup)
-	corpYearMonthInsertsMap, corpYearMonthDeletesMap, corpYearMonthAuthorsMap := yearMonthlyDataMap(cr.CorporateGroup)
+	commYearMonthInsertsMap, commYearMonthDeletesMap, commYearMonthAuthorsMap := cr.CommunityGroup.Commits.YearMonthCounts()
+	corpYearMonthInsertsMap, corpYearMonthDeletesMap, corpYearMonthAuthorsMap := cr.CorporateGroup.Commits.YearMonthCounts()
 
-	returnArray := [][]string{
-		{
-			"year_month",
-			"corp_insertions",
-			"corp_deletions",
-			"corp_authors",
-			"comm_insertions",
-			"comm_deletions",
-			"comm_authors",
-		},
-	}
-
-	sortedCorpYears := common.SortedMapKeys(cr.CorporateGroup.YearlyLineChanges)
-	sortedCommYears := common.SortedMapKeys(cr.CommunityGroup.YearlyLineChanges)
+	sortedCorpYears := cr.CommunityGroup.Commits.YearRange(false)
+	sortedCommYears := cr.CommunityGroup.Commits.YearRange(false)
 	var firstYear int
 
 	if len(sortedCorpYears) == 0 && len(sortedCommYears) == 0 {
@@ -283,6 +221,18 @@ func (cr *CorporateReport) CSVChangesString(repoName string) [][]string {
 	}
 
 	maxNumYears := common.MaxInt(len(sortedCorpYears), len(sortedCommYears))
+
+	returnArray := [][]string{
+		{
+			"year_month",
+			"corp_insertions",
+			"corp_deletions",
+			"corp_authors",
+			"comm_insertions",
+			"comm_deletions",
+			"comm_authors",
+		},
+	}
 
 	for i := firstYear; i < firstYear+(maxNumYears-1); i++ {
 		corpMonthInserts, yearInCorpMonthInserts := corpYearMonthInsertsMap[i]

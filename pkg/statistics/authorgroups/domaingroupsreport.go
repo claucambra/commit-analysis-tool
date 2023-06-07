@@ -14,20 +14,14 @@ const fallbackGroupName = "unknown"
 
 // Report of the organised raw data around a grouping of domains
 type DomainGroupsReport struct {
-	TotalAuthors           common.EmailSet
-	TotalChanges           *common.LineChanges
-	TotalYearlyAuthors     common.YearlyEmailMap
-	TotalYearlyLineChanges common.YearlyLineChangeMap
-	TotalCommits           common.CommitMap
+	TotalAuthors common.EmailSet
+	TotalChanges *common.LineChanges
+	TotalCommits common.CommitMap
 
 	GroupsOfDomains map[string][]string
 
-	DomainTotalAuthors      map[string]common.EmailSet
-	DomainTotalLineChanges  map[string]*common.LineChanges
-	DomainTotalNumDeletions map[string]int
-
-	DomainTotalYearlyAuthors     map[string]common.YearlyEmailMap
-	DomainTotalYearlyLineChanges map[string]common.YearlyLineChangeMap
+	DomainTotalAuthors     map[string]common.EmailSet
+	DomainTotalLineChanges map[string]*common.LineChanges
 
 	DomainCommits map[string]common.CommitMap
 
@@ -36,29 +30,23 @@ type DomainGroupsReport struct {
 
 func NewDomainGroupsReport(domainGroups map[string][]string, sqlb *db.SQLiteBackend) *DomainGroupsReport {
 	return &DomainGroupsReport{
-		TotalAuthors:                 common.EmailSet{},
-		TotalChanges:                 &common.LineChanges{},
-		TotalYearlyAuthors:           common.YearlyEmailMap{},
-		TotalYearlyLineChanges:       common.YearlyLineChangeMap{},
-		TotalCommits:                 common.CommitMap{},
-		GroupsOfDomains:              domainGroups,
-		DomainTotalAuthors:           map[string]common.EmailSet{},
-		DomainTotalLineChanges:       map[string]*common.LineChanges{},
-		DomainTotalYearlyAuthors:     map[string]common.YearlyEmailMap{},
-		DomainTotalYearlyLineChanges: map[string]common.YearlyLineChangeMap{},
-		DomainCommits:                map[string]common.CommitMap{},
-		sqlb:                         sqlb,
+		TotalAuthors:           common.EmailSet{},
+		TotalChanges:           &common.LineChanges{},
+		TotalCommits:           common.CommitMap{},
+		GroupsOfDomains:        domainGroups,
+		DomainTotalAuthors:     map[string]common.EmailSet{},
+		DomainTotalLineChanges: map[string]*common.LineChanges{},
+		DomainCommits:          map[string]common.CommitMap{},
+		sqlb:                   sqlb,
 	}
 }
 
 func (report *DomainGroupsReport) resetStats() {
 	report.TotalAuthors = common.EmailSet{}
 	report.TotalChanges = &common.LineChanges{}
-	report.TotalYearlyLineChanges = common.YearlyLineChangeMap{}
 	report.TotalCommits = common.CommitMap{}
 	report.DomainTotalAuthors = map[string]common.EmailSet{}
 	report.DomainTotalLineChanges = map[string]*common.LineChanges{}
-	report.DomainTotalYearlyLineChanges = map[string]common.YearlyLineChangeMap{}
 	report.DomainCommits = map[string]common.CommitMap{}
 }
 
@@ -79,36 +67,6 @@ func (report *DomainGroupsReport) updateDomainChanges() {
 			report.DomainTotalLineChanges[authorDomain] = summedDomainLineChanges
 		} else {
 			report.DomainTotalLineChanges[authorDomain] = lineChanges
-		}
-
-		yearlyLineChanges, err := domainYearlyLineChanges(report.sqlb, authorDomain)
-		if err != nil {
-			log.Fatalf("Error retrieving yearly line changes for domain %s, received error: %s", authorDomain, err)
-			return
-		}
-
-		report.TotalYearlyLineChanges.AddYearlyLineChangeMap(yearlyLineChanges)
-
-		if existingDomainYearLineChanges, ok := report.DomainTotalYearlyLineChanges[authorDomain]; ok {
-			existingDomainYearLineChanges.AddYearlyLineChangeMap(yearlyLineChanges)
-			report.DomainTotalYearlyLineChanges[authorDomain] = existingDomainYearLineChanges
-		} else {
-			report.DomainTotalYearlyLineChanges[authorDomain] = yearlyLineChanges
-		}
-
-		yearlyAuthors, err := domainYearlyAuthors(report.sqlb, authorDomain)
-		if err != nil {
-			log.Fatalf("Error retrieving yearly authors for domain %s, received error: %s", authorDomain, err)
-			return
-		}
-
-		report.TotalYearlyAuthors.AddYearlyEmailMap(yearlyAuthors)
-
-		if existingDomainYearAuthors, ok := report.DomainTotalYearlyAuthors[authorDomain]; ok {
-			existingDomainYearAuthors.AddYearlyEmailMap(yearlyAuthors)
-			report.DomainTotalYearlyAuthors[authorDomain] = existingDomainYearAuthors
-		} else {
-			report.DomainTotalYearlyAuthors[authorDomain] = yearlyAuthors
 		}
 
 		domainCommits, err := domainCommits(report.sqlb, authorDomain)
@@ -167,8 +125,6 @@ func (report *DomainGroupsReport) Generate() {
 func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (
 	common.EmailSet,
 	*common.LineChanges,
-	common.YearlyEmailMap,
-	common.YearlyLineChangeMap,
 	common.CommitMap) {
 
 	totalGroupAuthors := common.EmailSet{}
@@ -176,8 +132,6 @@ func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (
 		NumInsertions: 0,
 		NumDeletions:  0,
 	}
-	totalGroupYearlyLineChanges := make(common.YearlyLineChangeMap, 0)
-	totalGroupYearlyAuthors := make(common.YearlyEmailMap, 0)
 	totalGroupCommits := common.CommitMap{}
 
 	// Slice of input group of domains string that matches actual domains extracted from emails
@@ -203,19 +157,11 @@ func (report *DomainGroupsReport) accumulateGroupCounts(groupName string) (
 		totalGroupLineChanges = common.AddLineChanges(totalGroupLineChanges, reportChanges)
 		totalGroupAuthors = common.AddEmailSet(totalGroupAuthors, report.DomainTotalAuthors[domain])
 
-		reportYearlyChanges := report.DomainTotalYearlyLineChanges[domain]
-		totalGroupYearlyLineChanges.AddYearlyLineChangeMap(reportYearlyChanges)
-
-		reportYearlyAuthors := report.DomainTotalYearlyAuthors[domain]
-		totalGroupYearlyAuthors.AddYearlyEmailMap(reportYearlyAuthors)
-
 		totalGroupCommits.AddCommitMap(report.DomainCommits[domain])
 	}
 
 	return totalGroupAuthors,
 		totalGroupLineChanges,
-		totalGroupYearlyAuthors,
-		totalGroupYearlyLineChanges,
 		totalGroupCommits
 }
 
@@ -225,27 +171,17 @@ func (report *DomainGroupsReport) UnknownGroupData() *GroupData {
 		NumInsertions: 0,
 		NumDeletions:  0,
 	}
-	totalGroupYearlyLineChanges := make(common.YearlyLineChangeMap, 0)
-	totalGroupYearlyAuthors := make(common.YearlyEmailMap, 0)
 	totalGroupCommits := common.CommitMap{}
 
 	for groupName := range report.GroupsOfDomains {
-		groupAuthors, groupLineChanges, yearlyGroupAuthors, yearlyGroupLineChanges, groupCommits := report.accumulateGroupCounts(groupName)
+		groupAuthors, groupLineChanges, groupCommits := report.accumulateGroupCounts(groupName)
 		totalGroupAuthors = common.AddEmailSet(totalGroupAuthors, groupAuthors)
 		totalGroupChanges = common.AddLineChanges(totalGroupChanges, groupLineChanges)
-		totalGroupYearlyLineChanges.AddYearlyLineChangeMap(yearlyGroupLineChanges)
-		totalGroupYearlyAuthors.AddYearlyEmailMap(yearlyGroupAuthors)
 		totalGroupCommits.AddCommitMap(groupCommits)
 	}
 
 	unknownGroupTotalAuthors, _ := common.SubtractEmailSet(report.TotalAuthors, totalGroupAuthors)
 	unknownGroupTotalLineChanges, _ := common.SubtractLineChanges(report.TotalChanges, totalGroupChanges)
-
-	var unknownGroupTotalYearlyLineChanges common.YearlyLineChangeMap = common.CopyMap(report.TotalYearlyLineChanges)
-	unknownGroupTotalYearlyLineChanges.SubtractYearlyLineChangeMap(totalGroupYearlyLineChanges)
-
-	var unknownGroupTotalYearlyAuthors common.YearlyEmailMap = common.CopyMap(report.TotalYearlyAuthors)
-	unknownGroupTotalYearlyAuthors.SubtractYearlyEmailMap(totalGroupYearlyAuthors)
 
 	var unknownGroupCommits common.CommitMap = common.CopyMap(report.TotalCommits)
 	unknownGroupCommits.SubtractCommitMap(totalGroupCommits)
@@ -254,8 +190,6 @@ func (report *DomainGroupsReport) UnknownGroupData() *GroupData {
 		fallbackGroupName,
 		unknownGroupTotalAuthors,
 		unknownGroupTotalLineChanges,
-		unknownGroupTotalYearlyLineChanges,
-		unknownGroupTotalYearlyAuthors,
 		unknownGroupCommits)
 }
 
@@ -264,13 +198,11 @@ func (report *DomainGroupsReport) GroupData(groupName string) *GroupData {
 		return report.UnknownGroupData()
 	}
 
-	totalGroupAuthors, totalGroupLineChanges, totalYearlyGroupAuthors, totalGroupYearlyLineChanges, totalGroupCommits := report.accumulateGroupCounts(groupName)
+	totalGroupAuthors, totalGroupLineChanges, totalGroupCommits := report.accumulateGroupCounts(groupName)
 
 	return NewGroupData(report,
 		groupName,
 		totalGroupAuthors,
 		totalGroupLineChanges,
-		totalGroupYearlyLineChanges,
-		totalYearlyGroupAuthors,
 		totalGroupCommits)
 }
