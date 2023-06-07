@@ -122,3 +122,30 @@ func HigherStartKey[K constraints.Ordered, V any, M ~map[K]V](inMapA M, inMapB M
 		}
 	}
 }
+
+// Returns whichever map has the lower key at the end when sorted
+func LowerEndKey[K constraints.Ordered, V any, M ~map[K]V](inMapA M, inMapB M) K {
+	sortedAKeys := SortedMapKeys(inMapA)
+	sortedBKeys := SortedMapKeys(inMapB)
+
+	sortedAKeysLen := len(sortedAKeys)
+	sortedBKeysLen := len(sortedBKeys)
+
+	lastSortedAIdx := sortedAKeysLen - 1
+	lastSortedBIdx := sortedBKeysLen - 1
+
+	if sortedAKeysLen == 0 {
+		return sortedBKeys[lastSortedAIdx]
+	} else if sortedBKeysLen == 0 {
+		return sortedAKeys[lastSortedBIdx]
+	} else {
+		lastSortedAKey := sortedAKeys[lastSortedAIdx]
+		lastSortedBKey := sortedBKeys[lastSortedBIdx]
+
+		if lastSortedAKey < lastSortedBKey {
+			return lastSortedAKey
+		} else {
+			return lastSortedBKey
+		}
+	}
+}
