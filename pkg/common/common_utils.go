@@ -78,3 +78,13 @@ func MinInt(numA int, numB int) int {
 	minNum := math.Min(float64(numA), float64(numB))
 	return int(minNum)
 }
+
+func SliceContains[V comparable](slice []V, valueToFind V) (bool, int) {
+	for i, value := range slice {
+		if value == valueToFind {
+			return true, i
+		}
+	}
+
+	return false, -1
+}
