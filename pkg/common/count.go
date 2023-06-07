@@ -27,11 +27,12 @@ func (ymc *YearMonthCount) Flatten() []int {
 	return values
 }
 
-func CorrelateYearMonthCounts(ymc1 YearMonthCount, ymc2 YearMonthCount) float64 {
+// Returns two filtered YMCs that contain data for the same years and months
+func EqualiseYearMonths(ymc1 YearMonthCount, ymc2 YearMonthCount) (YearMonthCount, YearMonthCount) {
 	commonYears := KeysInCommon(ymc1, ymc2)
 
 	if len(commonYears) == 0 {
-		return math.NaN()
+		return nil, nil
 	}
 
 	sort.Slice(commonYears, func(i, j int) bool {
@@ -45,6 +46,9 @@ func CorrelateYearMonthCounts(ymc1 YearMonthCount, ymc2 YearMonthCount) float64 
 	filteredYmc2 := YearMonthCount{}
 
 	for i := firstYear; i <= lastYear; i++ {
+		filteredYmc1[i] = MonthCount{}
+		filteredYmc2[i] = MonthCount{}
+
 		ymc1MonthMap, ymc1MonthMapOk := ymc1[i]
 		ymc2MonthMap, ymc2MonthMapOk := ymc2[i]
 
@@ -58,10 +62,6 @@ func CorrelateYearMonthCounts(ymc1 YearMonthCount, ymc2 YearMonthCount) float64 
 
 		// We fill in any gaps in the YearMonthCounts relative to each other with 0s
 		for j := firstMonth; j <= lastMonth; j++ {
-			// TODO: Deduplicate
-			if _, ok := filteredYmc1[i]; !ok {
-				filteredYmc1[i] = MonthCount{}
-			}
 			filteredYmc1[i][j] = 0
 			if ymc1MonthMapOk {
 				ymc1MonthValue, ymc1MonthValueOk := ymc1MonthMap[j]
@@ -70,9 +70,6 @@ func CorrelateYearMonthCounts(ymc1 YearMonthCount, ymc2 YearMonthCount) float64 
 				}
 			}
 
-			if _, ok := filteredYmc2[i]; !ok {
-				filteredYmc2[i] = MonthCount{}
-			}
 			filteredYmc2[i][j] = 0
 			if ymc2MonthMapOk {
 				ymc2MonthValue, ymc2MonthValueOk := ymc2MonthMap[j]
@@ -81,6 +78,16 @@ func CorrelateYearMonthCounts(ymc1 YearMonthCount, ymc2 YearMonthCount) float64 
 				}
 			}
 		}
+	}
+
+	return filteredYmc1, filteredYmc2
+}
+
+func CorrelateYearMonthCounts(ymc1 YearMonthCount, ymc2 YearMonthCount) float64 {
+	filteredYmc1, filteredYmc2 := EqualiseYearMonths(ymc1, ymc2)
+
+	if filteredYmc1 == nil || filteredYmc2 == nil {
+		return math.NaN()
 	}
 
 	flatFloatFilteredYmc1 := SliceIntToFloat[int, float64](filteredYmc1.Flatten())
