@@ -88,3 +88,13 @@ func SliceContains[V comparable](slice []V, valueToFind V) (bool, int) {
 
 	return false, -1
 }
+
+func SliceIntToFloat[I constraints.Integer, F constraints.Float](slice []I) []F {
+	outSlice := make([]F, len(slice))
+
+	for i, intVal := range slice {
+		outSlice[i] = F(intVal)
+	}
+
+	return outSlice
+}
