@@ -67,3 +67,52 @@ func (cm *CommitMap) YearRange(excludeEmpty bool) []int {
 
 	return filledYears
 }
+
+// FIXME: Just create an additive func for this
+func addValInYearMonthCountMap(inMap YearMonthCount, year int, month int, value int) {
+	if _, ok := inMap[year]; ok {
+		AdditiveValueMapInsert[int, int, map[int]int](inMap[year], month, func(a int, b int) int {
+			return a + b // FIXME: And here too
+		}, value)
+	} else {
+		inMap[year] = map[int]int{month: value}
+	}
+}
+
+func (cm *CommitMap) YearMonthCounts() (YearMonthCount, YearMonthCount, YearMonthCount) {
+	yearMonthInsertsMap := YearMonthCount{}
+	yearMonthDeletesMap := YearMonthCount{}
+	yearMonthAuthorsMap := YearMonthCount{}
+
+	checkAuthorInYearMonthMap := map[int]map[int]map[string]bool{}
+
+	for _, commit := range *cm {
+		commitTime := time.Unix(commit.AuthorTime, 0).UTC()
+		commitYear := commitTime.Year()
+		commitMonth := int(commitTime.Month())
+		commitAuthor := commit.Author.Email
+
+		addValInYearMonthCountMap(yearMonthInsertsMap, commitYear, commitMonth, commit.LineChanges.NumInsertions)
+		addValInYearMonthCountMap(yearMonthDeletesMap, commitYear, commitMonth, commit.LineChanges.NumDeletions)
+
+		// Make sure to only add author if not added already
+		addAuthor := false
+
+		if monthMap, ok := checkAuthorInYearMonthMap[commitYear]; !ok {
+			checkAuthorInYearMonthMap[commitYear] = map[int]map[string]bool{commitMonth: {commitAuthor: true}}
+			addAuthor = true
+		} else if monthAuthors, ok := monthMap[commitMonth]; !ok {
+			checkAuthorInYearMonthMap[commitYear][commitMonth] = map[string]bool{commitAuthor: true}
+			addAuthor = true
+		} else if !monthAuthors[commitAuthor] {
+			checkAuthorInYearMonthMap[commitYear][commitMonth][commitAuthor] = true
+			addAuthor = true
+		}
+
+		if addAuthor {
+			addValInYearMonthCountMap(yearMonthAuthorsMap, commitYear, commitMonth, 1)
+		}
+	}
+
+	return yearMonthInsertsMap, yearMonthDeletesMap, yearMonthAuthorsMap
+}
