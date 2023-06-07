@@ -2,6 +2,7 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 
 	"github.com/claucambra/commit-analysis-tool/pkg/common"
@@ -75,6 +76,10 @@ func (sqlb *SQLiteBackend) Setup() error {
 }
 
 func (sqlb *SQLiteBackend) AddCommit(commit *common.Commit) error {
+	if commit == nil {
+		return errors.New("received a nil commit, won't add to db")
+	}
+
 	stmt := `INSERT INTO commits (
 			id,
 			repo_name,
