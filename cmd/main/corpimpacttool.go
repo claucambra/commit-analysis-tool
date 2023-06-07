@@ -212,5 +212,19 @@ func batchCloneAndRead(urlsJsonFile string, clonePath string, domainGroupsFilePa
 		if err != nil {
 			log.Fatalf("Error writing to csv: %s", err)
 		}
+
+		// Do CSV file for changes
+		repoChangesCsvPath := filepath.Join(clonePath, repoName+"-changes.csv")
+		repoChangesCsvFile, err := os.Create(repoChangesCsvPath)
+		if err != nil {
+			log.Fatalf("Could not create repo changes csv file: %s", err)
+		}
+
+		repoChangesDataCSV := report.CSVChangesString(repoName)
+		repoChangesWriter := csv.NewWriter(repoChangesCsvFile)
+		err = repoChangesWriter.WriteAll(repoChangesDataCSV)
+		if err != nil {
+			log.Fatalf("Error writing to changes csv: %s", err)
+		}
 	}
 }
