@@ -2,8 +2,10 @@ package corpimpact
 
 import (
 	"strconv"
+	"time"
 
 	"github.com/claucambra/commit-analysis-tool/internal/db"
+	"github.com/claucambra/commit-analysis-tool/pkg/common"
 	"github.com/claucambra/commit-analysis-tool/pkg/statistics/authorgroups"
 	"github.com/claucambra/commit-analysis-tool/pkg/statistics/commitimpact"
 )
@@ -184,4 +186,100 @@ func (cr *CorporateReport) CSVString(name string, includeHeader bool) [][]string
 	finalReport = append(finalReport, csvfiedReport)
 
 	return finalReport
+}
+
+// FIXME: Just create an additive func for this
+func addValInYearMonthChangeNumMap(inMap map[int]map[int]int, year int, month int, value int) {
+	if _, ok := inMap[year]; ok {
+		common.AdditiveValueMapInsert[int, int, map[int]int](inMap[year], month, func(a int, b int) int {
+			return a + b // FIXME: And here too
+		}, value)
+	} else {
+		inMap[year] = map[int]int{month: value}
+	}
+}
+
+func yearMonthlyInsertsDeletesMap(group *authorgroups.GroupData) (map[int]map[int]int, map[int]map[int]int) {
+	yearMonthInsertsMap := map[int]map[int]int{}
+	yearMonthDeletesMap := map[int]map[int]int{}
+
+	for _, commit := range group.Commits {
+		commitTime := time.Unix(commit.AuthorTime, 0).UTC()
+		commitYear := commitTime.Year()
+		commitMonth := int(commitTime.Month())
+
+		addValInYearMonthChangeNumMap(yearMonthInsertsMap, commitYear, commitMonth, commit.LineChanges.NumInsertions)
+		addValInYearMonthChangeNumMap(yearMonthDeletesMap, commitYear, commitMonth, commit.LineChanges.NumDeletions)
+	}
+
+	return yearMonthInsertsMap, yearMonthDeletesMap
+}
+
+func setNumIfChildMap(childMap map[int]int, childMapIsInMap bool, childIndex int) int {
+	if !childMapIsInMap {
+		return 0
+	} else if num, ok := childMap[childIndex]; ok {
+		return num
+	} else {
+		return 0
+	}
+}
+
+// TODO: Move processing to DomainGroupsReport and base on SQL
+func (cr *CorporateReport) CSVChangesString(repoName string) [][]string {
+	// map[Year]map[Month]NumberOfChanges
+	commYearMonthInsertsMap, commYearMonthDeletesMap := yearMonthlyInsertsDeletesMap(cr.CommunityGroup)
+	corpYearMonthInsertsMap, corpYearMonthDeletesMap := yearMonthlyInsertsDeletesMap(cr.CorporateGroup)
+
+	returnArray := [][]string{
+		{
+			"year_month",
+			"corp_insertions",
+			"corp_deletions",
+			"comm_insertions",
+			"comm_deletions",
+		},
+	}
+
+	sortedCorpYears := common.SortedMapKeys(cr.CorporateGroup.YearlyLineChanges)
+	sortedCommYears := common.SortedMapKeys(cr.CommunityGroup.YearlyLineChanges)
+	var firstYear int
+
+	if len(sortedCorpYears) == 0 && len(sortedCommYears) == 0 {
+		return nil
+	} else if len(sortedCorpYears) == 0 {
+		firstYear = sortedCommYears[0]
+	} else if len(sortedCommYears) == 0 {
+		firstYear = sortedCorpYears[0]
+	} else {
+		firstYear = common.MinInt(sortedCommYears[0], sortedCorpYears[0])
+	}
+
+	maxNumYears := common.MaxInt(len(sortedCorpYears), len(sortedCommYears))
+
+	for i := firstYear; i < firstYear+(maxNumYears-1); i++ {
+		corpMonthInserts, yearInCorpMonthInserts := corpYearMonthInsertsMap[i]
+		corpMonthDeletes, yearInCorpMonthDeletes := corpYearMonthDeletesMap[i]
+		commMonthInserts, yearInCommMonthInserts := commYearMonthInsertsMap[i]
+		commMonthDeletes, yearInCommMonthDeletes := commYearMonthDeletesMap[i]
+
+		for j := int(time.January); j <= int(time.December); j++ {
+			corpInserts := setNumIfChildMap(corpMonthInserts, yearInCorpMonthInserts, j)
+			corpDeletes := setNumIfChildMap(corpMonthDeletes, yearInCorpMonthDeletes, j)
+			commInserts := setNumIfChildMap(commMonthInserts, yearInCommMonthInserts, j)
+			commDeletes := setNumIfChildMap(commMonthDeletes, yearInCommMonthDeletes, j)
+
+			lineCsv := []string{
+				strconv.FormatInt(int64(i), 10) + "-" + strconv.FormatInt(int64(j), 10),
+				strconv.FormatInt(int64(corpInserts), 10),
+				strconv.FormatInt(int64(corpDeletes), 10),
+				strconv.FormatInt(int64(commInserts), 10),
+				strconv.FormatInt(int64(commDeletes), 10),
+			}
+
+			returnArray = append(returnArray, lineCsv)
+		}
+	}
+
+	return returnArray
 }
