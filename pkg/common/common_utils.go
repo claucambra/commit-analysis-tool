@@ -98,3 +98,27 @@ func SliceIntToFloat[I constraints.Integer, F constraints.Float](slice []I) []F 
 
 	return outSlice
 }
+
+// Returns whichever map has the higher key at the beginning when sorted
+func HigherStartKey[K constraints.Ordered, V any, M ~map[K]V](inMapA M, inMapB M) K {
+	sortedAKeys := SortedMapKeys(inMapA)
+	sortedBKeys := SortedMapKeys(inMapB)
+
+	sortedAKeysLen := len(sortedAKeys)
+	sortedBKeysLen := len(sortedBKeys)
+
+	if sortedAKeysLen == 0 {
+		return sortedBKeys[0]
+	} else if sortedBKeysLen == 0 {
+		return sortedAKeys[0]
+	} else {
+		firstSortedAKey := sortedAKeys[0]
+		firstSortedBKey := sortedBKeys[0]
+
+		if sortedAKeys[0] > sortedBKeys[0] {
+			return firstSortedAKey
+		} else {
+			return firstSortedBKey
+		}
+	}
+}
