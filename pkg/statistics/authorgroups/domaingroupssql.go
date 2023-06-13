@@ -82,18 +82,53 @@ func domainYearlyLineChanges(sqlb *db.SQLiteBackend, domain string) (common.Year
 }
 
 // The years in which an author has contributed
-func authorYears(sqlb *db.SQLiteBackend, authorEmail string) ([]int, error) {
+func authorContinuousMonths(sqlb *db.SQLiteBackend, authorEmail string) (int, error) {
 	authorCommits, err := sqlb.AuthorCommits(authorEmail)
 	if err != nil {
 		log.Fatalf("Error retrieving rows: %s", err)
-		return nil, err
+		return 0, err
 	}
 
-	yearsMap := map[int]bool{}
+	yearsMap := map[int]map[int]bool{}
 	for _, commit := range authorCommits {
-		commitYear := time.Unix(commit.AuthorTime, 0).UTC().Year()
-		yearsMap[commitYear] = true
+		commitTime := time.Unix(commit.AuthorTime, 0).UTC()
+		commitYear := commitTime.Year()
+		commitMonth := int(commitTime.Month())
+
+		if _, ok := yearsMap[commitYear]; !ok {
+			yearsMap[commitYear] = map[int]bool{}
+		}
+
+		yearsMap[commitYear][commitMonth] = true
 	}
 
-	return common.SortedMapKeys(yearsMap), nil
+	sortedYears := common.SortedMapKeys(yearsMap)
+	if len(sortedYears) == 0 {
+		log.Printf("Author %s active for no years, can't return number of continuous months", authorEmail)
+		return 0, nil
+	}
+
+	monthCount := 0
+
+	// Count up time, stop when found a lapse
+	for i := sortedYears[0]; i <= sortedYears[len(sortedYears)-1]; i++ {
+		firstMonth := int(time.January)
+
+		if i == sortedYears[0] {
+			sortedFirstYearMonths := common.SortedMapKeys(yearsMap[i])
+			firstMonth = sortedFirstYearMonths[0]
+		} else if _, ok := yearsMap[i]; !ok {
+			return monthCount, nil
+		}
+
+		for j := firstMonth; j <= int(time.December); j++ {
+			if !yearsMap[i][j] {
+				return monthCount, nil
+			}
+
+			monthCount++
+		}
+	}
+
+	return monthCount, nil
 }

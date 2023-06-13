@@ -80,7 +80,7 @@ func (cr *CorporateReport) Generate() {
 }
 
 func (cr *CorporateReport) CSVString(name string, includeHeader bool) [][]string {
-	numSurvValuesToWrite := 10
+	numSurvValuesToWrite := 100
 	safeCorpSurvivalValues := make([]float64, numSurvValuesToWrite)
 	safeCommSurvivalValues := make([]float64, numSurvValuesToWrite)
 	actualCorpSurvivalValuesLen := len(cr.CorporateGroupSurvivalReport.AuthorsSurvival)
@@ -200,7 +200,6 @@ func setNumIfChildMap(childMap map[int]int, childMapIsInMap bool, childIndex int
 	}
 }
 
-// TODO: Move processing to DomainGroupsReport and base on SQL
 func (cr *CorporateReport) CSVChangesString(repoName string) [][]string {
 	// map[Year]map[Month]NumberOfChanges
 	commYearMonthInsertsMap, commYearMonthDeletesMap, commYearMonthAuthorsMap := cr.CommunityGroup.Commits.YearMonthCounts()
