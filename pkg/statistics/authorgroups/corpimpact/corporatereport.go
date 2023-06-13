@@ -265,3 +265,40 @@ func (cr *CorporateReport) CSVChangesString(repoName string) [][]string {
 
 	return returnArray
 }
+
+func (cr *CorporateReport) CSVSurvivalString(repoName string) [][]string {
+	corpSurvLen := len(cr.CorporateGroupSurvivalReport.AuthorsSurvival)
+	commSurvLen := len(cr.CommunityGroupSurvivalReport.AuthorsSurvival)
+	totalTimeSteps := common.MaxInt(corpSurvLen, commSurvLen) + 1 // Always reach 0 for both counts
+
+	returnArray := [][]string{
+		{
+			"timestep",
+			"corp_survival",
+			"comm_survival",
+		},
+	}
+
+	for i := 0; i < totalTimeSteps; i++ {
+		corpVal := 0.
+		commVal := 0.
+
+		if i < corpSurvLen {
+			corpVal = cr.CorporateGroupSurvivalReport.AuthorsSurvival[i]
+		}
+
+		if i < commSurvLen {
+			commVal = cr.CommunityGroupSurvivalReport.AuthorsSurvival[i]
+		}
+
+		line := []string{
+			strconv.FormatInt(int64(i), 10),
+			strconv.FormatFloat(corpVal, 'f', -1, 64),
+			strconv.FormatFloat(commVal, 'f', -1, 64),
+		}
+
+		returnArray = append(returnArray, line)
+	}
+
+	return returnArray
+}
