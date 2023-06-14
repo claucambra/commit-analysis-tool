@@ -160,26 +160,14 @@ func (cr *CorporateReport) CSVString(name string, includeHeader bool) [][]string
 			"authors_correl",
 			"mean_corp_impact",
 			"mean_comm_impact",
-			"corp_surv_0",
-			"corp_surv_1",
-			"corp_surv_2",
-			"corp_surv_3",
-			"corp_surv_4",
-			"corp_surv_5",
-			"corp_surv_6",
-			"corp_surv_7",
-			"corp_surv_8",
-			"corp_surv_9",
-			"comm_surv_0",
-			"comm_surv_1",
-			"comm_surv_2",
-			"comm_surv_3",
-			"comm_surv_4",
-			"comm_surv_5",
-			"comm_surv_6",
-			"comm_surv_7",
-			"comm_surv_8",
-			"comm_surv_9",
+		}
+
+		for i := 0; i < numSurvValuesToWrite; i++ {
+			header = append(header, "corp_surv_"+strconv.FormatInt(int64(i), 10))
+		}
+
+		for i := 0; i < numSurvValuesToWrite; i++ {
+			header = append(header, "comm_surv_"+strconv.FormatInt(int64(i), 10))
 		}
 
 		finalReport = append(finalReport, header)
